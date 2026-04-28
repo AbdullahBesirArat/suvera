@@ -1,0 +1,9 @@
+{
+  "name": "suvera-storefront",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "node dev-server.js",
+    "check": "node --check dev-server.js && node --check js/api.js && node --check js/config.js && node --check js/storefront.js && node --check js/product-detail.js && node --check js/site-pages.js && node --check js/cart-ui.js && node --check shared.js"
+  }
+}
