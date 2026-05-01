@@ -8,6 +8,14 @@ const upstreamApi = (process.env.UPSTREAM_API || 'https://panelya-api-production
 const publicAccessToken = process.env.SUVERA_PUBLIC_ACCESS_TOKEN || '';
 const host = process.env.HOST || '127.0.0.1';
 const preferredPort = Number(process.env.PORT || 4173);
+// FIX: Keep proxy memory bounded even when env input is missing or invalid.
+const maxProxyBodyBytes = positiveNumber(process.env.MAX_PROXY_BODY_BYTES, 1024 * 1024);
+// FIX: Mirror production hardening headers during API-connected local testing.
+const securityHeaders = {
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'X-Content-Type-Options': 'nosniff',
+  'Content-Security-Policy': "base-uri 'self'; object-src 'none'; frame-ancestors 'self'",
+};
 
 const contentTypes = {
   '.css': 'text/css; charset=utf-8',
@@ -18,31 +26,59 @@ const contentTypes = {
   '.txt': 'text/plain; charset=utf-8',
   '.webmanifest': 'application/manifest+json; charset=utf-8',
   '.webp': 'image/webp',
+  '.avif': 'image/avif',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',
 };
 
+function positiveNumber(value, fallback) {
+  const next = Number(value);
+  return Number.isFinite(next) && next > 0 ? next : fallback;
+}
+
 function send(res, status, body, headers = {}) {
   res.writeHead(status, {
-    'Referrer-Policy': 'strict-origin-when-cross-origin',
-    'X-Content-Type-Options': 'nosniff',
+    ...securityHeaders,
     ...headers,
   });
   res.end(body);
 }
 
-function requestBody(req) {
+function requestBody(req, maxBytes = maxProxyBodyBytes) {
   return new Promise((resolve, reject) => {
     const chunks = [];
-    req.on('data', (chunk) => chunks.push(chunk));
-    req.on('end', () => resolve(Buffer.concat(chunks)));
-    req.on('error', reject);
+    let size = 0;
+    let settled = false;
+    req.on('data', (chunk) => {
+      if (settled) return;
+      size += chunk.length;
+      if (size > maxBytes) {
+        settled = true;
+        reject(Object.assign(new Error('Request body too large'), { statusCode: 413 }));
+        return;
+      }
+      chunks.push(chunk);
+    });
+    req.on('end', () => {
+      if (!settled) resolve(Buffer.concat(chunks));
+    });
+    req.on('error', (err) => {
+      if (!settled) reject(err);
+    });
   });
 }
 
 function storefrontOrigin(req) {
-  return `http://${req.headers.host || `${host}:${preferredPort}`}`;
+  const forwardedHost = String(req.headers.host || '').split(',')[0].trim();
+  // FIX: Mirror production proxy origin so Railway CORS accepts local API-connected smoke tests.
+  if (/^(localhost|127\.0\.0\.1)(:\d+)?$/i.test(forwardedHost)) {
+    return 'https://suvera.com.tr';
+  }
+  if (/\.vercel\.app$/i.test(forwardedHost)) {
+    return 'https://suvera.com.tr';
+  }
+  return `http://${forwardedHost || `${host}:${preferredPort}`}`;
 }
 
 async function proxyApi(req, res, pathname, search) {
@@ -70,7 +106,7 @@ async function proxyApi(req, res, pathname, search) {
 
     send(res, response.status, response.body, response.headers);
   } catch (err) {
-    send(res, 502, JSON.stringify({
+    send(res, err.statusCode || 502, JSON.stringify({
       error: 'Panelya API proxy istegi basarisiz',
       detail: err.message,
     }), { 'Content-Type': 'application/json; charset=utf-8' });
@@ -113,10 +149,18 @@ function upstreamRequest(target, options) {
 
 function serveFile(req, res, pathname) {
   const requestedPath = pathname === '/' ? '/index.html' : pathname;
-  const filePath = path.normalize(path.join(rootDir, decodeURIComponent(requestedPath)));
-  const normalizedRoot = path.normalize(rootDir);
+  let decodedPath;
+  try {
+    decodedPath = decodeURIComponent(requestedPath);
+  } catch (_) {
+    send(res, 400, 'Bad request', { 'Content-Type': 'text/plain; charset=utf-8' });
+    return;
+  }
 
-  if (!filePath.startsWith(normalizedRoot)) {
+  const filePath = path.resolve(rootDir, '.' + decodedPath);
+  const relativePath = path.relative(rootDir, filePath);
+  // FIX: Use path.relative so sibling directories with the same prefix cannot be served.
+  if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
     send(res, 403, 'Forbidden', { 'Content-Type': 'text/plain; charset=utf-8' });
     return;
   }
@@ -128,7 +172,11 @@ function serveFile(req, res, pathname) {
     }
 
     const type = contentTypes[path.extname(filePath).toLowerCase()] || 'application/octet-stream';
-    send(res, 200, body, { 'Content-Type': type });
+    const cacheableAsset = /[\\\/](assets|uploads)[\\\/]/.test(filePath);
+    send(res, 200, body, {
+      'Content-Type': type,
+      ...(cacheableAsset ? { 'Cache-Control': 'public, max-age=31536000, immutable' } : {}),
+    });
   });
 }
 

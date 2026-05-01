@@ -8,6 +8,9 @@
   const CUSTOMER_TOKEN_KEY = 'suveraCustomerToken';
   const ORGANIZATION_SLUG = String(window.SUVERA_ORGANIZATION_SLUG || 'suvera').trim();
   const PUBLIC_ACCESS_TOKEN = String(window.SUVERA_PUBLIC_ACCESS_TOKEN || '').trim();
+  // FIX: Dedupe short-lived storefront GETs that are triggered by multiple renderers.
+  const GET_CACHE_TTL_MS = 15000;
+  const getCache = new Map();
 
   function withOrganizationPayload(payload) {
     const nextPayload = {
@@ -26,7 +29,21 @@
     return localStorage.getItem(TOKEN_KEY) || '';
   }
 
+  function cacheKey(path, headers) {
+    return [
+      API_BASE,
+      path,
+      headers.Authorization || '',
+      headers['x-public-access-token'] || '',
+    ].join('|');
+  }
+
+  function clearGetCache() {
+    getCache.clear();
+  }
+
   async function request(path, options = {}) {
+    const method = String(options.method || 'GET').toUpperCase();
     const isFormData = options.body instanceof FormData;
     const headers = {
       ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
@@ -39,18 +56,41 @@
       headers['x-public-access-token'] = PUBLIC_ACCESS_TOKEN;
     }
 
-    const response = await fetch(`${API_BASE}${path}`, {
-      ...options,
-      headers,
-    });
+    if (method !== 'GET') clearGetCache();
 
-    if (!response.ok) {
-      const body = await response.json().catch(() => ({}));
-      throw new Error(body.error || `API hatası: ${response.status}`);
+    const key = method === 'GET' && options.cache !== 'no-store' ? cacheKey(path, headers) : '';
+    if (key) {
+      const cached = getCache.get(key);
+      if (cached && Date.now() - cached.createdAt < GET_CACHE_TTL_MS) {
+        return cached.promise;
+      }
+      getCache.delete(key);
     }
 
-    if (response.status === 204) return null;
-    return response.json();
+    const resultPromise = fetch(`${API_BASE}${path}`, {
+      ...options,
+      method,
+      headers,
+    }).then(async function (response) {
+
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(body.error || `API hatası: ${response.status}`);
+      }
+
+      if (response.status === 204) return null;
+      return response.json();
+    });
+
+    if (key) {
+      getCache.set(key, { createdAt: Date.now(), promise: resultPromise });
+      resultPromise.catch(function () {
+        const cached = getCache.get(key);
+        if (cached && cached.promise === resultPromise) getCache.delete(key);
+      });
+    }
+
+    return resultPromise;
   }
 
   function customerToken() {
@@ -101,7 +141,10 @@
 
   function assetUrl(url) {
     const value = String(url || '').trim();
-    if (!value || /^(https?:|data:|blob:)/i.test(value)) return value;
+    if (!value) return '';
+    if (/^https?:\/\//i.test(value) || /^blob:/i.test(value)) return value;
+    // FIX: Block data/javascript/file asset URLs before API content reaches DOM attributes.
+    if (/^[a-z][a-z0-9+.-]*:/i.test(value)) return '';
 
     const assetBase = String(
       window.PANELYA_ASSET_BASE ||
@@ -143,6 +186,7 @@
     customerToken,
     logoutCustomer,
     request,
+    clearGetCache,
     organization: {
       current: () => request(withOrganizationSlug('/organizations/current')),
     },

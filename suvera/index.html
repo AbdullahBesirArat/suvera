@@ -158,6 +158,13 @@
       background-image:
         linear-gradient(90deg, rgba(247,245,241,.92) 0%, rgba(247,245,241,.72) 34%, rgba(247,245,241,.12) 62%),
         url('assets/suvera-istanbul-editorial.png');
+      background-image:
+        linear-gradient(90deg, rgba(247,245,241,.92) 0%, rgba(247,245,241,.72) 34%, rgba(247,245,241,.12) 62%),
+        image-set(
+          url('assets/suvera-istanbul-editorial-1200.avif') type('image/avif') 1x,
+          url('assets/suvera-istanbul-editorial-1200.webp') type('image/webp') 1x,
+          url('assets/suvera-istanbul-editorial.png') type('image/png') 1x
+        );
       background-position:center;
     }
     .slide:nth-child(2) .slide-bg { background:linear-gradient(135deg,#ded4c7,#b7bfa7); }
@@ -329,6 +336,13 @@
         background-image:
           linear-gradient(180deg, rgba(247,245,241,.92) 0%, rgba(247,245,241,.62) 48%, rgba(247,245,241,.10) 100%),
           url('assets/suvera-istanbul-editorial.png');
+        background-image:
+          linear-gradient(180deg, rgba(247,245,241,.92) 0%, rgba(247,245,241,.62) 48%, rgba(247,245,241,.10) 100%),
+          image-set(
+            url('assets/suvera-istanbul-editorial-800.avif') type('image/avif') 1x,
+            url('assets/suvera-istanbul-editorial-800.webp') type('image/webp') 1x,
+            url('assets/suvera-istanbul-editorial.png') type('image/png') 1x
+          );
         background-position:58% center;
       }
       .slide-content { padding:56px 24px 118px; justify-content:flex-start; }
@@ -495,9 +509,18 @@
     .ed-body { font-size:14px; line-height:1.9; color:rgba(255,255,255,.65); margin-bottom:36px; font-weight:300; }
     .ed-img {
       aspect-ratio:4/5;
-      background:
+      background-image:
         linear-gradient(180deg, rgba(32,52,31,0) 44%, rgba(32,52,31,.62) 100%),
-        url('assets/suvera-istanbul-editorial.png') center/cover;
+        url('assets/suvera-istanbul-editorial.png');
+      background-image:
+        linear-gradient(180deg, rgba(32,52,31,0) 44%, rgba(32,52,31,.62) 100%),
+        image-set(
+          url('assets/suvera-istanbul-editorial-800.avif') type('image/avif') 1x,
+          url('assets/suvera-istanbul-editorial-800.webp') type('image/webp') 1x,
+          url('assets/suvera-istanbul-editorial.png') type('image/png') 1x
+        );
+      background-position:center;
+      background-size:cover;
       display:flex; align-items:center; justify-content:center; font-size:80px;
       position:relative;
     }

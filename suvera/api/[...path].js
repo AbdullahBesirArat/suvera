@@ -1,12 +1,34 @@
 const UPSTREAM_API = process.env.UPSTREAM_API || 'https://panelya-api-production.up.railway.app/api';
 const PUBLIC_ACCESS_TOKEN = process.env.SUVERA_PUBLIC_ACCESS_TOKEN || '';
+// FIX: Keep proxy memory bounded even when env input is missing or invalid.
+const MAX_PROXY_BODY_BYTES = positiveNumber(process.env.MAX_PROXY_BODY_BYTES, 1024 * 1024);
 
-function collectBody(req) {
+function positiveNumber(value, fallback) {
+  const next = Number(value);
+  return Number.isFinite(next) && next > 0 ? next : fallback;
+}
+
+function collectBody(req, maxBytes = MAX_PROXY_BODY_BYTES) {
   return new Promise((resolve, reject) => {
     const chunks = [];
-    req.on('data', (chunk) => chunks.push(chunk));
-    req.on('end', () => resolve(Buffer.concat(chunks)));
-    req.on('error', reject);
+    let size = 0;
+    let settled = false;
+    req.on('data', (chunk) => {
+      if (settled) return;
+      size += chunk.length;
+      if (size > maxBytes) {
+        settled = true;
+        reject(Object.assign(new Error('Request body too large'), { statusCode: 413 }));
+        return;
+      }
+      chunks.push(chunk);
+    });
+    req.on('end', () => {
+      if (!settled) resolve(Buffer.concat(chunks));
+    });
+    req.on('error', (err) => {
+      if (!settled) reject(err);
+    });
   });
 }
 
@@ -43,11 +65,30 @@ module.exports = async function handler(req, res) {
   if (req.headers.authorization) headers.Authorization = req.headers.authorization;
 
   const hasBody = !['GET', 'HEAD'].includes(req.method || 'GET');
-  const response = await fetch(upstream, {
-    method: req.method,
-    headers,
-    body: hasBody ? await collectBody(req) : undefined,
-  });
+  let body;
+  try {
+    body = hasBody ? await collectBody(req) : undefined;
+  } catch (err) {
+    res.statusCode = err.statusCode || 502;
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.end(JSON.stringify({ error: err.message || 'Proxy request failed' }));
+    return;
+  }
+
+  let response;
+  // FIX: Return a controlled proxy error instead of leaking runtime failures.
+  try {
+    response = await fetch(upstream, {
+      method: req.method,
+      headers,
+      body,
+    });
+  } catch (err) {
+    res.statusCode = 502;
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.end(JSON.stringify({ error: 'Proxy upstream request failed' }));
+    return;
+  }
 
   response.headers.forEach((value, key) => {
     if (!['content-encoding', 'content-length', 'transfer-encoding'].includes(key.toLowerCase())) {

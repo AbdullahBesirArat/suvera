@@ -325,6 +325,18 @@
       );
     }
 
+    function safePaymentUrl(value) {
+      const raw = String(value || '').trim();
+      if (!raw) return '';
+      try {
+        const url = new URL(raw, location.href);
+        // FIX: Never navigate checkout to javascript/data URLs returned by an API response.
+        return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
+      } catch (_) {
+        return '';
+      }
+    }
+
     function itemImage(item, qty) {
       const src = item.image && window.SuveraAPI ? window.SuveraAPI.assetUrl(item.image) : item.image;
       const media = src
@@ -651,12 +663,13 @@
             });
         const orderCode = orderCodeFromResult(result);
         const provider = result && result.provider || snapshot.provider || 'provider';
+        const paymentPageUrl = safePaymentUrl(result && result.paymentPageUrl);
         const savedOrder = {
           ...snapshot,
           orderCode,
           provider,
           status: 'payment_pending',
-          paymentPageUrl: result && result.paymentPageUrl || '',
+          paymentPageUrl,
         };
         if (window.Suvera && window.Suvera.recordOrder) {
           window.Suvera.recordOrder(savedOrder);
@@ -669,8 +682,8 @@
           return;
         }
 
-        if (result && result.paymentPageUrl) {
-          window.location.href = result.paymentPageUrl;
+        if (paymentPageUrl) {
+          window.location.href = paymentPageUrl;
           return;
         }
 

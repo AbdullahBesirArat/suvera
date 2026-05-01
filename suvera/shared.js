@@ -78,8 +78,8 @@
     });
   }
 
-  function isFavorite(product) {
-    return favoriteIndex(product, loadFavorites()) >= 0;
+  function isFavorite(product, items) {
+    return favoriteIndex(product, items || loadFavorites()) >= 0;
   }
 
   function loadProfile() {
@@ -243,9 +243,9 @@
     };
   }
 
-  function syncFavoriteButton(button, product) {
+  function syncFavoriteButton(button, product, favoriteKeys) {
     if (!button || !product) return;
-    const active = isFavorite(product);
+    const active = favoriteKeys ? favoriteKeys.has(productKey(product)) : isFavorite(product);
     button.classList.toggle('active', active);
     button.setAttribute('aria-pressed', active ? 'true' : 'false');
     if (button.matches('.quick-fav, .prod-wish, #favToggle, [data-favorite-button]')) {
@@ -254,9 +254,12 @@
   }
 
   function refreshWishlistButtons() {
+    // FIX: Read favorites once per refresh to avoid repeated localStorage parsing.
+    const favorites = loadFavorites();
+    const favoriteKeys = new Set(favorites.map(productKey).filter(Boolean));
     document.querySelectorAll('.quick-fav, .prod-wish, #favToggle, [data-favorite-button]').forEach(function(button) {
       const product = productFromButton(button);
-      if (product) syncFavoriteButton(button, product);
+      if (product) syncFavoriteButton(button, product, favoriteKeys);
     });
   }
 

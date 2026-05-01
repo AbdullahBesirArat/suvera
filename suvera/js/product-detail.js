@@ -410,7 +410,8 @@
     wrap.innerHTML = products.map(function (product) {
       const price = Number(product.sale_price || product.price || 0);
       const src = Array.isArray(product.images) && product.images.length ? imageUrl(product.images[0]) : '';
-      return '<article class="related-card" onclick="location.href=\'urun.html?id=' + product.id + '\'">' +
+      // FIX: Encode product ids before inserting them into inline navigation handlers.
+      return '<article class="related-card" onclick="location.href=\'urun.html?id=' + encodeURIComponent(product.id) + '\'">' +
         '<div class="related-media">' + imageMarkup(src, product.name, 'related-fallback') + '</div>' +
         '<div class="related-info"><p>' + escapeHtml(product.category_name || 'Seçki') + '</p><h3>' + escapeHtml(product.name) + '</h3><div class="related-price">' + money(price) + '</div></div>' +
       '</article>';

@@ -24,6 +24,23 @@
     return window.SuveraAPI && window.SuveraAPI.assetUrl ? window.SuveraAPI.assetUrl(path) : path;
   }
 
+  // FIX: Block unsafe link protocols from API and localStorage-backed content.
+  function safeHref(value, fallback) {
+    const href = String(value || '').trim();
+    if (!href) return fallback || '';
+    try {
+      const parsed = new URL(href, location.href);
+      if (['http:', 'https:'].includes(parsed.protocol)) return href;
+    } catch (_) {}
+    if (/^(\/|\.\/|\.\.\/|#|[a-z0-9_-]+\.html(?:[?#].*)?)/i.test(href)) return href;
+    return fallback || '';
+  }
+
+  function trackingLink(url) {
+    const href = safeHref(url, '');
+    return href ? ' • <a href="' + escapeHtml(href) + '">Takip Linki</a>' : '';
+  }
+
   function productMatches(product, query) {
     const haystack = [
       product.name,
@@ -168,10 +185,20 @@
       if (!code || seen.has(String(code))) return false;
       seen.add(String(code));
       return true;
-    });
-    const results = await Promise.all(uniqueOrders.map(function (order) {
-      return fetchOrder(order.orderCode || order.id, orderEmail(order));
-    }));
+    }).slice(0, 20);
+
+    // FIX: Cap account order lookup concurrency so localStorage cannot create request bursts.
+    const results = [];
+    let cursor = 0;
+    async function worker() {
+      while (cursor < uniqueOrders.length) {
+        const index = cursor;
+        cursor += 1;
+        const order = uniqueOrders[index];
+        results[index] = await fetchOrder(order.orderCode || order.id, orderEmail(order));
+      }
+    }
+    await Promise.all(Array.from({ length: Math.min(4, uniqueOrders.length) }, worker));
     return results.filter(Boolean);
   }
 
@@ -299,7 +326,7 @@
       ((effectiveOrder.tracking_number || effectiveOrder.tracking_url)
         ? '<div class="page-info-banner" style="margin-top:16px;">Kargo: <strong>' + escapeHtml(effectiveOrder.shipping_company || 'Hazirlaniyor') + '</strong>' +
           (effectiveOrder.tracking_number ? ' • Takip No: <strong>' + escapeHtml(effectiveOrder.tracking_number) + '</strong>' : '') +
-          (effectiveOrder.tracking_url ? ' • <a href="' + escapeHtml(effectiveOrder.tracking_url) + '">Takip Linki</a>' : '') +
+          trackingLink(effectiveOrder.tracking_url) +
           '</div>'
         : '');
   }
@@ -359,7 +386,7 @@
           : escapeHtml(item.emoji || 'SU');
         return '<div class="page-favorite-card"><div class="page-favorite-media">' + media + '</div><h3>' +
           escapeHtml(item.name) + '</h3><p>' + money(item.price || 0) + '</p><a class="page-btn-secondary" href="' +
-          escapeHtml(item.url || 'urun.html') + '">Incele</a></div>';
+          escapeHtml(safeHref(item.url, 'urun.html')) + '">Incele</a></div>';
       }).join('');
     }
   }
@@ -432,7 +459,7 @@
         '<div class="page-favorite-media">' + media + '</div>' +
         '<h3>' + escapeHtml(item.name) + '</h3>' +
         '<p>' + money(item.price || 0) + '</p>' +
-        '<div class="page-inline-actions"><a class="page-btn-secondary" href="' + escapeHtml(item.url || 'urun.html') +
+        '<div class="page-inline-actions"><a class="page-btn-secondary" href="' + escapeHtml(safeHref(item.url, 'urun.html')) +
         '">Urunu Ac</a><button class="page-btn" type="button" data-remove-favorite="' + escapeHtml(item.id || item.name) +
         '">Kaldir</button></div></article>';
     }).join('');
@@ -530,7 +557,11 @@
 
     try {
       const categories = await window.SuveraAPI.categories.list().catch(function () { return []; });
-      const items = await window.SuveraAPI.products.list('?status=active&limit=128');
+      const productQuery = new URLSearchParams({ status: 'active', limit: '128' });
+      if (query) productQuery.set('q', query);
+      if (/^\d+$/.test(categoryId)) productQuery.set('category_id', categoryId);
+      // FIX: Let the API apply supported search filters before client-side faceting.
+      const items = await window.SuveraAPI.products.list('?' + productQuery.toString());
       const availableColors = uniqueSorted((items || []).flatMap(function (item) { return Array.isArray(item.colors) ? item.colors : []; }));
       const availableSizes = uniqueSorted((items || []).flatMap(function (item) { return Array.isArray(item.sizes) ? item.sizes : []; }));
 
@@ -636,7 +667,7 @@
         money(match.total || 0) + '</strong></div></div><div class="page-info-banner" style="margin-top:16px;">' +
         (match.tracking_number
           ? 'Kargo: <strong>' + escapeHtml(match.shipping_company || 'Hazirlaniyor') + '</strong> • Takip No: <strong>' + escapeHtml(match.tracking_number) + '</strong>' +
-            (match.tracking_url ? ' • <a href="' + escapeHtml(match.tracking_url) + '">Takip Linki</a>' : '')
+            trackingLink(match.tracking_url)
           : escapeHtml(orderStatusNote(match))) +
         '</div>' +
         (isIbanOrder(match) ? ibanInfoHtml(match.orderCode || match.id) : '');

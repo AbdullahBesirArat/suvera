@@ -20,6 +20,18 @@
     });
   }
 
+  // FIX: Block unsafe link protocols coming from CMS collection content.
+  function safeHref(value, fallback) {
+    const href = String(value || '').trim();
+    if (!href) return fallback || 'urunler.html';
+    try {
+      const parsed = new URL(href, location.href);
+      if (['http:', 'https:'].includes(parsed.protocol)) return href;
+    } catch (_) {}
+    if (/^(\/|\.\/|\.\.\/|#|[a-z0-9_-]+\.html(?:[?#].*)?)/i.test(href)) return href;
+    return fallback || 'urunler.html';
+  }
+
   function colorDots(colors) {
     const list = Array.isArray(colors) && colors.length ? colors : ['#d8d3c8'];
     return list.slice(0, 4).map(function (color, index) {
@@ -244,28 +256,33 @@
 
       if (!items.length) {
         target.innerHTML = '<div class="empty-state">Suvera urunleri hazirlaniyor. Cok yakinda burada olacak.</div>';
-        return;
+        return [];
       }
 
       target.innerHTML = items.map(productCard).join('');
       if (window.Suvera && window.Suvera.refreshWishlistButtons) {
         window.Suvera.refreshWishlistButtons();
       }
+      return items;
     } catch (err) {
       target.innerHTML = '<div class="empty-state">Suvera ürünleri şu anda yüklenemiyor. Lütfen kısa süre sonra tekrar deneyin.</div>';
       const count = document.getElementById('productResultCount');
       if (count) count.textContent = '0';
       console.warn('Suvera API urunleri alinamadi:', err.message);
+      return [];
     }
   }
 
-  async function renderFeaturedStrip(target, limit) {
+  async function renderFeaturedStrip(target, limit, sourceProducts) {
     if (!window.SuveraAPI || !target) return;
 
     target.innerHTML = '<div class="empty-state">Öne çıkan ürünler yükleniyor.</div>';
 
     try {
-      const products = await window.SuveraAPI.products.list('?status=active&limit=' + limit);
+      // FIX: Reuse the product list already loaded on the page instead of refetching.
+      const products = Array.isArray(sourceProducts)
+        ? sourceProducts
+        : await window.SuveraAPI.products.list('?status=active&limit=' + limit);
       const items = (products || []).slice(0, limit);
 
       if (!items.length) {
@@ -350,7 +367,11 @@
 
     try {
       var categories = await window.SuveraAPI.categories.list();
-      var products = await window.SuveraAPI.products.list('?status=active&limit=64');
+      var productQuery = new URLSearchParams({ status: 'active', limit: '64' });
+      if (/^\d+$/.test(selectedCategoryId)) productQuery.set('category_id', selectedCategoryId);
+      if (selectedQuery) productQuery.set('q', selectedQuery);
+      // FIX: Push supported catalog filters into the API query before client-side facets run.
+      var products = await window.SuveraAPI.products.list('?' + productQuery.toString());
       var collections = window.SuveraAPI.collections
         ? await window.SuveraAPI.collections.list().catch(function () { return []; })
         : [];
@@ -385,7 +406,7 @@
       if (collectionLinks) {
         collectionLinks.innerHTML = (collections || []).length
           ? collections.slice(0, 5).map(function (collection) {
-              var href = collection.link_url || ('urunler.html?collection=' + encodeURIComponent(collection.slug || collection.id));
+              var href = safeHref(collection.link_url, 'urunler.html?collection=' + encodeURIComponent(collection.slug || collection.id));
               return '<a class="editorial-link" href="' + escapeHtml(href) + '">' +
                 escapeHtml(collection.title || 'Suvera Koleksiyonu') + ' <span>' + escapeHtml(collection.slug || 'Seçki') + '</span></a>';
             }).join('')
@@ -398,7 +419,7 @@
         if (editorialFeatureTag) editorialFeatureTag.textContent = featuredEditorial.slug || 'Koleksiyon';
         if (editorialFeatureTitle) editorialFeatureTitle.innerHTML = escapeHtml(featuredEditorial.title || 'Suvera Koleksiyonu').replace(/\s+/g, '<br/>');
         if (editorialFeatureDescription) editorialFeatureDescription.textContent = featuredEditorial.description || 'Panelya panelinden yayınlanan koleksiyon.';
-        if (editorialFeatureLink) editorialFeatureLink.href = featuredEditorial.link_url || 'urunler.html';
+        if (editorialFeatureLink) editorialFeatureLink.href = safeHref(featuredEditorial.link_url, 'urunler.html');
       }
 
       var availableColors = [];
@@ -475,7 +496,7 @@
         grid.innerHTML = filtered.map(productCard).join('');
       }
 
-      renderFeaturedStrip(document.getElementById('featuredProductsStrip'), 5);
+      renderFeaturedStrip(document.getElementById('featuredProductsStrip'), 5, products);
       if (window.Suvera && window.Suvera.refreshWishlistButtons) {
         window.Suvera.refreshWishlistButtons();
       }
@@ -570,14 +591,24 @@
     renderHeroSlider();
     renderCampaignAnnouncement();
     renderCategories(document.getElementById('homeCategoryGrid'), 6);
-    renderProducts(document.getElementById('homeProductsGrid'), 8);
+    var homeProductsPromise = renderProducts(document.getElementById('homeProductsGrid'), 8);
     renderCollectionPage();
     if (!document.getElementById('collectionTitle')) {
-      renderProducts(document.getElementById('prodsGrid'), 24);
-      renderFeaturedStrip(
-        document.getElementById('featuredProductsStrip') || document.querySelector('.featured-strip'),
-        5
-      );
+      var productGrid = document.getElementById('prodsGrid');
+      var featuredTarget = document.getElementById('featuredProductsStrip') || document.querySelector('.featured-strip');
+      if (!productGrid) {
+        Promise.resolve(homeProductsPromise).then(function (products) {
+          renderFeaturedStrip(featuredTarget, 5, products);
+        });
+        return;
+      }
+      renderProducts(productGrid, 24).then(function (products) {
+        renderFeaturedStrip(
+          featuredTarget,
+          5,
+          products
+        );
+      });
     }
   });
 })();
