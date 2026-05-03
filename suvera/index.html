@@ -330,25 +330,82 @@
       .model-left, .model-right { font-size:clamp(80px,12vw,150px); }
     }
     @media(max-width:600px) {
-      body { padding-top:102px; }
-      .hero-slider { height:auto; min-height:560px; }
+      body { padding-top:92px; }
+      .hero-slider { height:auto; min-height:520px; }
       .slide:nth-child(1) .slide-bg {
         background-image:
-          linear-gradient(180deg, rgba(247,245,241,.92) 0%, rgba(247,245,241,.62) 48%, rgba(247,245,241,.10) 100%),
+          linear-gradient(180deg, rgba(247,245,241,.96) 0%, rgba(247,245,241,.80) 44%, rgba(247,245,241,.34) 100%),
           url('assets/suvera-istanbul-editorial.png');
         background-image:
-          linear-gradient(180deg, rgba(247,245,241,.92) 0%, rgba(247,245,241,.62) 48%, rgba(247,245,241,.10) 100%),
+          linear-gradient(180deg, rgba(247,245,241,.96) 0%, rgba(247,245,241,.80) 44%, rgba(247,245,241,.34) 100%),
           image-set(
             url('assets/suvera-istanbul-editorial-800.avif') type('image/avif') 1x,
             url('assets/suvera-istanbul-editorial-800.webp') type('image/webp') 1x,
             url('assets/suvera-istanbul-editorial.png') type('image/png') 1x
           );
-        background-position:58% center;
+        background-position:62% center;
       }
-      .slide-content { padding:56px 24px 118px; justify-content:flex-start; }
-      .model-left, .model-right { font-size:clamp(60px,14vw,110px); }
-      .slide-title { font-size:clamp(40px,11vw,58px); }
-      .hero-market-proof span { background:rgba(255,255,255,.74); }
+      .slide-overlay {
+        background:linear-gradient(180deg, rgba(247,245,241,.10) 0%, rgba(247,245,241,.22) 100%);
+      }
+      .slide-content {
+        padding:42px 24px 92px;
+        justify-content:flex-start;
+        max-width:100%;
+      }
+      .model-left, .model-right {
+        font-size:clamp(52px,14vw,86px);
+        opacity:.22;
+      }
+      .slide-tag {
+        font-size:10px;
+        letter-spacing:2.4px;
+        margin-bottom:14px;
+      }
+      .slide-title {
+        font-size:clamp(36px,10vw,46px);
+        line-height:1.02;
+        margin-bottom:14px;
+      }
+      .slide-desc {
+        max-width:330px;
+        font-size:14px;
+        line-height:1.65;
+        margin-bottom:18px;
+      }
+      .hero-market-proof {
+        gap:8px;
+        margin-bottom:22px;
+        max-width:330px;
+      }
+      .hero-market-proof span {
+        background:rgba(255,255,255,.82);
+        padding:7px 10px;
+        font-size:9.5px;
+        letter-spacing:1.1px;
+      }
+      .slide-ctas {
+        display:grid;
+        grid-template-columns:1fr;
+        gap:8px;
+        width:min(100%,330px);
+      }
+      .btn-slide-primary,
+      .btn-slide-outline {
+        width:100%;
+        text-align:center;
+        padding:12px 16px;
+        font-size:10.5px;
+      }
+      .slider-arrow {
+        top:auto;
+        bottom:58px;
+        width:38px;
+        height:38px;
+      }
+      .slider-arrow.prev { left:24px; }
+      .slider-arrow.next { right:24px; }
+      .slider-dots { bottom:28px; }
     }
 
     /* EXISTING BTNS (kept for other sections) */
@@ -623,6 +680,65 @@
       .features-bar { grid-template-columns:1fr 1fr; }
       footer { padding:0 20px 24px; }
       .footer-grid { grid-template-columns:1fr 1fr; }
+    }
+    @media(max-width:600px) {
+      section { padding:48px 18px; }
+      .sec-head {
+        display:grid;
+        gap:14px;
+        margin-bottom:28px;
+      }
+      .sec-title {
+        font-size:clamp(34px,10vw,42px);
+      }
+      .cats-grid {
+        grid-template-columns:1fr;
+        gap:8px;
+      }
+      .cat-card,
+      .cat-inner {
+        min-height:190px;
+      }
+      .cat-inner {
+        font-size:clamp(42px,14vw,64px);
+      }
+      .prods-grid {
+        gap:8px;
+      }
+      .prod-info {
+        padding:12px 10px 16px;
+      }
+      .prod-info h4 {
+        font-size:15px;
+      }
+      .editorial {
+        margin:0;
+        padding:38px 22px;
+        gap:28px;
+      }
+      .ed-title,
+      .newsletter h2 {
+        font-size:clamp(34px,10vw,42px);
+      }
+      .newsletter {
+        padding:52px 20px;
+      }
+      .nl-form {
+        display:grid;
+        gap:10px;
+      }
+      .nl-form input,
+      .nl-form button {
+        width:100%;
+      }
+      .features-bar {
+        grid-template-columns:1fr;
+      }
+      .feat {
+        padding:24px 20px;
+        border-right:none;
+        border-bottom:1px solid var(--light);
+      }
     }
   </style>
 </head>

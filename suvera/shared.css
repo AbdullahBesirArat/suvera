@@ -522,6 +522,97 @@ nav.scrolled .hamburger span { background:#1a1a1a; }
   .prod-wish { opacity:1; transform:scale(1); }
 }
 
+@media(max-width:480px) {
+  body { padding-top:92px !important; }
+
+  .announce {
+    height:34px !important;
+    min-height:34px;
+    padding:7px 14px !important;
+    font-size:9.5px !important;
+    letter-spacing:1.6px !important;
+    line-height:1.45;
+  }
+
+  nav {
+    top:34px !important;
+    height:58px !important;
+    padding:0 16px !important;
+    gap:10px;
+  }
+
+  nav.scrolled { top:0 !important; }
+
+  .nav-logo {
+    font-size:24px !important;
+    letter-spacing:5px !important;
+    line-height:1;
+  }
+
+  .nav-right {
+    gap:10px !important;
+    min-width:0;
+  }
+
+  .nav-search-icon {
+    width:38px;
+    height:38px;
+    padding:0 !important;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:16px !important;
+    line-height:1;
+  }
+
+  .nav-icon-btn[href="sepet.html"] {
+    padding:8px 6px !important;
+    font-size:11px !important;
+    letter-spacing:1.6px !important;
+  }
+
+  .cart-dot {
+    top:-3px !important;
+    right:-7px !important;
+    width:17px !important;
+    height:17px !important;
+    font-size:9px !important;
+  }
+
+  .hamburger {
+    width:42px;
+    height:42px;
+    align-items:center;
+    justify-content:center;
+    padding:0 !important;
+    gap:6px;
+  }
+
+  .hamburger span {
+    width:24px;
+    height:2px;
+  }
+
+  .mobile-drawer {
+    width:min(340px,92vw);
+  }
+}
+
+@media(max-width:360px) {
+  .nav-logo {
+    font-size:22px !important;
+    letter-spacing:4px !important;
+  }
+
+  .nav-search-wrap {
+    display:none !important;
+  }
+
+  .nav-right {
+    gap:8px !important;
+  }
+}
+
 /* ══════════════════════════════════════════════
    FOOTER RESPONSIVE
 ══════════════════════════════════════════════ */
