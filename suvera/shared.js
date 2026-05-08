@@ -57,7 +57,7 @@
       image: product.image || '',
       emoji: product.emoji || '',
       category: product.category || product.category_name || '',
-      url: product.url || (id ? ('urun.html?id=' + encodeURIComponent(id)) : 'urun.html'),
+      url: product.url || (id ? ('urun?id=' + encodeURIComponent(id)) : 'urun'),
       addedAt: new Date().toISOString(),
     };
   }
@@ -109,7 +109,7 @@
       price: item.price,
       image: item.image || item.image_url,
       category: item.category,
-      url: id ? ('urun.html?id=' + encodeURIComponent(id)) : 'urun.html',
+      url: id ? ('urun?id=' + encodeURIComponent(id)) : 'urun',
     });
   }
 
@@ -207,7 +207,7 @@
     el.appendChild(icon);
     el.appendChild(document.createTextNode(String(msg)));
     el.className = 'suvera-toast toast-' + type;
-    el.style.cssText = 'position:fixed;right:24px;bottom:24px;z-index:10050;';
+    el.removeAttribute('style');
     el.offsetWidth;
     el.classList.add('show');
     clearTimeout(toastTimer);
@@ -238,7 +238,7 @@
       price: Number(card.dataset.productPrice || 0),
       image: card.dataset.productImage || '',
       emoji: card.dataset.productEmoji || '',
-      url: card.dataset.productId ? ('urun.html?id=' + encodeURIComponent(card.dataset.productId)) : 'urun.html',
+      url: card.dataset.productId ? ('urun?id=' + encodeURIComponent(card.dataset.productId)) : 'urun',
       category: card.dataset.productCategory || '',
     };
   }
@@ -361,40 +361,40 @@
           <button class="mobile-drawer-close" onclick="closeMobileNav()">×</button>
         </div>
         <nav class="mobile-nav-items">
-          <a href="index.html" class="mobile-nav-item">Ana Sayfa</a>
+          <a href="anasayfa" class="mobile-nav-item">Ana Sayfa</a>
           <div class="mobile-nav-item" onclick="toggleMobileSub('mobGiyim')">
             Giyim <span>›</span>
           </div>
           <div class="mobile-nav-sub" id="mobGiyim">
-            <a href="urunler.html">Tümü</a>
-            <a href="urunler.html">Elbise</a>
-            <a href="urunler.html">Bluz & Gömlek</a>
-            <a href="urunler.html">Pantolon & Etek</a>
-            <a href="urunler.html">Takım & Kombin</a>
+            <a href="urunler">Tümü</a>
+            <a href="urunler">Elbise</a>
+            <a href="urunler">Bluz & Gömlek</a>
+            <a href="urunler">Pantolon & Etek</a>
+            <a href="urunler">Takım & Kombin</a>
           </div>
           <div class="mobile-nav-item" onclick="toggleMobileSub('mobDis')">
             Dış Giyim <span>›</span>
           </div>
           <div class="mobile-nav-sub" id="mobDis">
-            <a href="urunler.html">Kaban & Mont</a>
-            <a href="urunler.html">Trençkot</a>
-            <a href="urunler.html">Ceket & Blazer</a>
+            <a href="urunler">Kaban & Mont</a>
+            <a href="urunler">Trençkot</a>
+            <a href="urunler">Ceket & Blazer</a>
           </div>
           <div class="mobile-nav-item" onclick="toggleMobileSub('mobAbaya')">
             Abaya & Ferace <span>›</span>
           </div>
           <div class="mobile-nav-sub" id="mobAbaya">
-            <a href="urunler.html">Abaya</a>
-            <a href="urunler.html">Ferace</a>
-            <a href="urunler.html">Kuşaklı Modeller</a>
+            <a href="urunler">Abaya</a>
+            <a href="urunler">Ferace</a>
+            <a href="urunler">Kuşaklı Modeller</a>
           </div>
-          <a href="urunler.html" class="mobile-nav-item">Eşarp & Aksesuar</a>
-          <a href="urunler.html" class="mobile-nav-item">Koleksiyonlar</a>
-          <a href="urunler.html" class="mobile-nav-item outlet" style="color:#c44">Outlet</a>
+          <a href="urunler" class="mobile-nav-item">Eşarp & Aksesuar</a>
+          <a href="urunler" class="mobile-nav-item">Koleksiyonlar</a>
+          <a href="urunler" class="mobile-nav-item outlet" style="color:#c44">Outlet</a>
         </nav>
         <div class="mobile-nav-footer">
-          <a href="giris.html">👤 &nbsp; Hesabım</a>
-          <a href="sepet.html">🛍️ &nbsp; Sepetim</a>
+          <a href="giris">👤 &nbsp; Hesabım</a>
+          <a href="sepet">🛍️ &nbsp; Sepetim</a>
         </div>
       </div>
     </div>`;
@@ -488,7 +488,7 @@
               <h2 id="qvName" style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;margin-bottom:10px;"></h2>
               <p id="qvPrice" style="font-size:20px;font-weight:600;color:#3d6b38;margin-bottom:24px;"></p>
               <div style="display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap;" id="qvSizes"></div>
-              <a href="urun.html" id="qvLink" class="btn-primary" style="display:block;text-align:center;">Ürün Sayfasına Git →</a>
+              <a href="urun" id="qvLink" class="btn-primary" style="display:block;text-align:center;">Ürün Sayfasına Git →</a>
               <button id="qvAddBtn"
                 style="width:100%;background:#3d6b38;color:#fff;border:none;padding:13px;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:10px;transition:background .2s;"
                 onmouseover="this.style.background='#2a4827'" onmouseout="this.style.background='#3d6b38'">Sepete Ekle</button>
@@ -504,7 +504,7 @@
         : escapeHtml(emoji);
       document.getElementById('qvName').textContent = name;
       document.getElementById('qvPrice').textContent = price;
-      document.getElementById('qvLink').href = productId ? ('urun.html?id=' + productId) : 'urun.html';
+      document.getElementById('qvLink').href = productId ? ('urun?id=' + productId) : 'urun';
       const sizes = ['XS','S','M','L','XL','XXL'];
       document.getElementById('qvSizes').innerHTML = sizes.map(s =>
         `<button onclick="this.style.background=this.style.background?'':'#1a1a1a';this.style.color=this.style.color?'':'#fff'"
@@ -636,7 +636,7 @@
       if (e.key === 'Enter') {
         e.preventDefault();
         const query = input.value.trim();
-        window.location.href = 'arama.html' + (query ? ('?q=' + encodeURIComponent(query)) : '');
+        window.location.href = 'arama' + (query ? ('?q=' + encodeURIComponent(query)) : '');
       }
     };
   }
@@ -644,42 +644,42 @@
   // ── PAGE TRANSITION ─────────────────────────────
   function repairPlaceholderLinks() {
     const map = [
-      [/^kvkk/i, 'kvkk.html'],
-      [/^kvkk sozlesmesi/i, 'kvkk.html'],
-      [/^kvkk\s+[–-]/i, 'kvkk.html'],
-      [/^kargo/i, 'kargo.html'],
-      [/^iade/i, 'iade.html'],
-      [/^satis sozlesmesi$/i, 'sozlesme.html'],
-      [/^hakkimizda$/i, 'hakkimizda.html'],
-      [/^iletisim$/i, 'iletisim.html'],
-      [/^blog$/i, 'blog.html'],
-      [/^magazalar$/i, 'iletisim.html'],
-      [/^kariyer$/i, 'iletisim.html'],
-      [/^is birligi$/i, 'iletisim.html'],
-      [/^bize ulasin/i, 'iletisim.html#iletisim-kanallari'],
-      [/^e-posta:/i, 'iletisim.html#iletisim-kanallari'],
-      [/^whatsapp$/i, 'iletisim.html#iletisim-kanallari'],
-      [/^0850/i, 'iletisim.html#iletisim-kanallari'],
-      [/^instagram$/i, 'iletisim.html#iletisim-kanallari'],
-      [/^tiktok$/i, 'iletisim.html#iletisim-kanallari'],
-      [/^pinterest$/i, 'iletisim.html#iletisim-kanallari'],
-      [/^youtube$/i, 'iletisim.html#iletisim-kanallari'],
-      [/^elbise$/i, 'urunler.html'],
-      [/^abaya$/i, 'urunler.html'],
-      [/^takim$/i, 'urunler.html'],
-      [/^esarp$/i, 'urunler.html'],
-      [/^trenckot$/i, 'urunler.html'],
-      [/^ceket & blazer$/i, 'urunler.html'],
-      [/^kaban & mont$/i, 'urunler.html'],
-      [/^canta$/i, 'urunler.html'],
-      [/^etek$/i, 'urunler.html'],
-      [/^ust giyim$/i, 'urunler.html'],
-      [/^giyim$/i, 'urunler.html'],
-      [/^uyelik sozlesmesi$/i, 'uyelik-sozlesmesi.html'],
-      [/^sifremi unuttum$/i, 'sifre-sifirla.html'],
-      [/^hizlica uye olun/i, 'hesabim.html'],
-      [/^favoriler/i, 'favoriler.html'],
-      [/^hesabim$/i, 'hesabim.html'],
+      [/^kvkk/i, 'kvkk'],
+      [/^kvkk sozlesmesi/i, 'kvkk'],
+      [/^kvkk\s+[–-]/i, 'kvkk'],
+      [/^kargo/i, 'kargo'],
+      [/^iade/i, 'iade'],
+      [/^satis sozlesmesi$/i, 'sozlesme'],
+      [/^hakkimizda$/i, 'hakkimizda'],
+      [/^iletisim$/i, 'iletisim'],
+      [/^blog$/i, 'blog'],
+      [/^magazalar$/i, 'iletisim'],
+      [/^kariyer$/i, 'iletisim'],
+      [/^is birligi$/i, 'iletisim'],
+      [/^bize ulasin/i, 'iletisim#iletisim-kanallari'],
+      [/^e-posta:/i, 'iletisim#iletisim-kanallari'],
+      [/^whatsapp$/i, 'iletisim#iletisim-kanallari'],
+      [/^0850/i, 'iletisim#iletisim-kanallari'],
+      [/^instagram$/i, 'iletisim#iletisim-kanallari'],
+      [/^tiktok$/i, 'iletisim#iletisim-kanallari'],
+      [/^pinterest$/i, 'iletisim#iletisim-kanallari'],
+      [/^youtube$/i, 'iletisim#iletisim-kanallari'],
+      [/^elbise$/i, 'urunler'],
+      [/^abaya$/i, 'urunler'],
+      [/^takim$/i, 'urunler'],
+      [/^esarp$/i, 'urunler'],
+      [/^trenckot$/i, 'urunler'],
+      [/^ceket & blazer$/i, 'urunler'],
+      [/^kaban & mont$/i, 'urunler'],
+      [/^canta$/i, 'urunler'],
+      [/^etek$/i, 'urunler'],
+      [/^ust giyim$/i, 'urunler'],
+      [/^giyim$/i, 'urunler'],
+      [/^uyelik sozlesmesi$/i, 'uyelik-sozlesmesi'],
+      [/^sifremi unuttum$/i, 'sifre-sifirla'],
+      [/^hizlica uye olun/i, 'hesabim'],
+      [/^favoriler/i, 'favoriler'],
+      [/^hesabim$/i, 'hesabim'],
     ];
 
     document.querySelectorAll('a[href="#"], a[href=""], a[href="javascript:void(0)"]').forEach(function(link) {
@@ -702,25 +702,25 @@
   function initSeoDefaults() {
     if (!window.SuveraSEO) return;
 
-    const path = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+    const path = (location.pathname.split('/').pop() || 'anasayfa').toLowerCase();
     const currentDescription = ((document.querySelector('meta[name="description"]') || {}).content || '').trim();
     const titleMap = {
-      'index.html': 'Suvera | Modern Tesettur Giyim',
-      'urunler.html': 'Urunler | Suvera',
-      'urun.html': 'Urun Detayi | Suvera',
-      'sepet.html': 'Sepetim | Suvera',
-      'giris.html': 'Uye Girisi | Suvera',
-      'siparis.html': 'Odeme ve Teslimat | Suvera',
-      'suvera.html': 'Suvera',
+      'anasayfa': 'Suvera | Modern Tesettur Giyim',
+      'urunler': 'Urunler | Suvera',
+      'urun': 'Urun Detayi | Suvera',
+      'sepet': 'Sepetim | Suvera',
+      'giris': 'Uye Girisi | Suvera',
+      'siparis': 'Odeme ve Teslimat | Suvera',
+      'suvera': 'Suvera',
     };
     const descriptionMap = {
-      'index.html': 'Suvera modern tesettur giyim seckileri, guvenli alisveris akisi ve rafine koleksiyon deneyimi sunar.',
-      'urunler.html': 'Suvera koleksiyonundaki urunleri kesfedin, filtreleyin ve favorilerinize ekleyin.',
-      'urun.html': 'Suvera urun detaylarinda olcu, stok, teslimat ve benzer urun bilgilerini inceleyin.',
-      'sepet.html': 'Suvera sepetinizdeki urunleri kontrol edin ve odeme adimina hazirlanin.',
-      'giris.html': 'Suvera hesabiniza girin, siparislerinizi ve favorilerinizi tek ekrandan yonetin.',
-      'siparis.html': 'Suvera checkout akisinda teslimat, iletisim ve odeme adimlarini guvenli sekilde tamamlayin.',
-      'suvera.html': 'Suvera modern tesettur giyim vitrini.',
+      'anasayfa': 'Suvera modern tesettur giyim seckileri, guvenli alisveris akisi ve rafine koleksiyon deneyimi sunar.',
+      'urunler': 'Suvera koleksiyonundaki urunleri kesfedin, filtreleyin ve favorilerinize ekleyin.',
+      'urun': 'Suvera urun detaylarinda olcu, stok, teslimat ve benzer urun bilgilerini inceleyin.',
+      'sepet': 'Suvera sepetinizdeki urunleri kontrol edin ve odeme adimina hazirlanin.',
+      'giris': 'Suvera hesabiniza girin, siparislerinizi ve favorilerinizi tek ekrandan yonetin.',
+      'siparis': 'Suvera checkout akisinda teslimat, iletisim ve odeme adimlarini guvenli sekilde tamamlayin.',
+      'suvera': 'Suvera modern tesettur giyim vitrini.',
     };
 
     window.SuveraSEO.applyPageMeta({
@@ -736,8 +736,8 @@
   }
 
   function redirectPaymentReturn() {
-    const path = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
-    if (path === 'tesekkur.html') return;
+    const path = (location.pathname.split('/').pop() || 'anasayfa').toLowerCase();
+    if (path === 'tesekkur') return;
 
     const params = new URLSearchParams(location.search);
     const paymentState = String(
@@ -759,7 +759,7 @@
     const state = window.Suvera || {};
     const lastOrder = state.getLastOrder ? state.getLastOrder() : null;
     const orderCode = params.get('order') || (lastOrder && (lastOrder.orderCode || lastOrder.id)) || '';
-    const target = new URL('tesekkur.html', location.href);
+    const target = new URL('tesekkur', location.href);
 
     if (orderCode) target.searchParams.set('order', orderCode);
     if (paymentState) target.searchParams.set('payment', paymentState);

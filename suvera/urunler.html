@@ -4,11 +4,11 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="description" content="Suvera urun listesi, elbise, dis giyim ve secili tesettur koleksiyonlarini bir arada sunar." />
-  <link rel="canonical" href="https://suvera.com.tr/urunler.html" />
+  <link rel="canonical" href="https://suvera.com.tr/urunler" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Urunler | Suvera" />
   <meta property="og:description" content="Suvera urun listesi, elbise, dis giyim ve secili tesettur koleksiyonlarini bir arada sunar." />
-  <meta property="og:url" content="https://suvera.com.tr/urunler.html" />
+  <meta property="og:url" content="https://suvera.com.tr/urunler" />
   <meta property="og:image" content="https://suvera.com.tr/og-cover.svg" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Urunler | Suvera" />
@@ -32,7 +32,10 @@
     body{font-family:var(--sans);background:var(--bg);color:var(--black);overflow-x:hidden;padding-top:102px;}
 
     /* NAV — same as index */
-    .announce{background:#2a4827;color:rgba(255,255,255,.82);text-align:center;padding:10px 20px;font-size:11.5px;letter-spacing:2px;text-transform:uppercase;position:fixed;top:0;left:0;right:0;z-index:301;height:38px;display:flex;align-items:center;justify-content:center;}
+    .announce{background:#2a4827;color:rgba(255,255,255,.82);text-align:center;padding:0 20px;font-size:11.5px;letter-spacing:2px;text-transform:uppercase;position:fixed;top:0;left:0;right:0;z-index:301;height:38px;display:flex;align-items:center;justify-content:center;gap:22px;}
+    .announce-link{min-width:0;max-width:min(760px,calc(100vw - 120px));overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:rgba(255,255,255,.92);text-decoration:none;}
+    .announce-arrow{width:28px;height:28px;border:0;border-radius:50%;background:transparent;color:rgba(255,255,255,.76);display:grid;place-items:center;cursor:pointer;font-size:22px;line-height:1;transition:color .2s ease,background .2s ease;}
+    .announce-arrow:hover{color:#fff;background:rgba(255,255,255,.08);}
     nav{background:rgba(255,255,255,.96);border-bottom:1px solid var(--light);position:fixed;top:38px;left:0;right:0;z-index:300;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:64px;box-shadow:0 2px 20px rgba(0,0,0,.04);}
     .nav-left{display:flex;align-items:center;gap:36px;}
     .nav-logo{font-family:var(--serif);font-size:28px;font-weight:600;letter-spacing:6px;color:var(--black);text-decoration:none;}
@@ -61,7 +64,8 @@
     .editorial-link:hover{color:var(--black);transform:translateX(2px);}
     .editorial-link span{color:#aaa;font-size:12px;}
     .editorial-feature{padding:20px;display:flex;flex-direction:column;justify-content:space-between;background:linear-gradient(180deg,#f8f4ed 0%,#f2ede6 100%);}
-    .editorial-visual{min-height:180px;border-radius:6px;background:linear-gradient(140deg,#dfd6c8,#cfc3b4);display:flex;align-items:center;justify-content:center;font-size:66px;margin-bottom:18px;}
+    .editorial-visual{min-height:180px;border-radius:6px;background:linear-gradient(140deg,#dfd6c8,#cfc3b4);display:flex;align-items:center;justify-content:center;font-size:66px;margin-bottom:18px;background-size:cover;background-position:center;}
+    .editorial-visual.has-image{color:transparent;min-height:220px;}
     .editorial-feature small{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#6c8a5f;}
     .editorial-feature h2{font-family:var(--serif);font-size:36px;font-weight:300;line-height:1.02;margin:10px 0 14px;}
     .editorial-feature p{font-size:13px;line-height:1.8;color:var(--mid);}
@@ -187,45 +191,45 @@
   </style>
 </head>
 <body>
-<div class="announce">✦ Yeni sezon geldi — tüm siparişlerde ücretsiz kargo 600 TL ve üzeri ✦</div>
+<div class="announce" id="campaignAnnouncement">✦ Suvera seçkileri yükleniyor ✦</div>
 
 <nav id="mainNav">
-  <a class="nav-logo" href="index.html">Suvera</a>
+  <a class="nav-logo" href="anasayfa">Suvera</a>
   <ul class="nav-menu-wrap">
-    <li><a href="urunler.html">Yeni <span class="nav-chevron">▾</span></a>
-      <div class="simple-drop"><a href="urunler.html">Yeni Gelenler</a><a href="urunler.html">Çok Satanlar</a><a href="urunler.html">Editörün Seçimleri</a></div>
+    <li><a href="urunler">Yeni <span class="nav-chevron">▾</span></a>
+      <div class="simple-drop"><a href="urunler">Yeni Gelenler</a><a href="urunler">Çok Satanlar</a><a href="urunler">Editörün Seçimleri</a></div>
     </li>
-    <li><a href="urunler.html">Giyim <span class="nav-chevron">▾</span></a>
-      <div class="simple-drop"><a href="urunler.html">Elbise</a><a href="urunler.html">Bluz &amp; Gömlek</a><a href="urunler.html">Pantolon &amp; Etek</a><a href="urunler.html">Takım &amp; Kombin</a></div>
+    <li><a href="urunler">Giyim <span class="nav-chevron">▾</span></a>
+      <div class="simple-drop"><a href="urunler">Elbise</a><a href="urunler">Bluz &amp; Gömlek</a><a href="urunler">Pantolon &amp; Etek</a><a href="urunler">Takım &amp; Kombin</a></div>
     </li>
-    <li><a href="urunler.html">Dış Giyim <span class="nav-chevron">▾</span></a>
-      <div class="simple-drop"><a href="urunler.html">Kaban &amp; Mont</a><a href="urunler.html">Trençkot</a><a href="urunler.html">Ceket &amp; Blazer</a></div>
+    <li><a href="urunler">Dış Giyim <span class="nav-chevron">▾</span></a>
+      <div class="simple-drop"><a href="urunler">Kaban &amp; Mont</a><a href="urunler">Trençkot</a><a href="urunler">Ceket &amp; Blazer</a></div>
     </li>
-    <li><a href="urunler.html">Abaya <span class="nav-chevron">▾</span></a>
-      <div class="simple-drop"><a href="urunler.html">Abaya</a><a href="urunler.html">Ferace</a><a href="urunler.html">Kuşaklı Modeller</a></div>
+    <li><a href="urunler">Abaya <span class="nav-chevron">▾</span></a>
+      <div class="simple-drop"><a href="urunler">Abaya</a><a href="urunler">Ferace</a><a href="urunler">Kuşaklı Modeller</a></div>
     </li>
-    <li><a href="urunler.html">Eşarp &amp; Aksesuar</a></li>
-    <li><a href="urunler.html">Koleksiyonlar</a></li>
-    <li><a href="urunler.html" class="outlet">Outlet</a></li>
+    <li><a href="urunler">Eşarp &amp; Aksesuar</a></li>
+    <li><a href="urunler">Koleksiyonlar</a></li>
+    <li><a href="urunler" class="outlet">Outlet</a></li>
   </ul>
   <div class="nav-right">
     <div class="nav-search-wrap">
       <button class="nav-search-icon" aria-label="Ara">🔍</button>
       <div class="nav-search-box" id="navSearchBox">
-        <input type="text" placeholder="Ürün ara..." onkeydown="if(event.key==='Enter')location.href='urunler.html'"/>
+        <input type="text" placeholder="Ürün ara..." onkeydown="if(event.key==='Enter')location.href='urunler'"/>
       </div>
     </div>
-    <a href="giris.html" class="nav-icon-btn">HESABIM</a>
-    <a href="sepet.html" class="nav-icon-btn" style="position:relative">SEPETİM <span class="cart-dot">0</span></a>
+    <a href="giris" class="nav-icon-btn">HESABIM</a>
+    <a href="sepet" class="nav-icon-btn" style="position:relative">SEPETİM <span class="cart-dot">0</span></a>
     <button class="hamburger" aria-label="Menü" onclick="openMobileNav()"><span></span><span></span><span></span></button>
   </div>
 </nav>
 
 
 <div class="breadcrumb">
-  <a href="index.html">Ana Sayfa</a><span>›</span>
-  <a href="urunler.html">Koleksiyon</a><span>›</span>
-  <a href="urunler.html" id="collectionBreadcrumbLink">Tüm Ürünler</a><span>›</span>
+  <a href="anasayfa">Ana Sayfa</a><span>›</span>
+  <a href="urunler">Koleksiyon</a><span>›</span>
+  <a href="urunler" id="collectionBreadcrumbLink">Tüm Ürünler</a><span>›</span>
   <span id="collectionBreadcrumbCurrent">Seçki</span>
 </div>
 
@@ -236,28 +240,28 @@
       <div class="editorial-col">
         <h3>Kategoriler</h3>
         <div id="editorialCategoryLinks">
-          <a class="editorial-link" href="urunler.html">Seçki hazırlanıyor <span>Suvera</span></a>
+          <a class="editorial-link" href="urunler">Seçki hazırlanıyor <span>Suvera</span></a>
         </div>
       </div>
       <div class="editorial-col">
         <h3>Koleksiyonlar</h3>
         <div id="editorialCollectionLinks">
-          <a class="editorial-link" href="urunler.html">Koleksiyonlar yükleniyor <span>Suvera</span></a>
+          <a class="editorial-link" href="urunler">Koleksiyonlar yükleniyor <span>Suvera</span></a>
         </div>
       </div>
       <div class="editorial-feature">
-        <div class="editorial-visual">🥻</div>
+        <div class="editorial-visual" id="editorialFeatureVisual">🥻</div>
         <div>
           <small id="editorialFeatureTag">Öne Çıkan</small>
           <h2 id="editorialFeatureTitle">Suvera<br/>Yeni<br/>Seçki</h2>
           <p id="editorialFeatureDescription">Panelya panelinden yayına alınan ürünler burada öne çıkar.</p>
-          <a class="editorial-cta" href="urunler.html" id="editorialFeatureLink">Keşfet →</a>
+          <a class="editorial-cta" href="urunler" id="editorialFeatureLink">Keşfet →</a>
         </div>
       </div>
     </div>
   </div>
   <div class="editorial-feature">
-    <div class="editorial-visual">🧕</div>
+    <div class="editorial-visual" id="collectionFeatureVisual">🧕</div>
     <div>
       <small id="collectionFeatureTag">Yaz Koleksiyonu</small>
       <h2 id="collectionFeatureTitle">Suvera<br/>seçkisine<br/>yakından bak</h2>
@@ -346,7 +350,7 @@
     <!-- MAIN GRID -->
     <div class="prods-grid stagger-children" id="prodsGrid">
 
-      <div class="prod-card" onclick="location.href='urun.html'">
+      <div class="prod-card" onclick="location.href='urun'">
         <div class="prod-img">
           <div class="prod-img-bg" style="background:linear-gradient(150deg,#ddd5c8,#c8bdb0)"></div>
           <span class="prod-emoji">🧕</span>
@@ -367,7 +371,7 @@
         </div>
       </div>
 
-      <div class="prod-card" onclick="location.href='urun.html'">
+      <div class="prod-card" onclick="location.href='urun'">
         <div class="prod-img">
           <div class="prod-img-bg" style="background:linear-gradient(150deg,#8b9b6c,#607050)"></div>
           <span class="prod-emoji">🧕</span>
@@ -387,7 +391,7 @@
         </div>
       </div>
 
-      <div class="prod-card" onclick="location.href='urun.html'">
+      <div class="prod-card" onclick="location.href='urun'">
         <div class="prod-img">
           <div class="prod-img-bg" style="background:linear-gradient(150deg,#7c7c7c,#505050)"></div>
           <span class="prod-emoji">🧕</span>
@@ -406,7 +410,7 @@
         </div>
       </div>
 
-      <div class="prod-card" onclick="location.href='urun.html'">
+      <div class="prod-card" onclick="location.href='urun'">
         <div class="prod-img">
           <div class="prod-img-bg" style="background:linear-gradient(150deg,#e8e4d8,#d8d0c4)"></div>
           <span class="prod-emoji">🧕</span>
@@ -426,7 +430,7 @@
         </div>
       </div>
 
-      <div class="prod-card" onclick="location.href='urun.html'">
+      <div class="prod-card" onclick="location.href='urun'">
         <div class="prod-img">
           <div class="prod-img-bg" style="background:linear-gradient(150deg,#c8bdb0,#b8a898)"></div>
           <span class="prod-emoji">🧕</span>
@@ -445,7 +449,7 @@
         </div>
       </div>
 
-      <div class="prod-card" onclick="location.href='urun.html'">
+      <div class="prod-card" onclick="location.href='urun'">
         <div class="prod-img">
           <div class="prod-img-bg" style="background:linear-gradient(150deg,#dde4d8,#c4ccc0)"></div>
           <span class="prod-emoji">🧕</span>
@@ -465,7 +469,7 @@
         </div>
       </div>
 
-      <div class="prod-card" onclick="location.href='urun.html'">
+      <div class="prod-card" onclick="location.href='urun'">
         <div class="prod-img">
           <div class="prod-img-bg" style="background:linear-gradient(150deg,#e4dcd4,#d4c8bc)"></div>
           <span class="prod-emoji">🧕</span>
@@ -485,7 +489,7 @@
         </div>
       </div>
 
-      <div class="prod-card" onclick="location.href='urun.html'">
+      <div class="prod-card" onclick="location.href='urun'">
         <div class="prod-img">
           <div class="prod-img-bg" style="background:linear-gradient(150deg,#e0d8e0,#ccc4cc)"></div>
           <span class="prod-emoji">🧕</span>
@@ -525,18 +529,18 @@
   <hr class="footer-divider"/>
   <div class="footer-grid">
     <div class="footer-brand">
-      <a class="nav-logo" href="index.html">Suvera</a>
+      <a class="nav-logo" href="anasayfa">Suvera</a>
       <p>Modern tesettür giyimde zarafet ve sadelik.</p>
       <div class="socials">
-        <a href="iletisim.html#iletisim-kanallari" class="social-btn">INSTAGRAM</a> <span style="color:rgba(255,255,255,.15)">·</span>
-        <a href="iletisim.html#iletisim-kanallari" class="social-btn">TIKTOK</a> <span style="color:rgba(255,255,255,.15)">·</span>
-        <a href="iletisim.html#iletisim-kanallari" class="social-btn">PINTEREST</a>
+        <a href="iletisim#iletisim-kanallari" class="social-btn">INSTAGRAM</a> <span style="color:rgba(255,255,255,.15)">·</span>
+        <a href="iletisim#iletisim-kanallari" class="social-btn">TIKTOK</a> <span style="color:rgba(255,255,255,.15)">·</span>
+        <a href="iletisim#iletisim-kanallari" class="social-btn">PINTEREST</a>
       </div>
     </div>
-    <div class="footer-col"><h5>Kategoriler</h5><ul><li><a href="urunler.html">Elbise</a></li><li><a href="urunler.html">Abaya</a></li><li><a href="urunler.html">Takım</a></li><li><a href="urunler.html">Eşarp</a></li><li><a href="urunler.html">Dış Giyim</a></li></ul></div>
-    <div class="footer-col"><h5>Bilgiler</h5><ul><li><a href="kvkk.html">KVKK</a></li><li><a href="kargo.html">Kargo</a></li><li><a href="iade.html">İade & Değişim</a></li><li><a href="uyelik-sozlesmesi.html">Üyelik Sözleşmesi</a></li></ul></div>
-    <div class="footer-col"><h5>Suvera</h5><ul><li><a href="hakkimizda.html">Hakkımızda</a></li><li><a href="blog.html">Blog</a></li><li><a href="iletisim.html#iletisim-kanallari">Mağazalar</a></li></ul></div>
-    <div class="footer-col"><h5>İletişim</h5><ul><li><a href="tel:+908500007872">0850 000 78 72</a></li><li><a href="iletisim.html#iletisim-kanallari">WhatsApp</a></li><li><a href="mailto:destek@suvera.com">destek@suvera.com</a></li></ul></div>
+    <div class="footer-col"><h5>Kategoriler</h5><ul><li><a href="urunler">Elbise</a></li><li><a href="urunler">Abaya</a></li><li><a href="urunler">Takım</a></li><li><a href="urunler">Eşarp</a></li><li><a href="urunler">Dış Giyim</a></li></ul></div>
+    <div class="footer-col"><h5>Bilgiler</h5><ul><li><a href="kvkk">KVKK</a></li><li><a href="kargo">Kargo</a></li><li><a href="iade">İade & Değişim</a></li><li><a href="uyelik-sozlesmesi">Üyelik Sözleşmesi</a></li></ul></div>
+    <div class="footer-col"><h5>Suvera</h5><ul><li><a href="hakkimizda">Hakkımızda</a></li><li><a href="blog">Blog</a></li><li><a href="iletisim#iletisim-kanallari">Mağazalar</a></li></ul></div>
+    <div class="footer-col"><h5>İletişim</h5><ul><li><a href="tel:+908500007872">0850 000 78 72</a></li><li><a href="iletisim#iletisim-kanallari">WhatsApp</a></li><li><a href="mailto:destek@suvera.com">destek@suvera.com</a></li></ul></div>
   </div>
   <div class="footer-bottom"><span>© 2025 Suvera. Tüm hakları saklıdır.</span><span>SSL Güvenli Alışveriş 🔒</span></div>
 </footer>

@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="description" content="Suvera modern tesettur giyim koleksiyonlari, sade ve guclu parcalar ile yeni sezon seckileri." />
-  <link rel="canonical" href="https://suvera.com.tr/index.html" />
+  <link rel="canonical" href="https://suvera.com.tr/anasayfa" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Suvera | Modern Tesettur Giyim" />
   <meta property="og:description" content="Suvera modern tesettur giyim koleksiyonlari, sade ve guclu parcalar ile yeni sezon seckileri." />
-  <meta property="og:url" content="https://suvera.com.tr/index.html" />
+  <meta property="og:url" content="https://suvera.com.tr/anasayfa" />
   <meta property="og:image" content="https://suvera.com.tr/og-cover.svg" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Suvera | Modern Tesettur Giyim" />
@@ -46,10 +46,24 @@
     /* ANNOUNCEMENT — fixed at very top */
     .announce {
       background: var(--green-dark); color: rgba(255,255,255,.85);
-      text-align:center; padding:9px 20px;
+      text-align:center; padding:0 20px;
       font-size:11px; letter-spacing:2px; text-transform:uppercase;
       position:fixed; top:0; left:0; right:0; z-index:301;
-      height:38px; display:flex; align-items:center; justify-content:center;
+      height:38px; display:flex; align-items:center; justify-content:center; gap:22px;
+    }
+    .announce-link {
+      min-width:0; max-width:min(760px, calc(100vw - 120px));
+      overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+      color:rgba(255,255,255,.92); text-decoration:none;
+    }
+    .announce-arrow {
+      width:28px; height:28px; border:0; border-radius:50%;
+      background:transparent; color:rgba(255,255,255,.76);
+      display:grid; place-items:center; cursor:pointer;
+      font-size:22px; line-height:1; transition:color .2s ease, background .2s ease;
+    }
+    .announce-arrow:hover {
+      color:#fff; background:rgba(255,255,255,.08);
     }
 
     /* NAV */
@@ -483,6 +497,7 @@
     .cat-card:nth-child(3) .cat-inner { background:linear-gradient(150deg,#829772,#3d6b38); }
     .cat-card:nth-child(4) .cat-inner { background:linear-gradient(150deg,#eee4d7,#b9aa91); }
     .cat-card:nth-child(5) .cat-inner { background:linear-gradient(150deg,#425f63,#263f43); }
+    .cat-inner.has-image { background-repeat:no-repeat; background-size:cover; background-position:center; }
     .cat-overlay {
       position:absolute; bottom:0; left:0; right:0;
       background:linear-gradient(to top, rgba(0,0,0,.64) 0%, transparent 100%);
@@ -749,43 +764,43 @@
 
 <!-- MEGA MENU NAV -->
 <nav id="mainNav">
-  <a class="nav-logo" href="index.html">Suvera</a>
+  <a class="nav-logo" href="anasayfa">Suvera</a>
 
   <ul class="nav-menu-wrap">
     <li>
-      <a href="urunler.html">Yeni <span class="nav-chevron">▾</span></a>
+      <a href="urunler">Yeni <span class="nav-chevron">▾</span></a>
       <div class="simple-drop">
-        <a href="urunler.html">Yeni Gelenler</a>
-        <a href="urunler.html">Bu Hafta Eklenenler</a>
-        <a href="urunler.html">Çok Satanlar</a>
-        <a href="urunler.html">Editörün Seçimleri</a>
+        <a href="urunler">Yeni Gelenler</a>
+        <a href="urunler">Bu Hafta Eklenenler</a>
+        <a href="urunler">Çok Satanlar</a>
+        <a href="urunler">Editörün Seçimleri</a>
       </div>
     </li>
     <li>
-      <a href="urunler.html">Giyim <span class="nav-chevron">▾</span></a>
+      <a href="urunler">Giyim <span class="nav-chevron">▾</span></a>
       <div class="mega-drop" style="min-width:600px">
         <div class="mega-cols four">
           <div>
             <div class="mega-col-title">Üst Giyim</div>
-            <a href="urunler.html" class="mega-link">Elbise</a>
-            <a href="urunler.html" class="mega-link">Bluz & Gömlek</a>
-            <a href="urunler.html" class="mega-link">Triko & Kazak</a>
-            <a href="urunler.html" class="mega-link">Body</a>
-            <a href="urunler.html" class="mega-link">Sweatshirt</a>
+            <a href="urunler" class="mega-link">Elbise</a>
+            <a href="urunler" class="mega-link">Bluz & Gömlek</a>
+            <a href="urunler" class="mega-link">Triko & Kazak</a>
+            <a href="urunler" class="mega-link">Body</a>
+            <a href="urunler" class="mega-link">Sweatshirt</a>
             <div class="mega-col-title" style="margin-top:14px">Alt Giyim</div>
-            <a href="urunler.html" class="mega-link">Pantolon</a>
-            <a href="urunler.html" class="mega-link">Etek</a>
-            <a href="urunler.html" class="mega-link">Jean</a>
+            <a href="urunler" class="mega-link">Pantolon</a>
+            <a href="urunler" class="mega-link">Etek</a>
+            <a href="urunler" class="mega-link">Jean</a>
           </div>
           <div>
             <div class="mega-col-title">Koleksiyonlar</div>
-            <a href="urunler.html" class="mega-link">Yeni Gelenler</a>
-            <a href="urunler.html" class="mega-link">Günlük Seçki</a>
-            <a href="urunler.html" class="mega-link">Zamansız Parçalar</a>
-            <a href="urunler.html" class="mega-link">Özel Seri</a>
-            <a href="urunler.html" class="mega-link">Suvera Edit</a>
+            <a href="urunler" class="mega-link">Yeni Gelenler</a>
+            <a href="urunler" class="mega-link">Günlük Seçki</a>
+            <a href="urunler" class="mega-link">Zamansız Parçalar</a>
+            <a href="urunler" class="mega-link">Özel Seri</a>
+            <a href="urunler" class="mega-link">Suvera Edit</a>
           </div>
-          <a href="urunler.html" class="mega-featured">
+          <a href="urunler" class="mega-featured">
             <div class="mega-featured-emoji">TK</div>
             <div class="mf-tag">✦ Öne Çıkan</div>
             <div class="mf-title">Palazzo Keten<br/>Takım</div>
@@ -795,18 +810,18 @@
       </div>
     </li>
     <li>
-      <a href="urunler.html">Dış Giyim <span class="nav-chevron">▾</span></a>
+      <a href="urunler">Dış Giyim <span class="nav-chevron">▾</span></a>
       <div class="mega-drop" style="min-width:420px">
         <div class="mega-cols two">
           <div>
             <div class="mega-col-title">Kategoriler</div>
-            <a href="urunler.html" class="mega-link">Kaban & Mont</a>
-            <a href="urunler.html" class="mega-link">Trençkot</a>
-            <a href="urunler.html" class="mega-link">Ceket & Blazer</a>
-            <a href="urunler.html" class="mega-link">Yelek</a>
-            <a href="urunler.html" class="mega-link">Hırka</a>
+            <a href="urunler" class="mega-link">Kaban & Mont</a>
+            <a href="urunler" class="mega-link">Trençkot</a>
+            <a href="urunler" class="mega-link">Ceket & Blazer</a>
+            <a href="urunler" class="mega-link">Yelek</a>
+            <a href="urunler" class="mega-link">Hırka</a>
           </div>
-          <a href="urunler.html" class="mega-featured">
+          <a href="urunler" class="mega-featured">
             <div class="mega-featured-emoji">TR</div>
             <div class="mf-tag">Sezon Sonu</div>
             <div class="mf-title">%40'a Varan<br/>İndirim</div>
@@ -816,29 +831,29 @@
       </div>
     </li>
     <li>
-      <a href="urunler.html">Abaya <span class="nav-chevron">▾</span></a>
+      <a href="urunler">Abaya <span class="nav-chevron">▾</span></a>
       <div class="simple-drop">
-        <a href="urunler.html">Abaya</a>
-        <a href="urunler.html">Ferace</a>
-        <a href="urunler.html">Kuşaklı Modeller</a>
-        <a href="urunler.html">Nakışlı & Detaylı</a>
+        <a href="urunler">Abaya</a>
+        <a href="urunler">Ferace</a>
+        <a href="urunler">Kuşaklı Modeller</a>
+        <a href="urunler">Nakışlı & Detaylı</a>
       </div>
     </li>
     <li>
-      <a href="urunler.html">Eşarp & Aksesuar <span class="nav-chevron">▾</span></a>
+      <a href="urunler">Eşarp & Aksesuar <span class="nav-chevron">▾</span></a>
       <div class="mega-drop" style="min-width:480px">
         <div class="mega-cols two">
           <div>
             <div class="mega-col-title">Eşarp & Şal</div>
-            <a href="urunler.html" class="mega-link">İpek Eşarp</a>
-            <a href="urunler.html" class="mega-link">Modal Eşarp</a>
-            <a href="urunler.html" class="mega-link">Şal & Fular</a>
-            <a href="urunler.html" class="mega-link">Bere & Şapka</a>
+            <a href="urunler" class="mega-link">İpek Eşarp</a>
+            <a href="urunler" class="mega-link">Modal Eşarp</a>
+            <a href="urunler" class="mega-link">Şal & Fular</a>
+            <a href="urunler" class="mega-link">Bere & Şapka</a>
             <div class="mega-col-title" style="margin-top:14px">Aksesuar</div>
-            <a href="urunler.html" class="mega-link">Çanta</a>
-            <a href="urunler.html" class="mega-link">Takı & Küpe</a>
+            <a href="urunler" class="mega-link">Çanta</a>
+            <a href="urunler" class="mega-link">Takı & Küpe</a>
           </div>
-          <a href="urunler.html" class="mega-featured">
+          <a href="urunler" class="mega-featured">
             <div class="mega-featured-emoji">ES</div>
             <div class="mf-tag">✦ Popüler</div>
             <div class="mf-title">İpek Modal<br/>Eşarplar</div>
@@ -847,19 +862,19 @@
         </div>
       </div>
     </li>
-    <li><a href="urunler.html">Koleksiyonlar</a></li>
-    <li><a href="urunler.html" class="outlet">Outlet</a></li>
+    <li><a href="urunler">Koleksiyonlar</a></li>
+    <li><a href="urunler" class="outlet">Outlet</a></li>
   </ul>
 
   <div class="nav-right">
     <div class="nav-search-wrap">
       <button class="nav-search-icon" aria-label="Ara">🔍</button>
       <div class="nav-search-box" id="navSearchBox">
-        <input type="text" placeholder="Ürün ara..." onkeydown="if(event.key==='Enter')location.href='urunler.html'"/>
+        <input type="text" placeholder="Ürün ara..." onkeydown="if(event.key==='Enter')location.href='urunler'"/>
       </div>
     </div>
-    <a href="giris.html" class="nav-icon-btn">HESABIM</a>
-    <a href="sepet.html" class="nav-icon-btn" style="position:relative">
+    <a href="giris" class="nav-icon-btn">HESABIM</a>
+    <a href="sepet" class="nav-icon-btn" style="position:relative">
       SEPETİM <span class="cart-dot">0</span>
     </a>
     <button class="hamburger" aria-label="Menü" onclick="openMobileNav()">
@@ -890,8 +905,8 @@
         <span>30 gün kolay iade</span>
       </div>
       <div class="slide-ctas">
-        <a href="urunler.html" class="btn-slide-primary">Yeni Sezonu Keşfet</a>
-        <a href="urunler.html" class="btn-slide-outline">Koleksiyona Bak</a>
+        <a href="urunler" class="btn-slide-primary">Yeni Sezonu Keşfet</a>
+        <a href="urunler" class="btn-slide-outline">Koleksiyona Bak</a>
       </div>
     </div>
   </div>
@@ -934,7 +949,7 @@
       <p class="sec-sub">Kategoriler</p>
       <h2 class="sec-title">Ne arıyorsun <em>bugün?</em></h2>
     </div>
-    <a href="urunler.html" class="link-arrow">Tümünü Gör →</a>
+    <a href="urunler" class="link-arrow">Tümünü Gör →</a>
   </div>
   <div class="cats-grid stagger-children" id="homeCategoryGrid">
     <div class="cat-card">
@@ -951,11 +966,11 @@
       <p class="sec-sub">Öne Çıkanlar</p>
       <h2 class="sec-title">Haftanın <em>seçkileri</em></h2>
     </div>
-    <a href="urunler.html" class="link-arrow">Tümünü Gör →</a>
+    <a href="urunler" class="link-arrow">Tümünü Gör →</a>
   </div>
   <div class="prods-grid stagger-children" id="homeProductsGrid">
 
-    <div class="prod-card" onclick="location.href='urun.html'">
+    <div class="prod-card" onclick="location.href='urun'">
       <div class="prod-img">
         <div class="prod-img-bg" style="background:linear-gradient(150deg,#d8d3c8,#c5bfb2)"></div>
         <span style="position:relative;z-index:1">EL</span>
@@ -980,7 +995,7 @@
       </div>
     </div>
 
-    <div class="prod-card" onclick="location.href='urun.html'">
+    <div class="prod-card" onclick="location.href='urun'">
       <div class="prod-img">
         <div class="prod-img-bg" style="background:linear-gradient(150deg,#7a9b6a,#5a7d52)"></div>
         <span style="position:relative;z-index:1">AB</span>
@@ -1000,7 +1015,7 @@
       </div>
     </div>
 
-    <div class="prod-card" onclick="location.href='urun.html'">
+    <div class="prod-card" onclick="location.href='urun'">
       <div class="prod-img">
         <div class="prod-img-bg" style="background:linear-gradient(150deg,#ded8cc,#d0c8b8)"></div>
         <span style="position:relative;z-index:1">TK</span>
@@ -1020,7 +1035,7 @@
       </div>
     </div>
 
-    <div class="prod-card" onclick="location.href='urun.html'">
+    <div class="prod-card" onclick="location.href='urun'">
       <div class="prod-img">
         <div class="prod-img-bg" style="background:linear-gradient(150deg,#e4dcd4,#d4c8bc)"></div>
         <span style="position:relative;z-index:1">TR</span>
@@ -1043,7 +1058,7 @@
       </div>
     </div>
 
-    <div class="prod-card" onclick="location.href='urun.html'">
+    <div class="prod-card" onclick="location.href='urun'">
       <div class="prod-img">
         <div class="prod-img-bg" style="background:linear-gradient(150deg,#e0d8e0,#ccc4cc)"></div>
         <span style="position:relative;z-index:1">BL</span>
@@ -1062,7 +1077,7 @@
       </div>
     </div>
 
-    <div class="prod-card" onclick="location.href='urun.html'">
+    <div class="prod-card" onclick="location.href='urun'">
       <div class="prod-img">
         <div class="prod-img-bg" style="background:linear-gradient(150deg,#d4dcd8,#c0ccc8)"></div>
         <span style="position:relative;z-index:1">PN</span>
@@ -1082,7 +1097,7 @@
       </div>
     </div>
 
-    <div class="prod-card" onclick="location.href='urun.html'">
+    <div class="prod-card" onclick="location.href='urun'">
       <div class="prod-img">
         <div class="prod-img-bg" style="background:linear-gradient(150deg,#e8e0d0,#dcd0bc)"></div>
         <span style="position:relative;z-index:1">ES</span>
@@ -1107,7 +1122,7 @@
       </div>
     </div>
 
-    <div class="prod-card" onclick="location.href='urun.html'">
+    <div class="prod-card" onclick="location.href='urun'">
       <div class="prod-img">
         <div class="prod-img-bg" style="background:linear-gradient(150deg,#d8d0c8,#c8c0b4)"></div>
         <span style="position:relative;z-index:1">MX</span>
@@ -1135,7 +1150,7 @@
     <p>✦ Editöryal</p>
     <h2 class="ed-title">Suvera<br/><em>Koleksiyonu</em></h2>
     <p class="ed-body">Sakinliği ve zarafeti bir arada yaşayan kadın için tasarlandı. Geniş kesimler, yumuşak renkler ve özenli detaylar; ofisten akşam davetine kadar günün her anına eşlik eder.</p>
-    <a href="urunler.html" class="btn-dark" style="background:#fff;color:var(--green-dark);border:none;">Koleksiyonu Gör</a>
+    <a href="urunler" class="btn-dark" style="background:#fff;color:var(--green-dark);border:none;">Koleksiyonu Gör</a>
   </div>
   <div class="ed-img">
     <div class="ed-img-caption">
@@ -1164,7 +1179,7 @@
   </div>
   <div class="kvkk-check">
     <input type="checkbox" id="kvkk"/>
-    <label for="kvkk"><a href="kvkk.html">KVKK Sözleşmesi</a>'ni okudum, kabul ediyorum.</label>
+    <label for="kvkk"><a href="kvkk">KVKK Sözleşmesi</a>'ni okudum, kabul ediyorum.</label>
   </div>
 </div>
 
@@ -1173,54 +1188,54 @@
   <hr class="footer-divider"/>
   <div class="footer-grid">
     <div class="footer-brand">
-      <a class="nav-logo" href="index.html">Suvera</a>
+      <a class="nav-logo" href="anasayfa">Suvera</a>
       <p>Modern tesettür giyimde zarafet ve sadelik. Her kadın için özenle tasarlanmış koleksiyonlar.</p>
       <div class="socials">
-        <a href="iletisim.html#iletisim-kanallari" class="social-btn">INSTAGRAM</a>
+        <a href="iletisim#iletisim-kanallari" class="social-btn">INSTAGRAM</a>
         <span style="color:rgba(255,255,255,.15)">·</span>
-        <a href="iletisim.html#iletisim-kanallari" class="social-btn">TIKTOK</a>
+        <a href="iletisim#iletisim-kanallari" class="social-btn">TIKTOK</a>
         <span style="color:rgba(255,255,255,.15)">·</span>
-        <a href="iletisim.html#iletisim-kanallari" class="social-btn">PINTEREST</a>
+        <a href="iletisim#iletisim-kanallari" class="social-btn">PINTEREST</a>
         <span style="color:rgba(255,255,255,.15)">·</span>
-        <a href="iletisim.html#iletisim-kanallari" class="social-btn">YOUTUBE</a>
+        <a href="iletisim#iletisim-kanallari" class="social-btn">YOUTUBE</a>
       </div>
     </div>
     <div class="footer-col">
       <h5>Öne Çıkan Kategoriler</h5>
       <ul>
-        <li><a href="urunler.html">Trençkot</a></li>
-        <li><a href="urunler.html">Ceket & Blazer</a></li>
-        <li><a href="urunler.html">Kaban & Mont</a></li>
-        <li><a href="urunler.html">Çanta</a></li>
-        <li><a href="urunler.html">Etek</a></li>
-        <li><a href="urunler.html">Elbise</a></li>
+        <li><a href="urunler">Trençkot</a></li>
+        <li><a href="urunler">Ceket & Blazer</a></li>
+        <li><a href="urunler">Kaban & Mont</a></li>
+        <li><a href="urunler">Çanta</a></li>
+        <li><a href="urunler">Etek</a></li>
+        <li><a href="urunler">Elbise</a></li>
       </ul>
     </div>
     <div class="footer-col">
       <h5>Önemli Bilgiler</h5>
       <ul>
-        <li><a href="kvkk.html">KVKK – ETK Aydınlatma</a></li>
-        <li><a href="kargo.html">Kargo ve Teslimat</a></li>
-        <li><a href="uyelik-sozlesmesi.html">Üyelik Sözleşmesi</a></li>
-        <li><a href="sozlesme.html">Satış Sözleşmesi</a></li>
-        <li><a href="iade.html">İade ve Değişim</a></li>
+        <li><a href="kvkk">KVKK – ETK Aydınlatma</a></li>
+        <li><a href="kargo">Kargo ve Teslimat</a></li>
+        <li><a href="uyelik-sozlesmesi">Üyelik Sözleşmesi</a></li>
+        <li><a href="sozlesme">Satış Sözleşmesi</a></li>
+        <li><a href="iade">İade ve Değişim</a></li>
       </ul>
     </div>
     <div class="footer-col">
       <h5>Suvera</h5>
       <ul>
-        <li><a href="hakkimizda.html">Hakkımızda</a></li>
-        <li><a href="blog.html">Blog</a></li>
-        <li><a href="iletisim.html#iletisim-kanallari">Mağazalar</a></li>
-        <li><a href="iletisim.html#iletisim-kanallari">Kariyer</a></li>
-        <li><a href="iletisim.html#iletisim-kanallari">İş Birliği</a></li>
+        <li><a href="hakkimizda">Hakkımızda</a></li>
+        <li><a href="blog">Blog</a></li>
+        <li><a href="iletisim#iletisim-kanallari">Mağazalar</a></li>
+        <li><a href="iletisim#iletisim-kanallari">Kariyer</a></li>
+        <li><a href="iletisim#iletisim-kanallari">İş Birliği</a></li>
       </ul>
     </div>
     <div class="footer-col">
       <h5>İletişim</h5>
       <ul>
         <li><a href="tel:+908500007872">Bize Ulaşın: 0850 000 78 72</a></li>
-        <li><a href="iletisim.html#iletisim-kanallari">WhatsApp: Hızlı Destek</a></li>
+        <li><a href="iletisim#iletisim-kanallari">WhatsApp: Hızlı Destek</a></li>
         <li><a href="mailto:destek@suvera.com">E-posta: destek@suvera.com</a></li>
         <li><a href="mailto:isbirligi@suvera.com">İş Birliği: isbirligi@suvera.com</a></li>
       </ul>

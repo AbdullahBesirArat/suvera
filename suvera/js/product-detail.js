@@ -10,7 +10,9 @@
     selectedColor: '',
     selectedSize: '',
     images: [],
+    imageEntries: [],
     categoryId: null,
+    variants: [],
   };
   let activeImageIndex = 0;
   let lightboxScrollY = 0;
@@ -62,6 +64,56 @@
 
   function imageUrl(path) {
     return window.SuveraAPI && window.SuveraAPI.assetUrl ? window.SuveraAPI.assetUrl(path) : path;
+  }
+
+  function normalizeColor(value) {
+    return String(value || '').trim().toLocaleLowerCase('tr-TR');
+  }
+
+  function colorMeta(value) {
+    const raw = String(value || '').trim();
+    const parts = raw.split('|').map(function (part) { return part.trim(); }).filter(Boolean);
+    const hexMatch = raw.match(/#(?:[0-9a-f]{3}){1,2}\b/i);
+    const label = parts.length >= 2
+      ? parts[0]
+      : raw.replace(/#(?:[0-9a-f]{3}){1,2}\b/i, '').replace(/[()]/g, '').trim();
+    const css = parts.length >= 2 ? parts[parts.length - 1] : (hexMatch ? hexMatch[0] : raw);
+    return {
+      label: label || css,
+      css: css || '#e9dfd0',
+      value: raw,
+    };
+  }
+
+  function parseImageEntry(value) {
+    const raw = String(value || '').trim();
+    if (!raw) return null;
+    const parts = raw.split('|').map(function (part) { return part.trim(); }).filter(Boolean);
+    if (parts.length >= 2) {
+      return {
+        color: parts[0],
+        url: parts[parts.length - 1],
+      };
+    }
+    return {
+      color: '',
+      url: raw,
+    };
+  }
+
+  function productImageEntries(product) {
+    return (Array.isArray(product.images) ? product.images : [])
+      .map(parseImageEntry)
+      .filter(function (entry) { return entry && entry.url; });
+  }
+
+  function imageEntriesForColor(color) {
+    const selected = normalizeColor(color);
+    const entries = currentProduct.imageEntries || [];
+    const colorEntries = selected
+      ? entries.filter(function (entry) { return normalizeColor(entry.color) === selected; })
+      : [];
+    return colorEntries.length ? colorEntries : entries;
   }
 
   function imageMarkup(src, alt, fallbackClass) {
@@ -145,6 +197,20 @@
     });
 
     const media = currentProduct.images[index] || currentProduct.images[0] || '';
+    currentProduct.image = media;
+    const favButton = document.getElementById('favToggle');
+    if (favButton) {
+      favButton.dataset.productImage = media;
+      if (window.Suvera && window.Suvera.syncFavoriteButton) {
+        window.Suvera.syncFavoriteButton(favButton, {
+          id: currentProduct.id,
+          name: currentProduct.name,
+          price: currentProduct.price,
+          image: media,
+          emoji: currentProduct.emoji,
+        });
+      }
+    }
     const mainMedia = document.getElementById('detailMainMedia');
     const counter = document.getElementById('galleryCounter');
 
@@ -159,10 +225,11 @@
     }
   }
 
-  function renderGallery(product) {
-    const images = Array.isArray(product.images) && product.images.length
-      ? product.images.map(imageUrl)
-      : [];
+  function renderGallery(product, color) {
+    currentProduct.imageEntries = productImageEntries(product);
+    const images = imageEntriesForColor(color).map(function (entry) {
+      return imageUrl(entry.url);
+    });
 
     currentProduct.images = images;
     currentProduct.image = images[0] || '';
@@ -200,17 +267,19 @@
     if (!wrap) return;
 
     wrap.innerHTML = colors.map(function (color, index) {
-      return '<button class="swatch' + (index === 0 ? ' active' : '') + '" type="button" style="background:' + escapeHtml(color) + '" data-color="' + escapeHtml(color) + '"></button>';
+      const meta = colorMeta(color);
+      return '<button class="swatch' + (index === 0 ? ' active' : '') + '" type="button" style="background:' + escapeHtml(meta.css) + '" data-color="' + escapeHtml(color) + '" title="' + escapeHtml(meta.label) + '"></button>';
     }).join('');
 
-    if (label) label.textContent = colors[0];
+    if (label) label.textContent = colorMeta(colors[0]).label;
 
     wrap.querySelectorAll('.swatch').forEach(function (button) {
       button.addEventListener('click', function () {
         wrap.querySelectorAll('.swatch').forEach(function (item) { item.classList.remove('active'); });
         button.classList.add('active');
         currentProduct.selectedColor = button.dataset.color || '';
-        if (label) label.textContent = currentProduct.selectedColor;
+        if (label) label.textContent = colorMeta(currentProduct.selectedColor).label;
+        renderGallery(product, currentProduct.selectedColor);
       });
     });
   }
@@ -260,6 +329,7 @@
     currentProduct.price = finalPrice;
     currentProduct.emoji = product.emoji || '👗';
     currentProduct.categoryId = product.category_id || null;
+    currentProduct.variants = Array.isArray(product.variants) ? product.variants : [];
 
     document.title = currentProduct.name + ' – Suvera';
     document.getElementById('detailProductTitle').textContent = currentProduct.name;
@@ -311,7 +381,7 @@
     }
 
     const breadcrumb = document.getElementById('productBreadcrumb');
-    breadcrumb.innerHTML = '<a href="index.html">Ana Sayfa</a><span>›</span><a href="urunler.html">Ürünler</a><span>›</span><a href="urunler.html">' +
+    breadcrumb.innerHTML = '<a href="anasayfa">Ana Sayfa</a><span>›</span><a href="urunler">Ürünler</a><span>›</span><a href="urunler">' +
       escapeHtml(product.category_name || 'Kategori') + '</a><span>›</span><span>' + escapeHtml(currentProduct.name) + '</span>';
 
     const favButton = document.getElementById('favToggle');
@@ -321,7 +391,7 @@
       favButton.dataset.productPrice = String(currentProduct.price || 0);
       favButton.dataset.productImage = currentProduct.image || '';
       favButton.dataset.productEmoji = currentProduct.emoji || '';
-      favButton.dataset.productUrl = currentProduct.id ? ('urun.html?id=' + encodeURIComponent(currentProduct.id)) : 'urun.html';
+      favButton.dataset.productUrl = currentProduct.id ? ('urun?id=' + encodeURIComponent(currentProduct.id)) : 'urun';
       if (window.Suvera && window.Suvera.syncFavoriteButton) {
         window.Suvera.syncFavoriteButton(favButton, {
           id: currentProduct.id,
@@ -334,7 +404,7 @@
     }
 
     if (window.SuveraSEO) {
-      const pagePath = 'urun.html?id=' + encodeURIComponent(currentProduct.id || '');
+      const pagePath = 'urun?id=' + encodeURIComponent(currentProduct.id || '');
       window.SuveraSEO.applyPageMeta({
         title: currentProduct.name + ' | Suvera',
         description: shortText,
@@ -409,13 +479,97 @@
 
     wrap.innerHTML = products.map(function (product) {
       const price = Number(product.sale_price || product.price || 0);
-      const src = Array.isArray(product.images) && product.images.length ? imageUrl(product.images[0]) : '';
+      const firstImage = productImageEntries(product)[0];
+      const src = firstImage ? imageUrl(firstImage.url) : '';
       // FIX: Encode product ids before inserting them into inline navigation handlers.
-      return '<article class="related-card" onclick="location.href=\'urun.html?id=' + encodeURIComponent(product.id) + '\'">' +
+      return '<article class="related-card" onclick="location.href=\'urun?id=' + encodeURIComponent(product.id) + '\'">' +
         '<div class="related-media">' + imageMarkup(src, product.name, 'related-fallback') + '</div>' +
         '<div class="related-info"><p>' + escapeHtml(product.category_name || 'Seçki') + '</p><h3>' + escapeHtml(product.name) + '</h3><div class="related-price">' + money(price) + '</div></div>' +
       '</article>';
     }).join('');
+  }
+
+  function showCartFeedback(message, options = {}) {
+    const feedback = document.getElementById('cartFeedback');
+    const button = document.getElementById('detailAddCartBtn');
+    if (feedback) {
+      feedback.textContent = message;
+      feedback.classList.add('show');
+      clearTimeout(showCartFeedback.timer);
+      showCartFeedback.timer = setTimeout(function () {
+        feedback.classList.remove('show');
+      }, 3600);
+    }
+
+    if (button && options.success !== false) {
+      const original = button.dataset.originalText || button.textContent || 'Sepete Ekle';
+      button.dataset.originalText = original;
+      button.textContent = 'Sepete Eklendi';
+      clearTimeout(showCartFeedback.buttonTimer);
+      showCartFeedback.buttonTimer = setTimeout(function () {
+        button.textContent = original;
+      }, 1800);
+    }
+  }
+
+  function matchingVariant(product) {
+    const variants = Array.isArray(product && product.variants) ? product.variants : [];
+    const selectedColor = normalizeColor(currentProduct.selectedColor);
+    const selectedSize = String(currentProduct.selectedSize || '').trim().toLocaleLowerCase('tr-TR');
+    return variants.find(function (variant) {
+      const colorMatches = !selectedColor || normalizeColor(variant.color) === selectedColor;
+      const sizeMatches = !selectedSize || String(variant.size || '').trim().toLocaleLowerCase('tr-TR') === selectedSize;
+      return colorMatches && sizeMatches;
+    }) || null;
+  }
+
+  async function latestAvailability() {
+    if (!window.SuveraAPI || !window.SuveraAPI.products || !currentProduct.id) {
+      return { ok: true, variant: null };
+    }
+    const latest = await window.SuveraAPI.products.get(currentProduct.id, { cache: 'no-store' });
+    const variant = matchingVariant(latest);
+    const stock = variant ? Number(variant.stock || 0) : Number(latest.stock || 0);
+    return {
+      ok: stock > 0 && latest.status === 'active' && (!variant || variant.status === 'active'),
+      stock,
+      variant,
+    };
+  }
+
+  async function addCurrentProductToCart() {
+    if (!window.Suvera || !currentProduct.id) return false;
+
+    let availability;
+    try {
+      availability = await latestAvailability();
+    } catch (_) {
+      availability = { ok: true, variant: null };
+    }
+
+    if (!availability.ok) {
+      const message = 'Bu secenek icin stok su anda tukendi. Lutfen farkli beden/renk deneyin.';
+      showCartFeedback(message, { success: false });
+      if (window.showToast) window.showToast(message, 'dark');
+      return false;
+    }
+
+    const variant = availability.variant;
+    window.Suvera.addToCart(currentProduct.name, currentProduct.price, currentProduct.emoji, {
+      id: currentProduct.id,
+      product_id: currentProduct.id,
+      variant_id: variant ? variant.id : null,
+      image: currentProduct.image,
+      color: currentProduct.selectedColor,
+      size: currentProduct.selectedSize,
+      variant: [colorMeta(currentProduct.selectedColor).label, currentProduct.selectedSize].filter(Boolean).join(' / '),
+    });
+
+    showCartFeedback('Ürün sepetinize eklenmiştir. Sepetten devam edebilir ya da Satın Al ile ödeme adımına geçebilirsiniz.');
+    if (window.showToast) {
+      window.showToast('Ürün sepetinize eklenmiştir', 'green');
+    }
+    return true;
   }
 
   async function loadRelated(product) {
@@ -445,7 +599,7 @@
         price: currentProduct.price,
         image: currentProduct.image,
         emoji: currentProduct.emoji,
-        url: currentProduct.id ? ('urun.html?id=' + encodeURIComponent(currentProduct.id)) : 'urun.html',
+        url: currentProduct.id ? ('urun?id=' + encodeURIComponent(currentProduct.id)) : 'urun',
       });
       if (window.showToast) {
         window.showToast(
@@ -469,12 +623,12 @@
         if (!items || !items.length) throw new Error('Suvera urunleri hazirlaniyor.');
         id = items[0].id;
         params.set('id', id);
-        history.replaceState({}, '', 'urun.html?' + params.toString());
+        history.replaceState({}, '', 'urun?' + params.toString());
       }
       const product = await window.SuveraAPI.products.get(id);
       renderInfo(product);
-      renderGallery(product);
       renderSwatches(product);
+      renderGallery(product, currentProduct.selectedColor);
       renderSizes(product);
       loadRelated(product);
     } catch (err) {
@@ -484,22 +638,12 @@
   }
 
   window.addToCart = function () {
-    if (!window.Suvera) return;
+    addCurrentProductToCart();
+  };
 
-    window.Suvera.addToCart(currentProduct.name, currentProduct.price, currentProduct.emoji, {
-      id: currentProduct.id,
-      product_id: currentProduct.id,
-      image: currentProduct.image,
-      color: currentProduct.selectedColor,
-      size: currentProduct.selectedSize,
-    });
-
-    if (!window.showToast) {
-      const notice = document.createElement('div');
-      notice.textContent = 'Sepete eklendi';
-      notice.style.cssText = 'position:fixed;right:24px;bottom:24px;z-index:10050;background:#3d6b38;color:#fff;padding:13px 20px;font-family:Jost,sans-serif;font-size:14px;box-shadow:0 8px 32px rgba(0,0,0,.2)';
-      document.body.appendChild(notice);
-      setTimeout(function () { notice.remove(); }, 2600);
+  window.buyNow = async function () {
+    if (await addCurrentProductToCart()) {
+      window.location.href = 'siparis';
     }
   };
 

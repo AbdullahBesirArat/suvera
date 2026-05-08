@@ -16,7 +16,7 @@ Bu liste, Suvera storefront'un Panelya ile canliya alinmasi icin son adimlari to
 2. `js/api.js` icindeki `organizationSlug` ve public token akislarini deploy et.
 3. `js/storefront.js` icindeki slider, kampanya, kategori ve collection entegrasyonlarini deploy et.
 4. `js/site-pages.js` icindeki siparis takip ve hesap ekranlarini deploy et.
-5. `index.html` ve `urunler.html` icindeki entegrasyon hook'larinin canli kodda bulundugunu kontrol et.
+5. `anasayfa` ve `urunler` icindeki entegrasyon hook'larinin canli kodda bulundugunu kontrol et.
 
 ## Canli test
 
@@ -25,7 +25,7 @@ Bu liste, Suvera storefront'un Panelya ile canliya alinmasi icin son adimlari to
 3. Kategori kartlari filtreli listeleme sayfasina gitmeli.
 4. Collection sayfasinda kategori, renk, beden ve fiyat filtreleri calismali.
 5. Kart odemede `/api/payment/initialize` calismali ve `paymentPageUrl` gelirse kullanici odeme sayfasina gitmeli.
-6. IBAN odemede odeme saglayicisi acilmamali; siparis sonrasi `tesekkur.html?order=...` gorunmeli.
+6. IBAN odemede odeme saglayicisi acilmamali; siparis sonrasi `tesekkur?order=...` gorunmeli.
 7. Siparis notu, hediye paketi, kargo ucreti ve `paymentMethod` Panelya panelinde gorunmeli.
 8. Tesekkur, hesabim ve siparis-takip sayfalari backend siparis verisini gostermeli.
 9. Stok sipariste azalmali, iptalde geri gelmeli.

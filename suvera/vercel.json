@@ -2,14 +2,119 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": false,
   "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/anasayfa",
+      "permanent": true
+    },
+    {
+      "source": "/index.html",
+      "destination": "/anasayfa",
+      "permanent": true
+    },
+    {
+      "source": "/:page.html",
+      "destination": "/:page",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/(.*)",
       "destination": "/api/[...path].js"
     },
     {
-      "source": "/",
+      "source": "/sitemap.xml",
+      "destination": "/api/sitemap.xml.js"
+    },
+    {
+      "source": "/anasayfa",
       "destination": "/index.html"
+    },
+    {
+      "source": "/urunler",
+      "destination": "/urunler.html"
+    },
+    {
+      "source": "/urun",
+      "destination": "/urun.html"
+    },
+    {
+      "source": "/sepet",
+      "destination": "/sepet.html"
+    },
+    {
+      "source": "/giris",
+      "destination": "/giris.html"
+    },
+    {
+      "source": "/siparis",
+      "destination": "/siparis.html"
+    },
+    {
+      "source": "/sifre-sifirla",
+      "destination": "/sifre-sifirla.html"
+    },
+    {
+      "source": "/siparis-takip",
+      "destination": "/siparis-takip.html"
+    },
+    {
+      "source": "/tesekkur",
+      "destination": "/tesekkur.html"
+    },
+    {
+      "source": "/hakkimizda",
+      "destination": "/hakkimizda.html"
+    },
+    {
+      "source": "/iade",
+      "destination": "/iade.html"
+    },
+    {
+      "source": "/iletisim",
+      "destination": "/iletisim.html"
+    },
+    {
+      "source": "/kargo",
+      "destination": "/kargo.html"
+    },
+    {
+      "source": "/kvkk",
+      "destination": "/kvkk.html"
+    },
+    {
+      "source": "/sozlesme",
+      "destination": "/sozlesme.html"
+    },
+    {
+      "source": "/uyelik-sozlesmesi",
+      "destination": "/uyelik-sozlesmesi.html"
+    },
+    {
+      "source": "/favoriler",
+      "destination": "/favoriler.html"
+    },
+    {
+      "source": "/hesabim",
+      "destination": "/hesabim.html"
+    },
+    {
+      "source": "/blog-detay",
+      "destination": "/blog-detay.html"
+    },
+    {
+      "source": "/blog",
+      "destination": "/blog.html"
+    },
+    {
+      "source": "/arama",
+      "destination": "/arama.html"
+    },
+    {
+      "source": "/suvera",
+      "destination": "/suvera.html"
     }
   ],
   "headers": [
@@ -52,7 +157,7 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "base-uri 'self'; object-src 'none'; frame-ancestors 'self'"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; connect-src 'self' https://panelya-api-production.up.railway.app; img-src 'self' https: data: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'"
         }
       ]
     }

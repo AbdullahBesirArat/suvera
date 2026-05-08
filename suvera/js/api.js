@@ -3,9 +3,6 @@
 
   const API_BASE = window.PANELYA_API_BASE || window.SUVERA_API_BASE ||
     (['localhost', '127.0.0.1'].includes(location.hostname) ? 'http://localhost:3000/api' : '/api');
-  const TOKEN_KEY = 'suveraAccessToken';
-  const REFRESH_TOKEN_KEY = 'suveraRefreshToken';
-  const CUSTOMER_TOKEN_KEY = 'suveraCustomerToken';
   const ORGANIZATION_SLUG = String(window.SUVERA_ORGANIZATION_SLUG || 'suvera').trim();
   const PUBLIC_ACCESS_TOKEN = String(window.SUVERA_PUBLIC_ACCESS_TOKEN || '').trim();
   // FIX: Dedupe short-lived storefront GETs that are triggered by multiple renderers.
@@ -23,10 +20,6 @@
     }
 
     return nextPayload;
-  }
-
-  function token() {
-    return localStorage.getItem(TOKEN_KEY) || '';
   }
 
   function cacheKey(path, headers) {
@@ -50,8 +43,6 @@
       ...(options.headers || {}),
     };
 
-    const jwt = token();
-    if (jwt && !headers.Authorization) headers.Authorization = `Bearer ${jwt}`;
     if (PUBLIC_ACCESS_TOKEN && !headers['x-public-access-token']) {
       headers['x-public-access-token'] = PUBLIC_ACCESS_TOKEN;
     }
@@ -71,6 +62,7 @@
       ...options,
       method,
       headers,
+      credentials: 'same-origin',
     }).then(async function (response) {
 
       if (!response.ok) {
@@ -94,14 +86,11 @@
   }
 
   function customerToken() {
-    return localStorage.getItem(CUSTOMER_TOKEN_KEY) || '';
+    return 'httpOnly-cookie';
   }
 
   function customerRequest(path, options = {}) {
-    const headers = { ...(options.headers || {}) };
-    const token = customerToken();
-    if (token) headers.Authorization = `Bearer ${token}`;
-    return request(path, { ...options, headers });
+    return request(path, { ...options, headers: { ...(options.headers || {}) } });
   }
 
   async function login(email, password) {
@@ -109,20 +98,14 @@
       method: 'POST',
       body: JSON.stringify({ email, password, organizationSlug: ORGANIZATION_SLUG }),
     });
-    localStorage.setItem(TOKEN_KEY, result.accessToken || '');
-    if (result.refreshToken) localStorage.setItem(REFRESH_TOKEN_KEY, result.refreshToken);
     return result;
   }
 
   function logout() {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(REFRESH_TOKEN_KEY);
+    return request('/auth/session/logout', { method: 'POST' }).catch(() => null);
   }
 
   function saveCustomerSession(result) {
-    if (result && result.accessToken) {
-      localStorage.setItem(CUSTOMER_TOKEN_KEY, result.accessToken);
-    }
     if (result && result.account && window.Suvera && window.Suvera.saveProfile) {
       window.Suvera.saveProfile(result.account);
     }
@@ -130,12 +113,8 @@
   }
 
   function logoutCustomer() {
-    const token = customerToken();
-    localStorage.removeItem(CUSTOMER_TOKEN_KEY);
-    if (!token) return Promise.resolve(null);
     return request('/customer-auth/logout', {
       method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
     }).catch(() => null);
   }
 
@@ -166,6 +145,7 @@
   function cartToOrderPayload(cart, customer) {
     const items = (cart || []).map((item) => ({
       product_id: item.product_id || item.id || null,
+      variant_id: item.variant_id || item.variantId || null,
       name: item.name || 'Ürün',
       quantity: item.qty || item.quantity || 1,
       unit_price: item.price || item.unit_price || 0,
@@ -192,7 +172,7 @@
     },
     products: {
       list: (params = '') => request(withOrganizationSlug(`/products${params}`)),
-      get: (id) => request(withOrganizationSlug(`/products/${id}`)),
+      get: (id, options = {}) => request(withOrganizationSlug(`/products/${id}`), options),
       create: (product) => request('/products', { method: 'POST', body: JSON.stringify(product) }),
       update: (id, product) => request(`/products/${id}`, { method: 'PUT', body: JSON.stringify(product) }),
       remove: (id) => request(`/products/${id}`, { method: 'DELETE' }),
@@ -250,6 +230,7 @@
     },
     blog: {
       list: () => request(withOrganizationSlug('/blog')),
+      get: (idOrSlug) => request(withOrganizationSlug('/blog/' + encodeURIComponent(idOrSlug))),
       adminList: () => request('/blog/admin/all'),
       create: (post) => request('/blog', { method: 'POST', body: JSON.stringify(post) }),
       update: (id, post) => request(`/blog/${id}`, { method: 'PUT', body: JSON.stringify(post) }),

@@ -34,13 +34,13 @@ suvera
 Zip icinde statik Suvera storefront dosyalari bulunur:
 
 ```text
-index.html
-urunler.html
-urun.html
-sepet.html
-siparis.html
-giris.html
-suvera.html
+anasayfa
+urunler
+urun
+sepet
+siparis
+giris
+suvera
 shared.css
 shared.js
 vercel.json
@@ -175,11 +175,11 @@ Bu bilgiler test icindir. Canli kullanimdan once sifreleri degistir veya test he
 Deploy sonrasi su sayfalari kontrol et:
 
 ```text
-/index.html
-/urunler.html
-/urun.html
-/sepet.html
-/siparis.html
+/anasayfa
+/urunler
+/urun
+/sepet
+/siparis
 ```
 
 Kontrol listesi:
@@ -290,10 +290,10 @@ Output Directory: .
 
 Eger Vercel build command otomatik bir sey koyarsa kaldir.
 
-`vercel.json` icindeki root rewrite sayesinde Vercel domaini dogrudan ana sayfayi acmalidir. Gerekirse dogrulama icin `/index.html` ile de test edebilirsin:
+`vercel.json` icindeki root rewrite sayesinde Vercel domaini dogrudan ana sayfayi acmalidir. Gerekirse dogrulama icin `/anasayfa` ile de test edebilirsin:
 
 ```text
-https://suvera-web.vercel.app/index.html
+https://suvera-web.vercel.app/anasayfa
 ```
 
 `cleanUrls` su anda kapali:
@@ -377,12 +377,12 @@ Onerilen repo yapisi:
 
 ```text
 suvera-storefront/
-  index.html
-  urunler.html
-  urun.html
-  sepet.html
-  siparis.html
-  giris.html
+  anasayfa
+  urunler
+  urun
+  sepet
+  siparis
+  giris
   shared.css
   shared.js
   css/

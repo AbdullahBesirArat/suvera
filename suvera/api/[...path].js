@@ -2,6 +2,9 @@ const UPSTREAM_API = process.env.UPSTREAM_API || 'https://panelya-api-production
 const PUBLIC_ACCESS_TOKEN = process.env.SUVERA_PUBLIC_ACCESS_TOKEN || '';
 // FIX: Keep proxy memory bounded even when env input is missing or invalid.
 const MAX_PROXY_BODY_BYTES = positiveNumber(process.env.MAX_PROXY_BODY_BYTES, 1024 * 1024);
+const CUSTOMER_COOKIE = 'suveraCustomerToken';
+const ACCESS_COOKIE = 'suveraAccessToken';
+const REFRESH_COOKIE = 'suveraRefreshToken';
 
 function positiveNumber(value, fallback) {
   const next = Number(value);
@@ -49,11 +52,82 @@ function storefrontOrigin(req) {
   return `${proto}://${host}`;
 }
 
+function parseCookies(header) {
+  return String(header || '').split(';').reduce((cookies, part) => {
+    const index = part.indexOf('=');
+    if (index < 0) return cookies;
+    const key = part.slice(0, index).trim();
+    const value = part.slice(index + 1).trim();
+    if (key) cookies[key] = decodeURIComponent(value);
+    return cookies;
+  }, {});
+}
+
+function serializeCookie(req, name, value, options = {}) {
+  const host = String(req.headers.host || '');
+  const isLocal = /^(localhost|127\.0\.0\.1)(:\d+)?$/i.test(host);
+  const parts = [
+    `${name}=${encodeURIComponent(value || '')}`,
+    'Path=/',
+    'HttpOnly',
+    'SameSite=Lax',
+  ];
+
+  if (!isLocal) parts.push('Secure');
+  if (options.maxAge != null) parts.push(`Max-Age=${Math.max(0, Number(options.maxAge) || 0)}`);
+  return parts.join('; ');
+}
+
+function setCookies(res, cookies) {
+  if (!cookies.length) return;
+  res.setHeader('Set-Cookie', cookies);
+}
+
+function isCustomerAuthPath(path) {
+  return /^customer-auth(?:\/|$)/.test(path) || /^customers\/account(?:\/|\?|$)/.test(path);
+}
+
+function stripSessionTokens(payload) {
+  if (!payload || typeof payload !== 'object') return payload;
+  const next = { ...payload };
+  delete next.accessToken;
+  delete next.refreshToken;
+  return next;
+}
+
+function shouldAttachRefreshCookie(path) {
+  return /^auth\/session\/(refresh|logout)$/.test(path);
+}
+
+function bodyWithRefreshCookie(path, body, cookies, headers) {
+  if (!shouldAttachRefreshCookie(path) || !cookies[REFRESH_COOKIE]) return body;
+
+  let payload = {};
+  if (body && body.length) {
+    const contentType = String(headers['Content-Type'] || '').toLowerCase();
+    if (contentType && !contentType.includes('application/json')) return body;
+
+    try {
+      payload = JSON.parse(Buffer.from(body).toString('utf8') || '{}');
+    } catch (_) {
+      return body;
+    }
+  }
+
+  if (payload.refreshToken) return body;
+  headers['Content-Type'] = 'application/json; charset=utf-8';
+  return Buffer.from(JSON.stringify({
+    ...payload,
+    refreshToken: cookies[REFRESH_COOKIE],
+  }));
+}
+
 module.exports = async function handler(req, res) {
   const incoming = new URL(req.url, 'https://suvera.local');
   const path = incoming.pathname.replace(/^\/api\/?/, '');
   const upstream = new URL(`${UPSTREAM_API}/${path}`);
   upstream.search = incoming.search;
+  const cookies = parseCookies(req.headers.cookie);
 
   const headers = {
     Origin: storefrontOrigin(req),
@@ -62,7 +136,13 @@ module.exports = async function handler(req, res) {
   if (publicAccessToken) headers['x-public-access-token'] = publicAccessToken;
 
   if (req.headers['content-type']) headers['Content-Type'] = req.headers['content-type'];
-  if (req.headers.authorization) headers.Authorization = req.headers.authorization;
+  if (req.headers.authorization) {
+    headers.Authorization = req.headers.authorization;
+  } else if (isCustomerAuthPath(path) && cookies[CUSTOMER_COOKIE]) {
+    headers.Authorization = `Bearer ${cookies[CUSTOMER_COOKIE]}`;
+  } else if (cookies[ACCESS_COOKIE]) {
+    headers.Authorization = `Bearer ${cookies[ACCESS_COOKIE]}`;
+  }
 
   const hasBody = !['GET', 'HEAD'].includes(req.method || 'GET');
   let body;
@@ -74,6 +154,7 @@ module.exports = async function handler(req, res) {
     res.end(JSON.stringify({ error: err.message || 'Proxy request failed' }));
     return;
   }
+  body = bodyWithRefreshCookie(path, body, cookies, headers);
 
   let response;
   // FIX: Return a controlled proxy error instead of leaking runtime failures.
@@ -90,12 +171,57 @@ module.exports = async function handler(req, res) {
     return;
   }
 
+  const responseBuffer = Buffer.from(await response.arrayBuffer());
+  const responseCookies = [];
+  const contentType = response.headers.get('content-type') || '';
+  let outgoingBuffer = responseBuffer;
+
+  if (response.ok && contentType.includes('application/json')) {
+    let payload = {};
+    try {
+      payload = JSON.parse(responseBuffer.toString('utf8') || '{}');
+    } catch (_) {
+      payload = {};
+    }
+    if (/^customer-auth\/(login|register)$/.test(path) && payload.accessToken) {
+      responseCookies.push(serializeCookie(req, CUSTOMER_COOKIE, payload.accessToken, { maxAge: 60 * 60 * 24 * 30 }));
+      outgoingBuffer = Buffer.from(JSON.stringify(stripSessionTokens(payload)));
+    }
+    if (/^auth\/session\/login$/.test(path) && payload.accessToken) {
+      responseCookies.push(serializeCookie(req, ACCESS_COOKIE, payload.accessToken, { maxAge: 60 * 15 }));
+      if (payload.refreshToken) {
+        responseCookies.push(serializeCookie(req, REFRESH_COOKIE, payload.refreshToken, { maxAge: 60 * 60 * 24 * 30 }));
+      }
+      outgoingBuffer = Buffer.from(JSON.stringify(stripSessionTokens(payload)));
+    }
+    if (/^auth\/session\/refresh$/.test(path) && payload.accessToken) {
+      responseCookies.push(serializeCookie(req, ACCESS_COOKIE, payload.accessToken, { maxAge: 60 * 15 }));
+      if (payload.refreshToken) {
+        responseCookies.push(serializeCookie(req, REFRESH_COOKIE, payload.refreshToken, { maxAge: 60 * 60 * 24 * 30 }));
+      }
+      outgoingBuffer = Buffer.from(JSON.stringify(stripSessionTokens(payload)));
+    }
+    if (/^auth\/session\/switch-organization$/.test(path) && payload.accessToken) {
+      responseCookies.push(serializeCookie(req, ACCESS_COOKIE, payload.accessToken, { maxAge: 60 * 15 }));
+      outgoingBuffer = Buffer.from(JSON.stringify(stripSessionTokens(payload)));
+    }
+  }
+
+  if (/^customer-auth\/logout$/.test(path)) {
+    responseCookies.push(serializeCookie(req, CUSTOMER_COOKIE, '', { maxAge: 0 }));
+  }
+  if (/^auth\/session\/logout$/.test(path)) {
+    responseCookies.push(serializeCookie(req, ACCESS_COOKIE, '', { maxAge: 0 }));
+    responseCookies.push(serializeCookie(req, REFRESH_COOKIE, '', { maxAge: 0 }));
+  }
+
   response.headers.forEach((value, key) => {
     if (!['content-encoding', 'content-length', 'transfer-encoding'].includes(key.toLowerCase())) {
       res.setHeader(key, value);
     }
   });
+  setCookies(res, responseCookies);
 
   res.statusCode = response.status;
-  res.end(Buffer.from(await response.arrayBuffer()));
+  res.end(outgoingBuffer);
 };

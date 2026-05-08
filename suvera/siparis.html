@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Suvera checkout akisinda teslimat, iletisim ve odeme adimlarini guvenli sekilde tamamlayin." />
-  <link rel="canonical" href="https://suvera.com.tr/siparis.html" />
+  <link rel="canonical" href="https://suvera.com.tr/siparis" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Odeme ve Teslimat | Suvera" />
   <meta property="og:description" content="Suvera checkout akisinda teslimat, iletisim ve odeme adimlarini guvenli sekilde tamamlayin." />
-  <meta property="og:url" content="https://suvera.com.tr/siparis.html" />
+  <meta property="og:url" content="https://suvera.com.tr/siparis" />
   <meta property="og:image" content="https://suvera.com.tr/og-cover.svg" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Odeme ve Teslimat | Suvera" />
@@ -68,6 +68,14 @@
     .method-detail{display:none;border-top:1px solid var(--line);padding:14px 16px;background:#fafafa;color:var(--muted);font-size:13px;line-height:1.55}
     .method:has(input:checked){border-color:#9cadb9;box-shadow:0 0 0 1px #9cadb9}
     .method:has(input:checked) .method-detail{display:block}
+    .guest-choice{border:1px solid #dfe4dc;background:#f7faf5;border-radius:12px;padding:16px;margin-bottom:18px}
+    .guest-choice-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:12px}
+    .guest-choice h3{margin:0;font-size:13px;letter-spacing:1.8px;text-transform:uppercase}
+    .guest-choice p{margin:4px 0 0;color:var(--muted);font-size:13px;line-height:1.55}
+    .guest-pill{border:1px solid #b9d3b1;background:#fff;color:#2f5f2b;border-radius:999px;padding:7px 10px;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;white-space:nowrap}
+    .guest-actions{display:flex;flex-wrap:wrap;gap:10px}
+    .guest-btn{border:1px solid #263b22;background:#263b22;color:#fff;border-radius:8px;padding:10px 14px;font-family:var(--sans);font-size:11px;letter-spacing:1.4px;text-transform:uppercase;cursor:pointer}
+    .guest-link{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:8px;padding:10px 14px;text-decoration:none;font-size:11px;letter-spacing:1.4px;text-transform:uppercase}
     .error{display:none;background:#fff1f1;border:1px solid #efc5c5;color:var(--danger);border-radius:6px;padding:13px 14px;font-size:13px;line-height:1.55;margin-bottom:16px}
     .trust-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:16px}
     .trust-card{border:1px solid var(--line);border-radius:6px;background:#fafafa;padding:12px 13px;font-size:12px;color:var(--muted);line-height:1.6}
@@ -116,8 +124,8 @@
     <section class="checkout-main">
       <div class="checkout-inner">
         <div class="brand-row">
-          <a class="checkout-logo" href="index.html">Suvera</a>
-          <a class="cart-link" href="sepet.html">Sepete dön</a>
+          <a class="checkout-logo" href="anasayfa">Suvera</a>
+          <a class="cart-link" href="sepet">Sepete dön</a>
         </div>
 
         <div class="steps">
@@ -130,6 +138,19 @@
           <section class="section">
             <div class="section-head">
               <h2 class="section-title">İletişim</h2>
+            </div>
+            <div class="guest-choice" id="guestChoice">
+              <div class="guest-choice-head">
+                <div>
+                  <h3>Misafir olarak devam et</h3>
+                  <p>Üye olmadan sipariş verebilirsiniz. E-posta sadece sipariş bilgilendirmesi ve takip için kullanılır.</p>
+                </div>
+                <span class="guest-pill">Üyeliksiz</span>
+              </div>
+              <div class="guest-actions">
+                <button class="guest-btn" id="continueGuestBtn" type="button">Misafir Devam Et</button>
+                <a class="guest-link" href="giris">Üye girişi yap</a>
+              </div>
             </div>
             <div class="field-grid">
               <div class="field full">
@@ -245,7 +266,7 @@
           </section>
 
           <div class="pay-row">
-            <a class="back-link" href="sepet.html">Sepete geri dön</a>
+            <a class="back-link" href="sepet">Sepete geri dön</a>
             <button class="pay-btn" id="payButton" type="submit">Siparişi Tamamla</button>
           </div>
         </form>
@@ -283,8 +304,8 @@
     const GIFT_WRAP_KEY = 'suveraGiftWrap';
     let checkoutSettings = {};
     const SITE_ORIGIN = String(window.SUVERA_SITE_ORIGIN || location.origin).replace(/\/$/, '');
-    const CARD_PAYMENT_SUCCESS_URL = SITE_ORIGIN + '/tesekkur.html';
-    const CARD_PAYMENT_FAILURE_URL = SITE_ORIGIN + '/tesekkur.html?payment=failed';
+    const CARD_PAYMENT_SUCCESS_URL = SITE_ORIGIN + '/tesekkur';
+    const CARD_PAYMENT_FAILURE_URL = SITE_ORIGIN + '/tesekkur?payment=failed';
 
     function escapeHtml(value) {
       return String(value || '').replace(/[&<>"']/g, (char) => ({
@@ -472,6 +493,7 @@
     }
 
     function hydrateCheckoutProfile() {
+      if (localStorage.getItem('suveraCheckoutMode') === 'guest') return;
       const profile = window.Suvera && window.Suvera.loadProfile ? window.Suvera.loadProfile() : {};
       const [firstName, ...rest] = String(profile.name || '').trim().split(/\s+/).filter(Boolean);
       const lastName = rest.join(' ');
@@ -619,6 +641,7 @@
         },
         items: cart.map((item) => ({
           product_id: item.product_id || item.id,
+          variant_id: item.variant_id || item.variantId || null,
           quantity: item.qty || item.quantity || 1,
         })),
         shipping_fee: shippingFee,
@@ -678,7 +701,7 @@
         localStorage.removeItem(CHECKOUT_NOTE_KEY);
         localStorage.removeItem(GIFT_WRAP_KEY);
         if (isIbanPayment) {
-          window.location.href = 'tesekkur.html?order=' + encodeURIComponent(orderCode);
+          window.location.href = 'tesekkur?order=' + encodeURIComponent(orderCode);
           return;
         }
 
@@ -687,7 +710,7 @@
           return;
         }
 
-        window.location.href = 'tesekkur.html?order=' + encodeURIComponent(orderCode);
+        window.location.href = 'tesekkur?order=' + encodeURIComponent(orderCode);
       } catch (err) {
         console.error('Checkout payment initialize failed:', err);
         showCheckoutMessage(getCheckoutErrorMessage(err));
@@ -697,14 +720,24 @@
     });
 
     document.addEventListener('DOMContentLoaded', () => {
+      const guestButton = document.getElementById('continueGuestBtn');
+      const emailInput = document.getElementById('customerEmail');
+      if (guestButton) {
+        guestButton.addEventListener('click', () => {
+          localStorage.setItem('suveraCheckoutMode', 'guest');
+          guestButton.textContent = 'Misafir olarak devam ediliyor';
+          if (emailInput) emailInput.focus();
+        });
+      }
+
       if (window.SuveraSEO) {
         window.SuveraSEO.applyPageMeta({
           title: 'Odeme ve Teslimat | Suvera',
           description: 'Suvera checkout akisinda teslimat, iletisim ve odeme adimlarini guvenli sekilde tamamlayin.',
-          path: 'siparis.html',
+          path: 'siparis',
         });
         window.SuveraSEO.applyBaseSchemas({
-          path: 'siparis.html',
+          path: 'siparis',
           name: 'Odeme ve Teslimat | Suvera',
           description: 'Suvera checkout akisinda teslimat, iletisim ve odeme adimlarini guvenli sekilde tamamlayin.',
         });

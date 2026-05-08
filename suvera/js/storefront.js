@@ -23,19 +23,64 @@
   // FIX: Block unsafe link protocols coming from CMS collection content.
   function safeHref(value, fallback) {
     const href = String(value || '').trim();
-    if (!href) return fallback || 'urunler.html';
+    if (!href) return fallback || 'urunler';
     try {
       const parsed = new URL(href, location.href);
       if (['http:', 'https:'].includes(parsed.protocol)) return href;
     } catch (_) {}
-    if (/^(\/|\.\/|\.\.\/|#|[a-z0-9_-]+\.html(?:[?#].*)?)/i.test(href)) return href;
-    return fallback || 'urunler.html';
+    if (/^(\/|\.\/|\.\.\/|#|[a-z0-9_-]+(?:\.html)?(?:[?#].*)?)/i.test(href)) return href;
+    return fallback || 'urunler';
   }
 
-  function colorDots(colors) {
+  function parseImageEntry(value) {
+    const raw = String(value || '').trim();
+    if (!raw) return null;
+    const parts = raw.split('|').map(function (part) { return part.trim(); }).filter(Boolean);
+    if (parts.length >= 2) return { color: parts[0], url: parts[parts.length - 1] };
+    return { color: '', url: raw };
+  }
+
+  function productImageEntries(product) {
+    return (Array.isArray(product.images) ? product.images : [])
+      .map(parseImageEntry)
+      .filter(function (entry) { return entry && entry.url; });
+  }
+
+  function normalizeProductColor(value) {
+    return String(value || '').trim().toLocaleLowerCase('tr-TR');
+  }
+
+  function colorMeta(value) {
+    const raw = String(value || '').trim();
+    const parts = raw.split('|').map(function (part) { return part.trim(); }).filter(Boolean);
+    const hexMatch = raw.match(/#(?:[0-9a-f]{3}){1,2}\b/i);
+    const label = parts.length >= 2
+      ? parts[0]
+      : raw.replace(/#(?:[0-9a-f]{3}){1,2}\b/i, '').replace(/[()]/g, '').trim();
+    const css = parts.length >= 2 ? parts[parts.length - 1] : (hexMatch ? hexMatch[0] : raw);
+    return {
+      label: label || css,
+      css: css || '#d8d3c8',
+      value: raw,
+    };
+  }
+
+  function imageForColor(product, color) {
+    const entries = productImageEntries(product);
+    const selected = normalizeProductColor(color);
+    const match = selected
+      ? entries.find(function (entry) { return normalizeProductColor(entry.color) === selected; })
+      : null;
+    const entry = match || entries[0] || null;
+    return entry ? window.SuveraAPI.assetUrl(entry.url) : '';
+  }
+
+  function colorDots(colors, product) {
     const list = Array.isArray(colors) && colors.length ? colors : ['#d8d3c8'];
     return list.slice(0, 4).map(function (color, index) {
-      return '<div class="color-dot ' + (index === 0 ? 'active' : '') + '" style="background:' + escapeHtml(color) + '"></div>';
+      const meta = colorMeta(color);
+      const image = imageForColor(product, color);
+      return '<div class="color-dot ' + (index === 0 ? 'active' : '') + '" style="background:' + escapeHtml(meta.css) + '" data-image="' + escapeHtml(image) + '" title="' + escapeHtml(meta.label) + '" onclick="event.stopPropagation();selectProductCardColor(this)"></div>';
     }).join('');
   }
 
@@ -49,7 +94,7 @@
     const price = Number(product.sale_price || product.price || 0);
     const oldPrice = product.sale_price ? Number(product.price || 0) : null;
     const emoji = product.emoji || 'SU';
-    const image = Array.isArray(product.images) && product.images.length ? window.SuveraAPI.assetUrl(product.images[0]) : '';
+    const image = imageForColor(product, '');
     const id = encodeURIComponent(product.id);
 
     return `
@@ -61,10 +106,10 @@
         data-product-emoji="${escapeHtml(emoji)}"
         data-product-image="${escapeHtml(image)}"
         data-product-category="${escapeHtml(product.category_name || '')}"
-        onclick="location.href='urun.html?id=${id}'">
+        onclick="location.href='urun?id=${id}'">
         <div class="prod-img">
           <div class="prod-img-bg" style="background:linear-gradient(150deg,#d8d3c8,#c5bfb2)"></div>
-          ${image ? `<img src="${escapeHtml(image)}" alt="${escapeHtml(product.name)}" loading="lazy" decoding="async" style="position:relative;z-index:1;width:100%;height:100%;object-fit:cover;"/>` : `<span style="position:relative;z-index:1">${escapeHtml(emoji)}</span>`}
+          ${image ? `<img class="prod-main-image" src="${escapeHtml(image)}" alt="${escapeHtml(product.name)}" loading="lazy" decoding="async" style="position:relative;z-index:1;width:100%;height:100%;object-fit:cover;"/>` : `<span style="position:relative;z-index:1">${escapeHtml(emoji)}</span>`}
           <div class="prod-badges">${badge(product)}</div>
           <div class="prod-hover-actions">
             <button class="quick-add" onclick="event.stopPropagation();addApiProductToCart('${id}')">Hızlı Ekle</button>
@@ -74,7 +119,7 @@
         </div>
         <div class="prod-info">
           <h4>${escapeHtml(product.name)}</h4>
-          <div class="prod-colors">${colorDots(product.colors)}</div>
+          <div class="prod-colors">${colorDots(product.colors, product)}</div>
           <div class="prod-price">
             <span class="p-new">${money(price)}</span>
             ${oldPrice ? '<span class="p-old">' + money(oldPrice) + '</span>' : ''}
@@ -87,11 +132,11 @@
     const price = Number(product.sale_price || product.price || 0);
     const oldPrice = product.sale_price ? Number(product.price || 0) : null;
     const emoji = product.emoji || 'SU';
-    const image = Array.isArray(product.images) && product.images.length ? window.SuveraAPI.assetUrl(product.images[0]) : '';
+    const image = imageForColor(product, '');
     const id = encodeURIComponent(product.id);
 
     return `
-      <div class="feat-strip-item" onclick="location.href='urun.html?id=${id}'">
+      <div class="feat-strip-item" onclick="location.href='urun?id=${id}'">
         <div class="feat-strip-img">
           ${image ? `<img src="${escapeHtml(image)}" alt="${escapeHtml(product.name)}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;display:block;"/>` : `<span>${escapeHtml(emoji)}</span>`}
         </div>
@@ -110,6 +155,55 @@
     return String(value || '').trim().toUpperCase();
   }
 
+  function normalizeKey(value) {
+    return String(value || '')
+      .trim()
+      .toLocaleLowerCase('tr-TR')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/ı/g, 'i')
+      .replace(/ğ/g, 'g')
+      .replace(/ü/g, 'u')
+      .replace(/ş/g, 's')
+      .replace(/ö/g, 'o')
+      .replace(/ç/g, 'c')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+
+  function productMatches(product, query) {
+    var haystack = [
+      product.name,
+      product.category_name,
+      product.tags,
+      product.description,
+    ].join(' ').toLocaleLowerCase('tr-TR');
+
+    return haystack.includes(String(query || '').toLocaleLowerCase('tr-TR'));
+  }
+
+  function productTagKeys(product) {
+    return String(product.tags || '')
+      .split(/[,;\n]+/)
+      .map(normalizeKey)
+      .filter(Boolean);
+  }
+
+  function productBelongsToCollection(product, collection) {
+    if (!collection) return true;
+    var keys = productTagKeys(product);
+    var collectionKeys = [
+      collection.slug,
+      collection.title,
+      'koleksiyon-' + (collection.slug || ''),
+      'collection-' + (collection.slug || ''),
+    ].map(normalizeKey).filter(Boolean);
+
+    return collectionKeys.some(function (key) {
+      return keys.includes(key);
+    });
+  }
+
   function pickCategoryVisual(index) {
     const visuals = ['EL', 'AB', 'TK', 'TR', 'ES', 'KL'];
     return visuals[index % visuals.length];
@@ -118,14 +212,27 @@
   function categoryCard(category, index) {
     const categoryId = encodeURIComponent(category.id);
     const visual = pickCategoryVisual(index);
+    const image = category.image_url ? window.SuveraAPI.assetUrl(category.image_url) : '';
+    const imageStyle = image
+      ? 'background-image:linear-gradient(to top, rgba(12,24,12,.58), rgba(12,24,12,.10) 55%),url(' + escapeHtml(image) + ');background-size:cover;background-position:center;'
+      : '';
     return `
-      <div class="cat-card" onclick="location.href='urunler.html?category_id=${categoryId}'">
-        <div class="cat-inner">${escapeHtml(visual)}</div>
+      <div class="cat-card" onclick="location.href='urunler?category_id=${categoryId}'">
+        <div class="cat-inner${image ? ' has-image' : ''}" style="${imageStyle}">${image ? '' : escapeHtml(visual)}</div>
         <div class="cat-overlay">
           <h3>${escapeHtml(category.name || 'Kategori')}</h3>
           <p>${escapeHtml(category.slug || 'Suvera Seçkisi')}</p>
         </div>
       </div>`;
+  }
+
+  function applyEditorialVisual(target, image, fallbackText) {
+    if (!target) return;
+    target.classList.toggle('has-image', !!image);
+    target.style.backgroundImage = image
+      ? 'linear-gradient(to top, rgba(18,25,18,.54), rgba(18,25,18,.08) 58%),url(' + image + ')'
+      : '';
+    target.textContent = image ? '' : fallbackText;
   }
 
   function pickSlideVisual(index) {
@@ -170,8 +277,8 @@
             <span>30 gün kolay iade</span>
           </div>
           <div class="slide-ctas">
-            <a href="urunler.html" class="btn-slide-primary">${escapeHtml(slide.btn || 'Keşfet')}</a>
-            <a href="urunler.html" class="btn-slide-outline">Tüm Ürünler</a>
+            <a href="urunler" class="btn-slide-primary">${escapeHtml(slide.btn || 'Keşfet')}</a>
+            <a href="urunler" class="btn-slide-outline">Tüm Ürünler</a>
           </div>
         </div>
       </div>`;
@@ -215,16 +322,58 @@
     return campaign.name || 'Kampanya';
   }
 
+  function collectionHref(collection) {
+    return safeHref(
+      collection && collection.link_url,
+      'urunler?collection=' + encodeURIComponent((collection && (collection.slug || collection.id)) || '')
+    );
+  }
+
+  function renderAnnouncementItem(target, items, index) {
+    if (!target || !items.length) return;
+    var safeIndex = ((index % items.length) + items.length) % items.length;
+    var item = items[safeIndex];
+    target.dataset.index = String(safeIndex);
+    target.innerHTML = ''
+      + '<button class="announce-arrow" type="button" aria-label="Önceki kampanya">‹</button>'
+      + '<a class="announce-link" href="' + escapeHtml(item.href) + '">' + escapeHtml(item.label) + '</a>'
+      + '<button class="announce-arrow" type="button" aria-label="Sonraki kampanya">›</button>';
+    var buttons = target.querySelectorAll('.announce-arrow');
+    buttons[0].onclick = function () {
+      renderAnnouncementItem(target, items, safeIndex - 1);
+    };
+    buttons[1].onclick = function () {
+      renderAnnouncementItem(target, items, safeIndex + 1);
+    };
+  }
+
   async function renderCampaignAnnouncement() {
     const announcement = document.getElementById('campaignAnnouncement');
     if (!window.SuveraAPI || !announcement) return;
 
     try {
-      const campaigns = await window.SuveraAPI.campaigns.list();
-      const active = Array.isArray(campaigns) && campaigns.length ? campaigns[0] : null;
-      if (!active) return;
+      const results = await Promise.all([
+        window.SuveraAPI.campaigns.list().catch(function () { return []; }),
+        window.SuveraAPI.collections ? window.SuveraAPI.collections.list().catch(function () { return []; }) : [],
+      ]);
+      const campaigns = Array.isArray(results[0]) ? results[0] : [];
+      const collections = Array.isArray(results[1]) ? results[1] : [];
+      const campaignItems = campaigns.map(function (campaign) {
+        return {
+          label: '✦ ' + (campaign.name || 'Suvera kampanyası') + ' • ' + campaignLabel(campaign) + ' ✦',
+          href: 'urunler',
+        };
+      });
+      const collectionItems = collections.map(function (collection) {
+        return {
+          label: '✦ ' + (collection.title || 'Suvera koleksiyonu') + ' koleksiyonuna ait ürünler ✦',
+          href: collectionHref(collection),
+        };
+      });
+      const items = campaignItems.concat(collectionItems);
+      if (!items.length) return;
 
-      announcement.textContent = '✦ ' + (active.name || 'Suvera kampanyasi') + ' • ' + campaignLabel(active) + ' ✦';
+      renderAnnouncementItem(announcement, items, Number(announcement.dataset.index || 0));
     } catch (err) {
       console.warn('Suvera kampanya alanı yüklenemedi:', err.message);
     }
@@ -360,6 +509,8 @@
     var editorialFeatureTitle = document.getElementById('editorialFeatureTitle');
     var editorialFeatureDescription = document.getElementById('editorialFeatureDescription');
     var editorialFeatureLink = document.getElementById('editorialFeatureLink');
+    var editorialFeatureVisual = document.getElementById('editorialFeatureVisual');
+    var collectionFeatureVisual = document.getElementById('collectionFeatureVisual');
 
     if (sortSelect) sortSelect.value = selectedSort;
     if (priceRange) priceRange.value = String(maxPrice);
@@ -367,7 +518,7 @@
 
     try {
       var categories = await window.SuveraAPI.categories.list();
-      var productQuery = new URLSearchParams({ status: 'active', limit: '64' });
+      var productQuery = new URLSearchParams({ status: 'active', limit: '24' });
       if (/^\d+$/.test(selectedCategoryId)) productQuery.set('category_id', selectedCategoryId);
       if (selectedQuery) productQuery.set('q', selectedQuery);
       // FIX: Push supported catalog filters into the API query before client-side facets run.
@@ -398,7 +549,7 @@
 
       if (editorLinks) {
         editorLinks.innerHTML = (categories || []).slice(0, 5).map(function (category) {
-          return '<a class="editorial-link" href="urunler.html?category_id=' + encodeURIComponent(category.id) + '">' +
+          return '<a class="editorial-link" href="urunler?category_id=' + encodeURIComponent(category.id) + '">' +
             escapeHtml(category.name) + ' <span>' + escapeHtml(category.slug || 'Suvera') + '</span></a>';
         }).join('');
       }
@@ -406,25 +557,31 @@
       if (collectionLinks) {
         collectionLinks.innerHTML = (collections || []).length
           ? collections.slice(0, 5).map(function (collection) {
-              var href = safeHref(collection.link_url, 'urunler.html?collection=' + encodeURIComponent(collection.slug || collection.id));
+              var href = safeHref(collection.link_url, 'urunler?collection=' + encodeURIComponent(collection.slug || collection.id));
               return '<a class="editorial-link" href="' + escapeHtml(href) + '">' +
                 escapeHtml(collection.title || 'Suvera Koleksiyonu') + ' <span>' + escapeHtml(collection.slug || 'Seçki') + '</span></a>';
             }).join('')
-          : '<a class="editorial-link" href="urunler.html">Koleksiyon hazırlanıyor <span>Suvera</span></a>';
+          : '<a class="editorial-link" href="urunler">Koleksiyon hazırlanıyor <span>Suvera</span></a>';
       }
 
       var featuredCollection = (collections || [])[0] || null;
       var featuredEditorial = activeCollection || featuredCollection;
       if (featuredEditorial) {
+        var editorialImage = featuredEditorial.image_url ? window.SuveraAPI.assetUrl(featuredEditorial.image_url) : '';
         if (editorialFeatureTag) editorialFeatureTag.textContent = featuredEditorial.slug || 'Koleksiyon';
         if (editorialFeatureTitle) editorialFeatureTitle.innerHTML = escapeHtml(featuredEditorial.title || 'Suvera Koleksiyonu').replace(/\s+/g, '<br/>');
         if (editorialFeatureDescription) editorialFeatureDescription.textContent = featuredEditorial.description || 'Panelya panelinden yayınlanan koleksiyon.';
-        if (editorialFeatureLink) editorialFeatureLink.href = safeHref(featuredEditorial.link_url, 'urunler.html');
+        if (editorialFeatureLink) editorialFeatureLink.href = safeHref(featuredEditorial.link_url, 'urunler');
+        applyEditorialVisual(editorialFeatureVisual, editorialImage, '🥻');
       }
+
+      var collectionProducts = activeCollection
+        ? (products || []).filter(function (product) { return productBelongsToCollection(product, activeCollection); })
+        : (products || []);
 
       var availableColors = [];
       var availableSizes = [];
-      (products || []).forEach(function (product) {
+      collectionProducts.forEach(function (product) {
         (product.colors || []).forEach(function (color) {
           if (color && !availableColors.includes(color)) availableColors.push(color);
         });
@@ -437,7 +594,8 @@
         colorWrap.innerHTML = availableColors.length
           ? availableColors.map(function (color) {
               var active = selectedColors.has(normalizeColor(color)) ? ' act' : '';
-              return '<div class="cf-dot' + active + '" style="background:' + escapeHtml(color) + '" data-color="' + escapeHtml(color) + '" title="' + escapeHtml(color) + '"></div>';
+              var meta = colorMeta(color);
+              return '<div class="cf-dot' + active + '" style="background:' + escapeHtml(meta.css) + '" data-color="' + escapeHtml(color) + '" title="' + escapeHtml(meta.label) + '"></div>';
             }).join('')
           : '<div class="empty-state">Renk filtresi hazır değil.</div>';
       }
@@ -451,7 +609,7 @@
           : '<button class="size-btn act" type="button" data-size="STANDART">Standart</button>';
       }
 
-      var filtered = (products || []).filter(function (product) {
+      var filtered = collectionProducts.filter(function (product) {
         var price = Number(product.sale_price || product.price || 0);
         var categoryOk = !selectedCategoryId || String(product.category_id || '') === String(selectedCategoryId);
         var queryOk = !selectedQuery || productMatches(product, selectedQuery);
@@ -467,7 +625,9 @@
 
       filtered = sortProducts(filtered, selectedSort);
 
-      title.textContent = activeCategory ? activeCategory.name : (selectedQuery ? '"' + selectedQuery + '" için sonuçlar' : 'Tüm Ürünler');
+      title.textContent = activeCategory
+        ? activeCategory.name
+        : (activeCollection ? activeCollection.title : (selectedQuery ? '"' + selectedQuery + '" için sonuçlar' : 'Tüm Ürünler'));
       if (breadcrumbLink) breadcrumbLink.textContent = activeCategory ? activeCategory.name : (activeCollection ? activeCollection.title : 'Tüm Ürünler');
       if (breadcrumbCurrent) breadcrumbCurrent.textContent = selectedQuery ? 'Arama' : (activeCategory ? activeCategory.name : (activeCollection ? 'Koleksiyon' : 'Seçki'));
       if (kicker) kicker.textContent = activeCategory
@@ -480,23 +640,34 @@
           ? activeCategory.name + ' kategorisindeki ürünler Panelya üzerinden canlı olarak güncellenir.'
           : 'Ürünler, filtreler ve stok bilgileri Panelya kataloğundan canlı gelir.';
       }
+      if (activeCategory) {
+        var categoryImage = activeCategory.image_url ? window.SuveraAPI.assetUrl(activeCategory.image_url) : '';
+        applyEditorialVisual(collectionFeatureVisual, categoryImage, '🧕');
+        if (!featuredEditorial) applyEditorialVisual(editorialFeatureVisual, categoryImage, '🥻');
+      } else {
+        applyEditorialVisual(collectionFeatureVisual, '', '🧕');
+      }
       if (!activeCategory && (activeCollection || featuredCollection)) {
         var heroCollection = activeCollection || featuredCollection;
+        var heroImage = heroCollection.image_url ? window.SuveraAPI.assetUrl(heroCollection.image_url) : '';
         if (featureTag) featureTag.textContent = heroCollection.slug || 'Öne Çıkan';
         if (featureTitle) featureTitle.innerHTML = escapeHtml(heroCollection.title || 'Suvera Seçkisi').replace(/\s+/g, '<br/>');
         if (featureDescription) featureDescription.textContent = heroCollection.description || 'Yayındaki ürünler Panelya panelinden canlı gelir.';
+        applyEditorialVisual(collectionFeatureVisual, heroImage, '🧕');
       }
 
       var resultCount = document.getElementById('productResultCount');
       if (resultCount) resultCount.textContent = String(filtered.length);
 
       if (!filtered.length) {
-        grid.innerHTML = '<div class="empty-state">Bu filtrelerle eşleşen ürün bulunamadı.</div>';
+        grid.innerHTML = activeCollection
+          ? '<div class="empty-state">Bu koleksiyona bağlı ürün bulunamadı. Panelya ürün etiketlerine koleksiyon kısa adını ekleyin.</div>'
+          : '<div class="empty-state">Bu filtrelerle eşleşen ürün bulunamadı.</div>';
       } else {
         grid.innerHTML = filtered.map(productCard).join('');
       }
 
-      renderFeaturedStrip(document.getElementById('featuredProductsStrip'), 5, products);
+      renderFeaturedStrip(document.getElementById('featuredProductsStrip'), 5, collectionProducts);
       if (window.Suvera && window.Suvera.refreshWishlistButtons) {
         window.Suvera.refreshWishlistButtons();
       }
@@ -561,7 +732,7 @@
 
       if (resetButton) {
         resetButton.onclick = function () {
-          location.href = 'urunler.html';
+          location.href = 'urunler';
         };
       }
     } catch (err) {
@@ -576,7 +747,7 @@
     try {
       const product = await window.SuveraAPI.products.get(id);
       const price = Number(product.sale_price || product.price || 0);
-      const image = Array.isArray(product.images) && product.images.length ? window.SuveraAPI.assetUrl(product.images[0]) : '';
+      const image = imageForColor(product, '');
       window.Suvera.addToCart(product.name, price, product.emoji || 'SU', {
         id: product.id,
         product_id: product.id,
@@ -584,6 +755,21 @@
       });
     } catch (err) {
       console.warn('Urun sepete eklenemedi:', err.message);
+    }
+  };
+
+  window.selectProductCardColor = function (dot) {
+    const card = dot && dot.closest ? dot.closest('.prod-card') : null;
+    if (!card) return;
+    card.querySelectorAll('.color-dot').forEach(function (item) {
+      item.classList.remove('active');
+    });
+    dot.classList.add('active');
+    const image = dot.getAttribute('data-image') || '';
+    const img = card.querySelector('.prod-main-image');
+    if (image && img) {
+      img.src = image;
+      card.dataset.productImage = image;
     }
   };
 

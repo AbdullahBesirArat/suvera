@@ -639,15 +639,16 @@ footer .footer-bottom span {
    TOAST NOTIFICATION
 ══════════════════════════════════════════════ */
 .suvera-toast {
-  position:fixed; bottom:24px; right:24px; z-index:10050;
+  position:fixed; top:88px; left:50%; z-index:10050;
   background:#1a1a1a; color:#fff;
   padding:13px 20px; font-family:'Jost',sans-serif; font-size:13.5px;
   display:flex; align-items:center; gap:10px;
-  transform:translateY(80px) scale(.95); opacity:0;
+  transform:translate(-50%,-18px) scale(.96); opacity:0;
   transition:all .35s cubic-bezier(.34,1.56,.64,1);
-  max-width:320px; box-shadow:0 8px 32px rgba(0,0,0,.2);
+  width:max-content; max-width:min(360px, calc(100vw - 32px));
+  box-shadow:0 14px 38px rgba(0,0,0,.22);
 }
-.suvera-toast.show { transform:translateY(0) scale(1); opacity:1; }
+.suvera-toast.show { transform:translate(-50%,0) scale(1); opacity:1; }
 .suvera-toast.toast-green { background:#3d6b38; }
 .suvera-toast.toast-red   { background:#dc2626; }
 .suvera-toast-icon { font-size:16px; flex-shrink:0; }

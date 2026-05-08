@@ -59,7 +59,7 @@ npm run dev
 - Add final admin/API domains to Panelya settings when custom domains are ready.
 - When a custom API domain is ready, update `js/config.js`.
 - Keep Panelya admin/dashboard deployment separate from this storefront.
-- Verify `index.html`, `urunler.html`, `js/storefront.js` and `js/site-pages.js` are deployed together.
+- Verify `anasayfa`, `urunler`, `js/storefront.js` and `js/site-pages.js` are deployed together.
 - Run end-to-end checks for slider, campaigns, collection filters, checkout, thank-you and order tracking flows.
 
 See also: `DEPLOY-CHECKLIST.md`

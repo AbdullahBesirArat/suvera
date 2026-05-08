@@ -4,11 +4,11 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="description" content="Suvera urun detay sayfasi; gorseller, beden secimleri ve guvenli siparis akisi ile desteklenir." />
-  <link rel="canonical" href="https://suvera.com.tr/urun.html" />
+  <link rel="canonical" href="https://suvera.com.tr/urun" />
   <meta property="og:type" content="product" />
   <meta property="og:title" content="Urun Detayi | Suvera" />
   <meta property="og:description" content="Suvera urun detay sayfasi; gorseller, beden secimleri ve guvenli siparis akisi ile desteklenir." />
-  <meta property="og:url" content="https://suvera.com.tr/urun.html" />
+  <meta property="og:url" content="https://suvera.com.tr/urun" />
   <meta property="og:image" content="https://suvera.com.tr/og-cover.svg" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Urun Detayi | Suvera" />
@@ -73,11 +73,15 @@
     .service-card{border:1px solid var(--line);border-radius:6px;padding:12px;background:#faf8f4;min-height:88px}
     .service-card strong{display:block;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:6px}
     .service-card p{margin:0;font-size:12px;color:#70685f;line-height:1.6}
-    .cta-row{display:grid;grid-template-columns:1fr 54px;gap:10px;padding-top:18px}
+    .cta-row{display:grid;grid-template-columns:1fr 1fr 54px;gap:10px;padding-top:18px}
     .buy-btn,.wa-btn{border:none;border-radius:6px;cursor:pointer}
     .buy-btn{background:var(--black);color:#fff;padding:16px 20px;font-family:var(--sans);font-size:12px;letter-spacing:2px;text-transform:uppercase}
     .buy-btn:hover{background:var(--accent)}
+    .buy-btn.secondary{background:#fff;color:var(--black);border:1px solid var(--line)}
+    .buy-btn.secondary:hover{background:#f4f0ea;color:var(--black)}
     .wa-btn{background:#25d366;color:#fff;font-size:22px}
+    .cart-feedback{display:none;margin-top:10px;border:1px solid rgba(61,107,56,.26);background:#f1f7ef;color:#2f5f2b;border-radius:8px;padding:11px 13px;font-size:13px;line-height:1.45}
+    .cart-feedback.show{display:block}
     .mini-note{padding-top:14px;font-size:12px;color:#7a736a;line-height:1.7}
     .info-accordions{margin-top:26px;border-top:1px solid var(--line)}
     .info-item{border-bottom:1px solid var(--line)}
@@ -133,38 +137,38 @@
     .footer-col ul li a{font-size:13px;color:rgba(255,255,255,.45);text-decoration:none;font-weight:300}
     .footer-bottom{border-top:1px solid rgba(255,255,255,.07);padding-top:22px;display:flex;justify-content:space-between;font-size:11.5px;color:rgba(255,255,255,.3)}
     @media(max-width:1180px){.product-main{grid-template-columns:1fr}.gallery-panel,.info-panel{position:static;max-height:none}.story-grid{grid-template-columns:1fr}.related-grid{grid-template-columns:repeat(2,1fr)}}
-    @media(max-width:760px){body{padding-top:102px}.page-shell{padding:0 16px 32px}.product-breadcrumb{font-size:11px;padding:10px 0 12px}.product-main{gap:16px}.gallery-panel{grid-template-columns:1fr}.gallery-thumbs{grid-template-columns:repeat(4,1fr);order:2}.gallery-note{font-size:11px}.info-panel{padding:22px 18px}.product-title{font-size:30px}.price-current{font-size:26px}.story-copy h2,.measure-card h2,.related-section h2{font-size:28px}.service-grid{grid-template-columns:1fr}.cta-row{grid-template-columns:1fr 48px}.related-grid{grid-template-columns:1fr}.footer-grid{grid-template-columns:1fr 1fr;gap:28px}footer{padding:0 20px 24px}.footer-bottom{flex-direction:column;gap:10px}}
+    @media(max-width:760px){body{padding-top:102px}.page-shell{padding:0 16px 32px}.product-breadcrumb{font-size:11px;padding:10px 0 12px}.product-main{gap:16px}.gallery-panel{grid-template-columns:1fr}.gallery-thumbs{grid-template-columns:repeat(4,1fr);order:2}.gallery-note{font-size:11px}.info-panel{padding:22px 18px}.product-title{font-size:30px}.price-current{font-size:26px}.story-copy h2,.measure-card h2,.related-section h2{font-size:28px}.service-grid{grid-template-columns:1fr}.cta-row{grid-template-columns:1fr}.wa-btn{height:48px}.related-grid{grid-template-columns:1fr}.footer-grid{grid-template-columns:1fr 1fr;gap:28px}footer{padding:0 20px 24px}.footer-bottom{flex-direction:column;gap:10px}}
   </style>
 </head>
 <body>
 <div class="announce">Yeni sezon seçkisi yayında • 600 TL üzeri ücretsiz kargo</div>
 
 <nav id="mainNav">
-  <a class="nav-logo" href="index.html">Suvera</a>
+  <a class="nav-logo" href="anasayfa">Suvera</a>
   <ul class="nav-menu-wrap">
-    <li><a href="urunler.html">Yeni <span class="nav-chevron">▾</span></a><div class="simple-drop"><a href="urunler.html">Yeni Gelenler</a><a href="urunler.html">Çok Satanlar</a><a href="urunler.html">Editörün Seçimleri</a></div></li>
-    <li><a href="urunler.html">Giyim <span class="nav-chevron">▾</span></a><div class="simple-drop"><a href="urunler.html">Elbise</a><a href="urunler.html">Bluz & Gömlek</a><a href="urunler.html">Takım & Kombin</a></div></li>
-    <li><a href="urunler.html">Dış Giyim</a></li>
-    <li><a href="urunler.html">Abaya</a></li>
-    <li><a href="urunler.html">Eşarp & Aksesuar</a></li>
-    <li><a href="urunler.html" class="outlet">Outlet</a></li>
+    <li><a href="urunler">Yeni <span class="nav-chevron">▾</span></a><div class="simple-drop"><a href="urunler">Yeni Gelenler</a><a href="urunler">Çok Satanlar</a><a href="urunler">Editörün Seçimleri</a></div></li>
+    <li><a href="urunler">Giyim <span class="nav-chevron">▾</span></a><div class="simple-drop"><a href="urunler">Elbise</a><a href="urunler">Bluz & Gömlek</a><a href="urunler">Takım & Kombin</a></div></li>
+    <li><a href="urunler">Dış Giyim</a></li>
+    <li><a href="urunler">Abaya</a></li>
+    <li><a href="urunler">Eşarp & Aksesuar</a></li>
+    <li><a href="urunler" class="outlet">Outlet</a></li>
   </ul>
   <div class="nav-right">
     <div class="nav-search-wrap">
       <button class="nav-search-icon" aria-label="Ara">🔍</button>
       <div class="nav-search-box" id="navSearchBox">
-        <input type="text" placeholder="Ürün ara..." onkeydown="if(event.key==='Enter')location.href='urunler.html'"/>
+        <input type="text" placeholder="Ürün ara..." onkeydown="if(event.key==='Enter')location.href='urunler'"/>
       </div>
     </div>
-    <a href="giris.html" class="nav-icon-btn">HESABIM</a>
-    <a href="sepet.html" class="nav-icon-btn" style="position:relative">SEPETİM <span class="cart-dot">0</span></a>
+    <a href="giris" class="nav-icon-btn">HESABIM</a>
+    <a href="sepet" class="nav-icon-btn" style="position:relative">SEPETİM <span class="cart-dot">0</span></a>
     <button class="hamburger" aria-label="Menü" onclick="openMobileNav()"><span></span><span></span><span></span></button>
   </div>
 </nav>
 
 <main class="page-shell">
   <div class="product-breadcrumb" id="productBreadcrumb">
-    <a href="index.html">Ana Sayfa</a><span>›</span><a href="urunler.html">Ürünler</a><span>›</span><span>Ürün Detayı</span>
+    <a href="anasayfa">Ana Sayfa</a><span>›</span><a href="urunler">Ürünler</a><span>›</span><span>Ürün Detayı</span>
   </div>
 
   <section class="product-main">
@@ -212,9 +216,11 @@
       </div>
 
       <div class="cta-row">
-        <button class="buy-btn" type="button" onclick="addToCart()">Sepete Ekle</button>
+        <button class="buy-btn" id="detailAddCartBtn" type="button" onclick="addToCart()">Sepete Ekle</button>
+        <button class="buy-btn secondary" type="button" onclick="buyNow()">Satın Al</button>
         <button class="wa-btn" type="button" title="WhatsApp ile Sor">💬</button>
       </div>
+      <div class="cart-feedback" id="cartFeedback" role="status" aria-live="polite"></div>
       <div class="mini-note" id="detailShortDesc">Ürün detayları hazırlanıyor.</div>
 
       <div class="info-accordions">
@@ -275,14 +281,14 @@
   <hr class="footer-divider"/>
   <div class="footer-grid">
     <div class="footer-brand">
-      <a class="nav-logo" href="index.html">Suvera</a>
+      <a class="nav-logo" href="anasayfa">Suvera</a>
       <p>Modern tesettür giyimde rafine, sakin ve güçlü parçalar.</p>
-      <div class="socials"><a href="iletisim.html#iletisim-kanallari" class="social-btn">INSTAGRAM</a><a href="iletisim.html#iletisim-kanallari" class="social-btn">TIKTOK</a><a href="iletisim.html#iletisim-kanallari" class="social-btn">PINTEREST</a></div>
+      <div class="socials"><a href="iletisim#iletisim-kanallari" class="social-btn">INSTAGRAM</a><a href="iletisim#iletisim-kanallari" class="social-btn">TIKTOK</a><a href="iletisim#iletisim-kanallari" class="social-btn">PINTEREST</a></div>
     </div>
-    <div class="footer-col"><h5>Kategoriler</h5><ul><li><a href="urunler.html">Elbise</a></li><li><a href="urunler.html">Abaya</a></li><li><a href="urunler.html">Takım</a></li><li><a href="urunler.html">Eşarp</a></li></ul></div>
-    <div class="footer-col"><h5>Bilgiler</h5><ul><li><a href="kvkk.html">KVKK</a></li><li><a href="kargo.html">Kargo</a></li><li><a href="iade.html">İade & Değişim</a></li></ul></div>
-    <div class="footer-col"><h5>Suvera</h5><ul><li><a href="hakkimizda.html">Hakkımızda</a></li><li><a href="iletisim.html#iletisim-kanallari">Mağazalar</a></li></ul></div>
-    <div class="footer-col"><h5>İletişim</h5><ul><li><a href="tel:+908500007872">0850 000 78 72</a></li><li><a href="iletisim.html#iletisim-kanallari">WhatsApp</a></li><li><a href="mailto:destek@suvera.com">destek@suvera.com</a></li></ul></div>
+    <div class="footer-col"><h5>Kategoriler</h5><ul><li><a href="urunler">Elbise</a></li><li><a href="urunler">Abaya</a></li><li><a href="urunler">Takım</a></li><li><a href="urunler">Eşarp</a></li></ul></div>
+    <div class="footer-col"><h5>Bilgiler</h5><ul><li><a href="kvkk">KVKK</a></li><li><a href="kargo">Kargo</a></li><li><a href="iade">İade & Değişim</a></li></ul></div>
+    <div class="footer-col"><h5>Suvera</h5><ul><li><a href="hakkimizda">Hakkımızda</a></li><li><a href="iletisim#iletisim-kanallari">Mağazalar</a></li></ul></div>
+    <div class="footer-col"><h5>İletişim</h5><ul><li><a href="tel:+908500007872">0850 000 78 72</a></li><li><a href="iletisim#iletisim-kanallari">WhatsApp</a></li><li><a href="mailto:destek@suvera.com">destek@suvera.com</a></li></ul></div>
   </div>
   <div class="footer-bottom"><span>© 2026 Suvera. Tüm hakları saklıdır.</span><span>SSL Güvenli Alışveriş</span></div>
 </footer>

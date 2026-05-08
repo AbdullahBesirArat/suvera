@@ -13,12 +13,12 @@ Bu proje, `C:\Users\Arat\Downloads\Panelya-Suvera-Entegrasyon-Raporu.docx` icind
 
 ## Bu repoda kalan temel dosyalar
 
-- `index.html`
-- `urunler.html`
-- `urun.html`
-- `sepet.html`
-- `siparis.html`
-- `giris.html`
+- `anasayfa`
+- `urunler`
+- `urun`
+- `sepet`
+- `siparis`
+- `giris`
 - `shared.css`
 - `shared.js`
 - `js/config.js`
@@ -64,7 +64,7 @@ window.SUVERA_API_BASE = window.PANELYA_API_BASE;
 - `Build Command: bos`
 - `Install Command: bos`
 - `Output Directory: .`
-- `/` istegi `index.html` dosyasina rewrite edilir.
+- `/` istegi `anasayfa` dosyasina rewrite edilir.
 
 ## Repo disinda yapilacaklar
 
@@ -82,11 +82,11 @@ Asagidaki maddeler kod icinden tamamlanmaz; Vercel ve Railway tarafinda uygulanm
 
 ## Test sirasi
 
-1. `index.html`
-2. `urunler.html`
-3. `urun.html`
-4. `sepet.html`
-5. `siparis.html`
+1. `anasayfa`
+2. `urunler`
+3. `urun`
+4. `sepet`
+5. `siparis`
 6. Siparisin Panelya panelindeki Orders alanina dusmesi
 
 ## Not

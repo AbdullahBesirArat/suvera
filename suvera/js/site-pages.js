@@ -24,6 +24,62 @@
     return window.SuveraAPI && window.SuveraAPI.assetUrl ? window.SuveraAPI.assetUrl(path) : path;
   }
 
+  function parseImageEntry(value) {
+    const raw = String(value || '').trim();
+    if (!raw) return null;
+    const parts = raw.split('|').map(function (part) { return part.trim(); }).filter(Boolean);
+    if (parts.length >= 2) return { color: parts[0], url: parts[parts.length - 1] };
+    return { color: '', url: raw };
+  }
+
+  function productImage(product) {
+    const entry = (Array.isArray(product.images) ? product.images : [])
+      .map(parseImageEntry)
+      .find(function (item) { return item && item.url; });
+    return entry ? assetUrl(entry.url) : '';
+  }
+
+  function blogUrl(post) {
+    const key = post && (post.id || post.slug);
+    return key ? 'blog-detay?id=' + encodeURIComponent(key) : 'blog-detay';
+  }
+
+  function publishedLabel(value) {
+    if (!value) return 'Suvera Rehberi';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return 'Suvera Rehberi';
+    return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+  }
+
+  function blogArticleHtml(content) {
+    const lines = String(content || '').split(/\n+/).map(function (line) { return line.trim(); }).filter(Boolean);
+    if (!lines.length) return '<p>Bu blog yazısının detayları hazırlanıyor.</p>';
+
+    const html = [];
+    let list = [];
+    function flushList() {
+      if (!list.length) return;
+      html.push('<ul>' + list.map(function (item) { return '<li>' + escapeHtml(item) + '</li>'; }).join('') + '</ul>');
+      list = [];
+    }
+
+    lines.forEach(function (line) {
+      if (line.startsWith('## ')) {
+        flushList();
+        html.push('<h2>' + escapeHtml(line.replace(/^##\s+/, '')) + '</h2>');
+        return;
+      }
+      if (line.startsWith('- ')) {
+        list.push(line.replace(/^-\s+/, ''));
+        return;
+      }
+      flushList();
+      html.push('<p>' + escapeHtml(line) + '</p>');
+    });
+    flushList();
+    return html.join('');
+  }
+
   // FIX: Block unsafe link protocols from API and localStorage-backed content.
   function safeHref(value, fallback) {
     const href = String(value || '').trim();
@@ -32,7 +88,7 @@
       const parsed = new URL(href, location.href);
       if (['http:', 'https:'].includes(parsed.protocol)) return href;
     } catch (_) {}
-    if (/^(\/|\.\/|\.\.\/|#|[a-z0-9_-]+\.html(?:[?#].*)?)/i.test(href)) return href;
+    if (/^(\/|\.\/|\.\.\/|#|[a-z0-9_-]+(?:\.html)?(?:[?#].*)?)/i.test(href)) return href;
     return fallback || '';
   }
 
@@ -371,7 +427,7 @@
         return '<div class="page-order-card"><strong>' + escapeHtml(order.orderCode || order.id || 'Siparis') + '</strong><p>' +
           escapeHtml(order.customer && order.customer.name || 'Musteri bilgisi yok') + '</p><p>Durum: ' +
           escapeHtml(orderStatusLabel(order.status)) + '</p><p>Toplam: ' + money(order.total || 0) +
-          '</p><div class="page-inline-actions"><a class="page-btn-secondary" href="siparis-takip.html?order=' +
+          '</p><div class="page-inline-actions"><a class="page-btn-secondary" href="siparis-takip?order=' +
           encodeURIComponent(order.orderCode || order.id || '') + '">Takip Et</a></div></div>';
       }).join('');
     }
@@ -386,7 +442,7 @@
           : escapeHtml(item.emoji || 'SU');
         return '<div class="page-favorite-card"><div class="page-favorite-media">' + media + '</div><h3>' +
           escapeHtml(item.name) + '</h3><p>' + money(item.price || 0) + '</p><a class="page-btn-secondary" href="' +
-          escapeHtml(safeHref(item.url, 'urun.html')) + '">Incele</a></div>';
+          escapeHtml(safeHref(item.url, 'urun')) + '">Incele</a></div>';
       }).join('');
     }
   }
@@ -459,7 +515,7 @@
         '<div class="page-favorite-media">' + media + '</div>' +
         '<h3>' + escapeHtml(item.name) + '</h3>' +
         '<p>' + money(item.price || 0) + '</p>' +
-        '<div class="page-inline-actions"><a class="page-btn-secondary" href="' + escapeHtml(safeHref(item.url, 'urun.html')) +
+        '<div class="page-inline-actions"><a class="page-btn-secondary" href="' + escapeHtml(safeHref(item.url, 'urun')) +
         '">Urunu Ac</a><button class="page-btn" type="button" data-remove-favorite="' + escapeHtml(item.id || item.name) +
         '">Kaldir</button></div></article>';
     }).join('');
@@ -494,15 +550,77 @@
         const media = image
           ? '<img src="' + escapeHtml(image) + '" alt="' + escapeHtml(post.title) + '" loading="lazy" decoding="async"/>'
           : String(index + 1).padStart(2, '0');
-        const content = post.content
-          ? '<details class="page-form-note"><summary>Devamini oku</summary><p>' + escapeHtml(post.content).replace(/\n+/g, '<br/>') + '</p></details>'
-          : '';
-        return '<article class="page-blog-card"><div class="page-blog-media">' + media + '</div><h3>' +
+        return '<article class="page-blog-card" onclick="location.href=\'' + escapeHtml(blogUrl(post)) + '\'"><div class="page-blog-media">' + media + '</div><span class="page-badge good">' +
+          escapeHtml(publishedLabel(post.published_at)) + '</span><h3>' +
           escapeHtml(post.title) + '</h3><p>' + escapeHtml(post.excerpt || 'Suvera blog yazisi') +
-          '</p>' + content + '</article>';
+          '</p><div class="page-inline-actions"><a class="page-btn-secondary" href="' + escapeHtml(blogUrl(post)) + '">Yazıyı oku</a></div></article>';
       }).join('');
     } catch (err) {
       grid.innerHTML = '<div class="page-empty">Blog yazilari yuklenemedi. Lutfen daha sonra tekrar deneyin.</div>';
+    }
+  }
+
+  async function renderBlogDetail() {
+    const root = document.getElementById('blogDetailPage');
+    if (!root) return;
+    const params = new URLSearchParams(location.search);
+    const id = params.get('id') || params.get('slug') || '';
+    const title = document.getElementById('blogDetailTitle');
+    const excerpt = document.getElementById('blogDetailExcerpt');
+    const meta = document.getElementById('blogDetailMeta');
+    const hero = document.getElementById('blogDetailHero');
+    const body = document.getElementById('blogDetailBody');
+    const breadcrumb = document.getElementById('blogDetailBreadcrumb');
+    const aside = document.getElementById('blogDetailAside');
+
+    if (!id || !window.SuveraAPI || !window.SuveraAPI.blog || !window.SuveraAPI.blog.get) {
+      if (body) body.innerHTML = '<div class="page-empty">Blog yazısı bulunamadı.</div>';
+      return;
+    }
+
+    try {
+      let post = null;
+      if (window.SuveraAPI.blog.get) {
+        post = await window.SuveraAPI.blog.get(id).catch(function () { return null; });
+      }
+      if (!post && window.SuveraAPI.blog.list) {
+        const posts = await window.SuveraAPI.blog.list();
+        post = (posts || []).find(function (item) {
+          return String(item.id) === String(id) || String(item.slug || '') === String(id);
+        });
+      }
+      if (!post) throw new Error('Blog yazısı bulunamadı');
+      const image = post.image_url ? assetUrl(post.image_url) : '';
+      const pageTitle = post.title || 'Suvera Blog';
+      const pageExcerpt = post.excerpt || 'Suvera stil, bakım ve seçki rehberi.';
+      if (title) title.textContent = pageTitle;
+      if (excerpt) excerpt.textContent = pageExcerpt;
+      if (meta) meta.textContent = publishedLabel(post.published_at) + ' • Suvera İçerik Merkezi';
+      if (breadcrumb) breadcrumb.innerHTML = '<a href="anasayfa">Ana Sayfa</a><span>›</span><a href="blog">Blog</a><span>›</span><span>' + escapeHtml(pageTitle) + '</span>';
+      if (hero) {
+        hero.innerHTML = image
+          ? '<img src="' + escapeHtml(image) + '" alt="' + escapeHtml(pageTitle) + '" decoding="async" />'
+          : '<div class="blog-detail-fallback">Suvera</div>';
+      }
+      if (body) body.innerHTML = blogArticleHtml(post.content);
+      if (aside) {
+        aside.innerHTML = '<div class="page-check"><strong>Okuma önerisi</strong><span>Bu yazıdaki bakım ve stil önerilerini ürün detayındaki ölçü bilgileriyle birlikte değerlendirin.</span></div>' +
+          '<div class="page-check"><strong>Sonraki adım</strong><span>İlgili ürünleri inceleyerek kombini tamamlayabilirsiniz.</span></div>';
+      }
+
+      document.title = pageTitle + ' | Suvera Blog';
+      if (window.SuveraSEO) {
+        const path = 'blog-detay?id=' + encodeURIComponent(post.id || id);
+        window.SuveraSEO.applyPageMeta({
+          title: pageTitle + ' | Suvera Blog',
+          description: pageExcerpt,
+          path,
+          image: image || window.SuveraSEO.defaultImage,
+          type: 'article',
+        });
+      }
+    } catch (err) {
+      if (body) body.innerHTML = '<div class="page-empty">Blog yazısı yüklenemedi. Lütfen blog listesine geri dönün.</div>';
     }
   }
 
@@ -538,10 +656,10 @@
         description: query
           ? 'Suvera urunleri icinde "' + query + '" arama sonuclari.'
           : 'Suvera koleksiyonunda urun arayin ve filtreleyin.',
-        path: 'arama.html' + (query ? '?q=' + encodeURIComponent(query) : ''),
+        path: 'arama' + (query ? '?q=' + encodeURIComponent(query) : ''),
       });
       window.SuveraSEO.applyBaseSchemas({
-        path: 'arama.html' + (query ? '?q=' + encodeURIComponent(query) : ''),
+        path: 'arama' + (query ? '?q=' + encodeURIComponent(query) : ''),
         name: query ? query + ' arama sonuclari | Suvera' : 'Arama | Suvera',
         description: query
           ? 'Suvera urunleri icinde "' + query + '" arama sonuclari.'
@@ -599,14 +717,14 @@
       }
 
       resultsNode.innerHTML = matches.map(function (item) {
-        const image = Array.isArray(item.images) && item.images.length ? assetUrl(item.images[0]) : '';
+        const image = productImage(item);
         const media = image
           ? '<img src="' + escapeHtml(image) + '" alt="' + escapeHtml(item.name) + '" loading="lazy" decoding="async"/>'
           : escapeHtml(item.emoji || 'SU');
         const finalPrice = productFinalPrice(item);
         return '<article class="page-result-card"><div class="page-result-media">' + media + '</div><span class="page-badge good">' +
           escapeHtml(item.category_name || 'Secki') + '</span><h3>' + escapeHtml(item.name) + '</h3><p>' +
-          escapeHtml(item.tags || 'Suvera katalog urunu') + '</p><div class="page-inline-actions"><a class="page-btn-secondary" href="urun.html?id=' +
+          escapeHtml(item.tags || 'Suvera katalog urunu') + '</p><div class="page-inline-actions"><a class="page-btn-secondary" href="urun?id=' +
           encodeURIComponent(item.id) + '">Incele</a><button class="page-btn" type="button" data-search-add="' +
           escapeHtml(item.id) + '">Sepete Ekle</button><span class="page-badge warn">' + money(finalPrice) +
           '</span></div></article>';
@@ -614,7 +732,20 @@
 
       resultsNode.querySelectorAll('[data-search-add]').forEach(function (button) {
         button.addEventListener('click', function () {
-          if (window.addApiProductToCart) window.addApiProductToCart(button.getAttribute('data-search-add'));
+          const id = button.getAttribute('data-search-add');
+          const item = matches.find(function (product) { return String(product.id) === String(id); });
+          if (!item) return;
+          if (window.addApiProductToCart) {
+            window.addApiProductToCart(id);
+            return;
+          }
+          if (window.Suvera) {
+            window.Suvera.addToCart(item.name, productFinalPrice(item), item.emoji || 'SU', {
+              id: item.id,
+              product_id: item.id,
+              image: productImage(item),
+            });
+          }
         });
       });
     } catch (err) {
@@ -714,7 +845,7 @@
         if (size) next.set('size', size);
         if (minPrice) next.set('min_price', minPrice);
         if (maxPrice) next.set('max_price', maxPrice);
-        location.href = 'arama.html' + (next.toString() ? '?' + next.toString() : '');
+        location.href = 'arama' + (next.toString() ? '?' + next.toString() : '');
       });
     }
   }
@@ -725,6 +856,7 @@
     await renderFavorites();
     await renderTracking();
     await renderBlog();
+    await renderBlogDetail();
     renderSearch();
     bindSupportForms();
   }
