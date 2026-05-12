@@ -101,6 +101,10 @@
     .size-btn:hover,.size-btn.act{background:var(--black);color:#fff;border-color:var(--black);}
     .filter-reset{width:100%;background:none;border:1px solid var(--light);padding:10px;font-family:var(--sans);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;color:var(--mid);transition:all .2s;margin-top:8px;}
     .filter-reset:hover{border-color:var(--accent);color:var(--accent);}
+    .sub-cat-link{display:flex;align-items:center;gap:8px;padding:5px 2px;font-size:13px;color:var(--mid);text-decoration:none;border-radius:3px;transition:color .15s;}
+    .sub-cat-link:hover{color:var(--black);}
+    .sub-cat-link.act{color:var(--black);font-weight:600;}
+    .sub-cat-arrow{color:#ccc;font-size:11px;flex-shrink:0;}
 
     /* CONTENT AREA */
     .content{padding:8px 40px 28px;}
@@ -298,7 +302,7 @@
     </div>
 
     <div class="filter-section">
-      <h4>Kategori</h4>
+      <h4 id="collectionCategoryHeading">Kategori</h4>
       <div class="filter-opts" id="collectionCategoryFilters">
         <label class="filter-check"><input type="radio" name="collectionCategory" value="" checked/> Tüm Ürünler</label>
       </div>
