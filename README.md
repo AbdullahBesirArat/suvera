@@ -1,65 +1,119 @@
-# Suvera Storefront
+# Panelya and Suvera Commerce Platform
 
-Public Suvera e-commerce storefront managed from Panelya.
+## Short Description
 
-This project is intentionally separate from the Panelya operations panel. Panelya owns the API, products, content, orders and customers; Suvera is the public storefront that reads and writes data through that API.
+A full-stack commerce portfolio project that combines Panelya, a multi-tenant SaaS operations platform, with Suvera, a customer-facing e-commerce storefront powered by the Panelya API.
 
-## Deploy
+## Key Features
 
-Deploy this directory as a separate Vercel project.
+- Multi-tenant SaaS operations dashboard for products, orders, customers, content, teams and analytics.
+- Node.js / Express REST API with PostgreSQL persistence, JWT authentication, RBAC and tenant isolation.
+- Customer-facing Suvera storefront with product listing, product detail, cart, checkout and order tracking.
+- Panelya API integration through same-origin `/api` proxy routes for the storefront.
+- iyzico-ready payment flow, manual payment support and payment callback handling.
+- SEO-focused storefront pages with sitemap, Open Graph metadata, JSON-LD and clean URLs.
+- Production-oriented setup with Docker, GitHub Actions, Vercel, Railway, Swagger docs and Prometheus-style metrics where available.
+- Security-minded defaults for environment handling, API proxying, rate limits and deployment headers.
 
-- Source of truth: `C:\Users\Arat\Desktop\proje\suvera`
-- Root Directory: `.`
-- Framework Preset: Other
-- Build Command: leave empty
-- Output Directory: `.`
-- Install Command: leave empty
+## Tech Stack
 
-## API Connection
+- Frontend dashboard: Next.js, React, TypeScript, Tailwind CSS, React Query, Zustand.
+- Storefront: Static HTML, CSS and vanilla JavaScript.
+- Backend: Node.js, Express, PostgreSQL, JWT, Swagger/OpenAPI.
+- Payments: iyzico integration path plus local/mock payment modes.
+- DevOps: Docker Compose, GitHub Actions, Vercel and Railway.
 
-The storefront reads catalog, content, cart/order and payment data from Panelya API.
+## Architecture / Folder Structure
 
-`js/config.js` uses the same-origin `/api` path. The local `api/[...path].js` Vercel function proxies that path to the live Panelya API, so the browser stays on the Suvera domain:
-
-```js
-window.PANELYA_API_BASE = window.PANELYA_API_BASE || "/api";
-window.SUVERA_API_BASE = window.PANELYA_API_BASE;
+```text
+.
+|-- panelya/                 # Separate nested repository for the SaaS platform
+|   |-- apps/web/            # Next.js / TypeScript operations dashboard
+|   |-- panelya-api/         # Express REST API, PostgreSQL layer, auth and payments
+|   `-- docs/                # Deployment and verification notes
+|-- suvera/                  # Public storefront source tracked by this root repo
+|   |-- api/                 # Vercel proxy and dynamic sitemap functions
+|   |-- assets/              # Public storefront assets
+|   |-- css/                 # Page-specific styles
+|   |-- js/                  # Storefront API, cart, SEO and page logic
+|   `-- *.html               # Static storefront pages
+|-- tools/                   # Local project utilities
+|-- OPTIMIZATIONS.md         # Optimization audit notes
+`-- SECURITY.md              # Security review notes
 ```
 
-The Panelya workspace slug for this storefront is `suvera`.
+Panelya and Suvera are deployed separately. Suvera browser calls intentionally keep using same-origin `/api` unless the deployment plan explicitly changes the proxy.
 
-For local API-connected testing, run the project through Vercel dev or another static server that also proxies `/api/*` to Panelya API. Opening the HTML with a plain static server is useful for layout checks, but API-backed catalog and checkout calls need the proxy.
+## Installation
 
-## Local Development
-
-Run the built-in dependency-free dev server:
+Install dependencies inside each deployable workspace:
 
 ```bash
+cd suvera
+npm install
+
+cd ../panelya
+npm install
+```
+
+## Environment Variables
+
+Never commit real `.env` files. Use the example files as templates:
+
+- `suvera/.env.example`
+- `panelya/apps/web/.env.example`
+- `panelya/panelya-api/.env.example`
+- `panelya/panelya-api/.env.production.example`
+
+Production secrets such as database URLs, JWT secrets, payment keys, callback secrets and email API keys must be configured only in the hosting provider.
+
+## Running Locally
+
+Run the Suvera storefront with its local API proxy:
+
+```bash
+cd suvera
 npm run dev
 ```
 
-It serves the storefront at `http://127.0.0.1:4173` and proxies `/api/*` to Panelya API. You can override the upstream with:
+Run Panelya API and dashboard in separate terminals:
 
 ```bash
-UPSTREAM_API=http://localhost:3000/api npm run dev
+cd panelya
+npm run dev:api
+npm run dev:web
 ```
 
-For API-backed catalog, checkout and order tracking, also provide the Suvera workspace public access token:
+## Available Scripts
 
-```powershell
-$env:SUVERA_PUBLIC_ACCESS_TOKEN="..."
+Suvera:
+
+```bash
 npm run dev
+npm run check
 ```
 
-## Production checklist
+Panelya:
 
-- Keep the Vercel `api/[...path].js` proxy route active for the storefront.
-- Add `SUVERA_PUBLIC_ACCESS_TOKEN` to the Vercel project environment variables.
-- Set `UPSTREAM_API` if the storefront should proxy to a custom Panelya API domain.
-- Add final admin/API domains to Panelya settings when custom domains are ready.
-- When a custom API domain is ready, update `js/config.js`.
-- Keep Panelya admin/dashboard deployment separate from this storefront.
-- Verify `anasayfa`, `urunler`, `js/storefront.js` and `js/site-pages.js` are deployed together.
-- Run end-to-end checks for slider, campaigns, collection filters, checkout, thank-you and order tracking flows.
+```bash
+npm run check:api
+npm run lint:web
+npm run typecheck:web
+npm run build:web
+npm run db:migrate
+npm run demo:seed
+npm run suvera:seed
+npm run smoke:auth
+npm run smoke:payment
+```
 
-See also: `DEPLOY-CHECKLIST.md`
+## Deployment
+
+- Suvera storefront: deploy `suvera/` as a separate Vercel static project (root directory: `suvera/`).
+- Panelya dashboard: deploy `panelya/apps/web/` to Vercel.
+- Panelya API: deploy `panelya/panelya-api/` to Railway or another Node.js host.
+- Database: provision PostgreSQL and run migrations before deploying API code that depends on new database objects.
+
+## Author
+
+Arat - Junior Full-Stack Developer

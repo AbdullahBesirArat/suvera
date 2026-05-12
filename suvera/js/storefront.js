@@ -90,6 +90,26 @@
     return '';
   }
 
+  function stockLabel(product) {
+    const stock = Number(product.stock ?? product.stock_quantity ?? product.quantity ?? 0);
+    if (Number.isFinite(stock) && stock > 0 && stock <= 3) return 'Son ' + stock + ' urun';
+    if (product.in_stock === false || product.is_active === false) return 'Stokta yok';
+    return 'Stokta';
+  }
+
+  function skeletonCards(count) {
+    return '<div class="product-skeleton-grid" aria-hidden="true">' + Array.from({ length: count || 6 }).map(function () {
+      return '<div class="product-skeleton-card">' +
+        '<div class="product-skeleton-media skeleton"></div>' +
+        '<div class="product-skeleton-body">' +
+        '<div class="product-skeleton-line skeleton"></div>' +
+        '<div class="product-skeleton-line short skeleton"></div>' +
+        '<div class="product-skeleton-line skeleton"></div>' +
+        '</div>' +
+        '</div>';
+    }).join('') + '</div>';
+  }
+
   function productCard(product) {
     const price = Number(product.sale_price || product.price || 0);
     const oldPrice = product.sale_price ? Number(product.price || 0) : null;
@@ -124,6 +144,7 @@
             <span class="p-new">${money(price)}</span>
             ${oldPrice ? '<span class="p-old">' + money(oldPrice) + '</span>' : ''}
           </div>
+          <span class="prod-stock-chip">${escapeHtml(stockLabel(product))}</span>
         </div>
       </div>`;
   }
@@ -395,7 +416,7 @@
   async function renderProducts(target, limit) {
     if (!window.SuveraAPI || !target) return;
 
-    target.innerHTML = '<div class="empty-state">Suvera ürünleri yükleniyor.</div>';
+    target.innerHTML = skeletonCards(limit || 6);
 
     try {
       const products = await window.SuveraAPI.products.list('?status=active&limit=' + limit);
@@ -425,7 +446,7 @@
   async function renderFeaturedStrip(target, limit, sourceProducts) {
     if (!window.SuveraAPI || !target) return;
 
-    target.innerHTML = '<div class="empty-state">Öne çıkan ürünler yükleniyor.</div>';
+    target.innerHTML = skeletonCards(limit || 5);
 
     try {
       // FIX: Reuse the product list already loaded on the page instead of refetching.
@@ -515,6 +536,7 @@
     if (sortSelect) sortSelect.value = selectedSort;
     if (priceRange) priceRange.value = String(maxPrice);
     if (priceVal) priceVal.textContent = maxPrice + ' TL';
+    grid.innerHTML = skeletonCards(8);
 
     try {
       var categories = await window.SuveraAPI.categories.list();

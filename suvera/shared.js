@@ -14,7 +14,7 @@
   const LAST_ORDER_KEY = 'suveraLastOrder';
   const PROFILE_KEY = 'suveraCustomerProfile';
   const defaultSettings = {
-    siteName: 'Suvera – Modern Tesettür Giyim',
+    siteName: 'SUVERA – Modern Tesettür Giyim',
     announcementText: '✦ Yeni sezon geldi — tüm siparişlerde ücretsiz kargo 600 TL ve üzeri ✦',
     freeShippingLimit: 600,
     features: {
@@ -89,6 +89,50 @@
   function saveProfile(profile) {
     if (!profile || typeof profile !== 'object') return;
     saveJson(PROFILE_KEY, { ...loadProfile(), ...profile });
+    updateAccountLinks(true);
+  }
+
+  function normalizeText(value) {
+    return String(value || '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLocaleLowerCase('tr-TR');
+  }
+
+  function updateAccountLinks(signedIn) {
+    const active = Boolean(signedIn);
+    document.querySelectorAll('a[href]').forEach(function(link) {
+      const href = String(link.getAttribute('href') || '').replace(/^\.?\//, '').split(/[?#]/)[0];
+      if (href !== 'giris' && href !== 'hesabim') return;
+
+      const text = normalizeText(link.textContent);
+      const isAccountLink = link.classList.contains('nav-icon-btn') ||
+        link.closest('.mobile-nav-footer') ||
+        text.includes('hesab');
+      if (!isAccountLink) return;
+
+      link.setAttribute('href', active ? 'hesabim' : 'giris');
+    });
+  }
+
+  async function refreshCustomerSession() {
+    const api = window.SuveraAPI;
+    const hasSession = Boolean(api && api.hasCustomerSession && api.hasCustomerSession());
+    updateAccountLinks(hasSession);
+    if (!hasSession || !api || !api.customerAuth || !api.customerAuth.me) return null;
+
+    try {
+      const session = await api.customerAuth.me();
+      if (session && session.account) {
+        saveProfile(session.account);
+      }
+      updateAccountLinks(true);
+      window.dispatchEvent(new CustomEvent('suvera:customer-session', { detail: session || null }));
+      return session;
+    } catch (_) {
+      updateAccountLinks(false);
+      return null;
+    }
   }
 
   function favoriteEmail() {
@@ -289,6 +333,12 @@
     else cart.push({ name, price, emoji: emoji || '🧕', qty: 1, ...meta });
     localStorage.setItem('suveraCart', JSON.stringify(cart));
     updateCartCount();
+    document.querySelectorAll('.prod-card').forEach(function(card) {
+      if (card.dataset.productName === name) {
+        card.classList.add('added');
+        setTimeout(function() { card.classList.remove('added'); }, 520);
+      }
+    });
     window.showToast('Sepete eklendi', 'green');
   };
 
@@ -316,6 +366,13 @@
     const ANN_H = ann ? ann.offsetHeight : 0;
 
     function update() {
+      const isMobile = window.matchMedia('(max-width: 768px)').matches;
+      if (isMobile) {
+        nav.classList.add('scrolled');
+        if (ann) ann.classList.toggle('hidden', window.scrollY < 96);
+        document.documentElement.classList.toggle('mobile-announcement-visible', !!ann && window.scrollY >= 96);
+        return;
+      }
       if (window.scrollY >= ANN_H) {
         nav.classList.add('scrolled');
         if (ann) ann.classList.add('hidden');
@@ -325,6 +382,7 @@
       }
     }
     window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update, { passive: true });
     update();
   }
 
@@ -357,10 +415,10 @@
       <div class="mobile-overlay" onclick="closeMobileNav()"></div>
       <div class="mobile-drawer">
         <div class="mobile-drawer-head">
-          <span class="mobile-drawer-logo">Suvera</span>
+          <span class="mobile-drawer-logo">SUVERA</span>
           <button class="mobile-drawer-close" onclick="closeMobileNav()">×</button>
         </div>
-        <nav class="mobile-nav-items">
+        <div class="mobile-nav-items" role="navigation" aria-label="Mobil menu">
           <a href="anasayfa" class="mobile-nav-item">Ana Sayfa</a>
           <div class="mobile-nav-item" onclick="toggleMobileSub('mobGiyim')">
             Giyim <span>›</span>
@@ -391,7 +449,7 @@
           <a href="urunler" class="mobile-nav-item">Eşarp & Aksesuar</a>
           <a href="urunler" class="mobile-nav-item">Koleksiyonlar</a>
           <a href="urunler" class="mobile-nav-item outlet" style="color:#c44">Outlet</a>
-        </nav>
+        </div>
         <div class="mobile-nav-footer">
           <a href="giris">👤 &nbsp; Hesabım</a>
           <a href="sepet">🛍️ &nbsp; Sepetim</a>
@@ -404,10 +462,14 @@
 
   window.openMobileNav = function() {
     document.getElementById('mobileNav')?.classList.add('open');
+    document.documentElement.classList.add('mobile-menu-open');
+    document.body.classList.add('mobile-menu-open');
     document.body.style.overflow = 'hidden';
   };
   window.closeMobileNav = function() {
     document.getElementById('mobileNav')?.classList.remove('open');
+    document.documentElement.classList.remove('mobile-menu-open');
+    document.body.classList.remove('mobile-menu-open');
     document.body.style.overflow = '';
   };
   window.toggleMobileSub = function(id) {
@@ -568,11 +630,10 @@
 
     const announce = document.querySelector('.announce');
     const announcementEnabled = !(siteSettings.features && siteSettings.features.announcement === false);
-    if (announce) {
-      announce.textContent = siteSettings.announcementText || defaultSettings.announcementText;
-      announce.style.display = announcementEnabled ? '' : 'none';
+    if (announce && !announcementEnabled) {
+      announce.style.display = 'none';
+      document.documentElement.style.setProperty('--announcement-offset', '0px');
     }
-    document.documentElement.style.setProperty('--announcement-offset', announcementEnabled ? '38px' : '0px');
 
     if (siteSettings.features && siteSettings.features.maintenance) {
       let banner = document.getElementById('maintenanceBanner');
@@ -618,6 +679,9 @@
 
     if (icon && box) {
       icon.addEventListener('click', () => {
+        if (window.matchMedia('(max-width: 768px)').matches && openMobileSearch()) {
+          return;
+        }
         box.classList.toggle('open');
         if (box.classList.contains('open')) {
           input?.focus();
@@ -642,6 +706,117 @@
   }
 
   // ── PAGE TRANSITION ─────────────────────────────
+  function currentPageKey() {
+    const path = (location.pathname.split('/').pop() || 'anasayfa').replace(/\.html$/, '') || 'anasayfa';
+    return path === 'index' ? 'anasayfa' : path;
+  }
+
+  function initMobileBottomNav() {
+    if (document.querySelector('.mobile-bottom-nav')) return;
+
+    const nav = document.createElement('div');
+    nav.className = 'mobile-bottom-nav';
+    nav.setAttribute('aria-label', 'Mobil alt gezinme');
+    const page = currentPageKey();
+    nav.innerHTML = [
+      '<a href="anasayfa" data-page="anasayfa"><span class="mbn-icon">⌂</span><span>Ana</span></a>',
+      '<a href="urunler" data-page="urunler"><span class="mbn-icon">≡</span><span>Kategori</span></a>',
+      '<button type="button" data-mobile-search><span class="mbn-icon">⌕</span><span>Arama</span></button>',
+      '<a href="favoriler" data-page="favoriler"><span class="mbn-icon">♡</span><span>Favori</span></a>',
+      '<a href="sepet" data-page="sepet"><span class="mbn-icon">◱</span><span>Sepet</span><span class="mbn-badge cart-dot">0</span></a>',
+    ].join('');
+
+    nav.querySelectorAll('[data-page]').forEach(function(item) {
+      item.classList.toggle('active', item.dataset.page === page || (page === 'urun' && item.dataset.page === 'urunler'));
+    });
+    nav.querySelector('[data-mobile-search]')?.addEventListener('click', openMobileSearch);
+    document.body.appendChild(nav);
+    updateCartCount();
+  }
+
+  function ensureMobileSearchPanel() {
+    let panel = document.getElementById('mobileSearchPanel');
+    if (panel) return panel;
+
+    panel = document.createElement('div');
+    panel.id = 'mobileSearchPanel';
+    panel.className = 'mobile-search-panel';
+    panel.setAttribute('aria-hidden', 'true');
+    panel.innerHTML = [
+      '<div class="mobile-search-sheet" role="dialog" aria-modal="true" aria-label="Urun arama">',
+      '  <div class="mobile-search-head">',
+      '    <input class="mobile-search-input" type="search" placeholder="Urun, kategori veya koleksiyon ara" autocomplete="off"/>',
+      '    <button class="mobile-search-close" type="button" aria-label="Aramayi kapat">x</button>',
+      '  </div>',
+      '  <div class="mobile-search-suggestions">',
+      '    <a href="urunler">Yeni gelenler</a>',
+      '    <a href="urunler?sort=price_asc">Fiyat artan</a>',
+      '    <a href="urunler?sort=price_desc">Fiyat azalan</a>',
+      '    <a href="favoriler">Favoriler</a>',
+      '  </div>',
+      '</div>',
+    ].join('');
+
+    const close = function() {
+      panel.classList.remove('open');
+      panel.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    };
+    panel.querySelector('.mobile-search-close')?.addEventListener('click', close);
+    panel.addEventListener('click', function(event) {
+      if (event.target === panel) close();
+    });
+    panel.querySelector('.mobile-search-input')?.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        close();
+        return;
+      }
+      if (event.key !== 'Enter') return;
+      event.preventDefault();
+      const query = event.currentTarget.value.trim();
+      location.href = 'arama' + (query ? ('?q=' + encodeURIComponent(query)) : '');
+    });
+    document.body.appendChild(panel);
+    return panel;
+  }
+
+  function openMobileSearch() {
+    const panel = ensureMobileSearchPanel();
+    panel.classList.add('open');
+    panel.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    requestAnimationFrame(function() {
+      panel.querySelector('.mobile-search-input')?.focus();
+    });
+    return true;
+  }
+
+  function initImageLazyState() {
+    document.querySelectorAll('img[loading="lazy"]').forEach(function(img) {
+      img.classList.add('is-lazy');
+      if (img.complete) img.classList.add('is-loaded');
+      img.addEventListener('load', function() {
+        img.classList.add('is-loaded');
+      }, { once: true });
+    });
+  }
+
+  function initMobileFilterButton() {
+    if (!document.getElementById('filterDrawer') || document.querySelector('.filter-mobile-btn')) return;
+
+    const host = document.querySelector('.content-meta') || document.querySelector('.content-header') || document.querySelector('.page-wrap');
+    if (!host) return;
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'filter-mobile-btn';
+    button.textContent = 'Filtrele';
+    button.addEventListener('click', function() {
+      if (window.openFilterDrawer) window.openFilterDrawer();
+    });
+    host.insertAdjacentElement('afterbegin', button);
+  }
+
   function repairPlaceholderLinks() {
     const map = [
       [/^kvkk/i, 'kvkk'],
@@ -792,24 +967,102 @@
     });
   }
 
+  // ── CAMPAIGN BANNER SLIDER ──────────────────────
+  async function initCampaignBanner() {
+    const announce = document.querySelector('.announce');
+    if (!announce) return;
+
+    const announcementEnabled = !(siteSettings.features && siteSettings.features.announcement === false);
+    if (!announcementEnabled) return;
+
+    const fallbackText = siteSettings.announcementText || defaultSettings.announcementText;
+
+    function showFallback() {
+      announce.innerHTML = '<span class="announce-link">' + escapeHtml(fallbackText) + '</span>';
+      announce.style.display = '';
+      document.documentElement.style.setProperty('--announcement-offset', '38px');
+    }
+
+    const api = window.SuveraAPI;
+    if (!api || typeof api.request !== 'function') {
+      showFallback();
+      return;
+    }
+
+    try {
+      const campaigns = await api.request('/campaigns');
+
+      if (!Array.isArray(campaigns) || !campaigns.length) {
+        announce.style.display = 'none';
+        document.documentElement.style.setProperty('--announcement-offset', '0px');
+        return;
+      }
+
+      let currentIndex = 0;
+      let autoTimer = null;
+
+      function renderCurrent() {
+        const link = announce.querySelector('.announce-link');
+        if (link) link.textContent = campaigns[currentIndex].name;
+      }
+
+      function goTo(index) {
+        currentIndex = ((index % campaigns.length) + campaigns.length) % campaigns.length;
+        renderCurrent();
+      }
+
+      function startAuto() {
+        if (autoTimer) clearInterval(autoTimer);
+        if (campaigns.length > 1) {
+          autoTimer = setInterval(function () { goTo(currentIndex + 1); }, 4000);
+        }
+      }
+
+      if (campaigns.length > 1) {
+        announce.innerHTML =
+          '<button class="announce-arrow" type="button" aria-label="Önceki kampanya">&#8249;</button>' +
+          '<span class="announce-link">' + escapeHtml(campaigns[0].name) + '</span>' +
+          '<button class="announce-arrow" type="button" aria-label="Sonraki kampanya">&#8250;</button>';
+
+        const arrows = announce.querySelectorAll('.announce-arrow');
+        arrows[0].addEventListener('click', function () { goTo(currentIndex - 1); startAuto(); });
+        arrows[1].addEventListener('click', function () { goTo(currentIndex + 1); startAuto(); });
+      } else {
+        announce.innerHTML = '<span class="announce-link">' + escapeHtml(campaigns[0].name) + '</span>';
+      }
+
+      announce.style.display = '';
+      document.documentElement.style.setProperty('--announcement-offset', '38px');
+      startAuto();
+    } catch (_) {
+      showFallback();
+    }
+  }
+
   // ── INIT ALL ────────────────────────────────────
   function init() {
     injectSkipLink();
     applySiteSettings();
+    initCampaignBanner().catch(function () {});
     redirectPaymentReturn();
     initSeoDefaults();
     updateCartCount();
     initNavScroll();
     buildNav();
     initMobileNav();
+    updateAccountLinks(window.SuveraAPI && window.SuveraAPI.hasCustomerSession && window.SuveraAPI.hasCustomerSession());
     initHamburger();
     initScrollReveal();
     initWishlistBtns();
     initQuickView();
     initQuickAddButtons();
     initNavSearch();
+    initMobileBottomNav();
+    initImageLazyState();
+    initMobileFilterButton();
     repairPlaceholderLinks();
     syncFavoritesFromServer().then(refreshWishlistButtons).catch(refreshWishlistButtons);
+    refreshCustomerSession().catch(function() {});
     initStickyBuy();
     // page transitions — subtle, opt-in
     // initPageTransitions(); // uncomment to enable
@@ -826,6 +1079,8 @@
   window.Suvera.getLastOrder = getLastOrder;
   window.Suvera.saveProfile = saveProfile;
   window.Suvera.loadProfile = loadProfile;
+  window.Suvera.refreshCustomerSession = refreshCustomerSession;
+  window.Suvera.updateAccountLinks = updateAccountLinks;
   window.Suvera.syncFavoriteButton = syncFavoriteButton;
 
   if (document.readyState === 'loading') {
