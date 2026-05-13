@@ -568,49 +568,6 @@
         }) || null;
       }
 
-      var categoryHeading = document.getElementById('collectionCategoryHeading');
-      if (categoryWrap) {
-        if (activeCollection) {
-          // --- Koleksiyon seçili: o koleksiyona ait ürünlerin kategori dağılımı ---
-          var catCountMap = {};
-          collectionProducts.forEach(function (product) {
-            var key = String(product.category_id || '');
-            if (!key) return;
-            if (!catCountMap[key]) {
-              var cat = categoryMap.get(key);
-              catCountMap[key] = { id: product.category_id, name: cat ? cat.name : key, count: 0 };
-            }
-            catCountMap[key].count++;
-          });
-          var subCats = Object.values(catCountMap).sort(function (a, b) { return b.count - a.count; });
-          var colParam = 'collection=' + encodeURIComponent(selectedCollectionKey);
-
-          if (categoryHeading) categoryHeading.textContent = activeCollection.title || 'Koleksiyon';
-
-          var totalAllActive = !selectedCategoryId;
-          categoryWrap.innerHTML =
-            '<a class="sub-cat-link' + (totalAllActive ? ' act' : '') + '" href="urunler?' + escapeHtml(colParam) + '">' +
-              'Tüm Ürünler <span class="filter-count">' + collectionProducts.length + '</span></a>' +
-            subCats.map(function (cat) {
-              var isActive = String(cat.id) === String(selectedCategoryId);
-              var href = 'urunler?' + colParam + '&category_id=' + encodeURIComponent(cat.id);
-              return '<a class="sub-cat-link' + (isActive ? ' act' : '') + '" href="' + escapeHtml(href) + '">' +
-                '<span class="sub-cat-arrow">└</span>' +
-                escapeHtml(cat.name) + ' <span class="filter-count">' + cat.count + '</span></a>';
-            }).join('');
-          // link-based navigation — event listener gerekmez
-        } else {
-          // --- Koleksiyon seçili değil: normal kategori radio listesi ---
-          if (categoryHeading) categoryHeading.textContent = 'Kategori';
-
-          categoryWrap.innerHTML = '<label class="filter-check"><input type="radio" name="collectionCategory" value="" ' + (activeCategory ? '' : 'checked') + '/> Tüm Ürünler</label>' +
-            (categories || []).map(function (category) {
-              var checked = String(category.id) === String(selectedCategoryId) ? 'checked' : '';
-              return '<label class="filter-check"><input type="radio" name="collectionCategory" value="' + escapeHtml(category.id) + '" ' + checked + '/> ' + escapeHtml(category.name) + '</label>';
-            }).join('');
-        }
-      }
-
       if (editorLinks) {
         editorLinks.innerHTML = (categories || []).slice(0, 5).map(function (category) {
           return '<a class="editorial-link" href="urunler?category_id=' + encodeURIComponent(category.id) + '">' +
@@ -642,6 +599,51 @@
       var collectionProducts = activeCollection
         ? (products || []).filter(function (product) { return productBelongsToCollection(product, activeCollection); })
         : (products || []);
+
+      // ── Sidebar kategori listesi ─────────────────────────────────────────
+      // collectionProducts is now defined, so we can safely build the category panel.
+      var categoryHeading = document.getElementById('collectionCategoryHeading');
+      if (categoryWrap) {
+        if (activeCollection) {
+          // Koleksiyon seçili: o koleksiyona ait ürünlerin kategori dağılımını göster
+          var catCountMap = {};
+          collectionProducts.forEach(function (product) {
+            var key = String(product.category_id || '');
+            if (!key) return;
+            if (!catCountMap[key]) {
+              var cat = categoryMap.get(key);
+              catCountMap[key] = { id: product.category_id, name: cat ? cat.name : key, count: 0 };
+            }
+            catCountMap[key].count++;
+          });
+          var subCats = Object.values(catCountMap).sort(function (a, b) { return b.count - a.count; });
+          var colParam = 'collection=' + encodeURIComponent(selectedCollectionKey);
+
+          if (categoryHeading) categoryHeading.textContent = activeCollection.title || 'Koleksiyon';
+
+          var totalAllActive = !selectedCategoryId;
+          categoryWrap.innerHTML =
+            '<a class="sub-cat-link' + (totalAllActive ? ' act' : '') + '" href="urunler?' + escapeHtml(colParam) + '">' +
+              'Tüm Ürünler <span class="filter-count">' + collectionProducts.length + '</span></a>' +
+            subCats.map(function (cat) {
+              var isActive = String(cat.id) === String(selectedCategoryId);
+              var href = 'urunler?' + colParam + '&category_id=' + encodeURIComponent(cat.id);
+              return '<a class="sub-cat-link' + (isActive ? ' act' : '') + '" href="' + escapeHtml(href) + '">' +
+                '<span class="sub-cat-arrow">└</span>' +
+                escapeHtml(cat.name) + ' <span class="filter-count">' + cat.count + '</span></a>';
+            }).join('');
+          // link-based navigation — event listener gerekmez
+        } else {
+          // Koleksiyon seçili değil: normal kategori radio listesi
+          if (categoryHeading) categoryHeading.textContent = 'Kategori';
+
+          categoryWrap.innerHTML = '<label class="filter-check"><input type="radio" name="collectionCategory" value="" ' + (activeCategory ? '' : 'checked') + '/> Tüm Ürünler</label>' +
+            (categories || []).map(function (category) {
+              var checked = String(category.id) === String(selectedCategoryId) ? 'checked' : '';
+              return '<label class="filter-check"><input type="radio" name="collectionCategory" value="' + escapeHtml(category.id) + '" ' + checked + '/> ' + escapeHtml(category.name) + '</label>';
+            }).join('');
+        }
+      }
 
       var availableColors = [];
       var availableSizes = [];
