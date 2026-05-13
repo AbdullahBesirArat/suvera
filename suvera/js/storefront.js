@@ -568,13 +568,6 @@
         }) || null;
       }
 
-      if (editorLinks) {
-        editorLinks.innerHTML = (categories || []).slice(0, 5).map(function (category) {
-          return '<a class="editorial-link" href="urunler?category_id=' + encodeURIComponent(category.id) + '">' +
-            escapeHtml(category.name) + ' <span>' + escapeHtml(category.slug || 'Suvera') + '</span></a>';
-        }).join('');
-      }
-
       if (collectionLinks) {
         collectionLinks.innerHTML = (collections || []).length
           ? collections.slice(0, 5).map(function (collection) {
@@ -600,25 +593,51 @@
         ? (products || []).filter(function (product) { return productBelongsToCollection(product, activeCollection); })
         : (products || []);
 
-      // ── Sidebar kategori listesi ─────────────────────────────────────────
-      // collectionProducts is now defined, so we can safely build the category panel.
+      // ── Koleksiyon alt-kategori haritası ─────────────────────────────────
+      // Computed once, used in both the sidebar and the editorial card below.
+      var colParam = activeCollection ? 'collection=' + encodeURIComponent(selectedCollectionKey) : '';
+      var subCats = [];
+      if (activeCollection) {
+        var catCountMap = {};
+        collectionProducts.forEach(function (product) {
+          var key = String(product.category_id || '');
+          if (!key) return;
+          if (!catCountMap[key]) {
+            var cat = categoryMap.get(key);
+            catCountMap[key] = { id: product.category_id, name: cat ? cat.name : key, count: 0 };
+          }
+          catCountMap[key].count++;
+        });
+        subCats = Object.values(catCountMap).sort(function (a, b) { return b.count - a.count; });
+      }
+
+      // ── Editorial panel kategori sütunu ──────────────────────────────────
+      var editorialCategoryHeading = document.getElementById('editorialCategoryHeading');
+      if (editorLinks) {
+        if (activeCollection) {
+          // Koleksiyon aktifken: o koleksiyonun kategori dağılımını göster
+          if (editorialCategoryHeading) editorialCategoryHeading.textContent = activeCollection.title || 'Koleksiyon';
+          editorLinks.innerHTML = subCats.length
+            ? subCats.map(function (cat) {
+                var href = 'urunler?' + colParam + '&category_id=' + encodeURIComponent(cat.id);
+                return '<a class="editorial-link' + (String(cat.id) === String(selectedCategoryId) ? ' act' : '') + '" href="' + escapeHtml(href) + '">' +
+                  escapeHtml(cat.name) + ' <span>' + cat.count + ' ürün</span></a>';
+              }).join('')
+            : '<a class="editorial-link" href="urunler?' + escapeHtml(colParam) + '">Ürünler yükleniyor <span>' + escapeHtml(activeCollection.slug || '') + '</span></a>';
+        } else {
+          // Koleksiyon yok: genel kategori linkleri
+          if (editorialCategoryHeading) editorialCategoryHeading.textContent = 'Kategoriler';
+          editorLinks.innerHTML = (categories || []).slice(0, 5).map(function (category) {
+            return '<a class="editorial-link" href="urunler?category_id=' + encodeURIComponent(category.id) + '">' +
+              escapeHtml(category.name) + ' <span>' + escapeHtml(category.slug || 'Suvera') + '</span></a>';
+          }).join('');
+        }
+      }
+
+      // ── Sidebar kategori listesi ──────────────────────────────────────────
       var categoryHeading = document.getElementById('collectionCategoryHeading');
       if (categoryWrap) {
         if (activeCollection) {
-          // Koleksiyon seçili: o koleksiyona ait ürünlerin kategori dağılımını göster
-          var catCountMap = {};
-          collectionProducts.forEach(function (product) {
-            var key = String(product.category_id || '');
-            if (!key) return;
-            if (!catCountMap[key]) {
-              var cat = categoryMap.get(key);
-              catCountMap[key] = { id: product.category_id, name: cat ? cat.name : key, count: 0 };
-            }
-            catCountMap[key].count++;
-          });
-          var subCats = Object.values(catCountMap).sort(function (a, b) { return b.count - a.count; });
-          var colParam = 'collection=' + encodeURIComponent(selectedCollectionKey);
-
           if (categoryHeading) categoryHeading.textContent = activeCollection.title || 'Koleksiyon';
 
           var totalAllActive = !selectedCategoryId;

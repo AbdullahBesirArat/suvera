@@ -62,6 +62,7 @@
     .editorial-col h3{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:#4d7443;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--light);}
     .editorial-link{display:flex;justify-content:space-between;gap:10px;padding:10px 0;color:var(--mid);text-decoration:none;font-size:14px;transition:color .2s,transform .2s;}
     .editorial-link:hover{color:var(--black);transform:translateX(2px);}
+    .editorial-link.act{color:var(--black);font-weight:600;}
     .editorial-link span{color:#aaa;font-size:12px;}
     .editorial-feature{padding:20px;display:flex;flex-direction:column;justify-content:space-between;background:linear-gradient(180deg,#f8f4ed 0%,#f2ede6 100%);}
     .editorial-visual{min-height:180px;border-radius:6px;background:linear-gradient(140deg,#dfd6c8,#cfc3b4);display:flex;align-items:center;justify-content:center;font-size:66px;margin-bottom:18px;background-size:cover;background-position:center;}
@@ -242,7 +243,7 @@
     <div class="editorial-kicker" id="collectionKicker">Suvera Seçkisi</div>
     <div class="editorial-grid">
       <div class="editorial-col">
-        <h3>Kategoriler</h3>
+        <h3 id="editorialCategoryHeading">Kategoriler</h3>
         <div id="editorialCategoryLinks">
           <a class="editorial-link" href="urunler">Seçki hazırlanıyor <span>SUVERA</span></a>
         </div>
