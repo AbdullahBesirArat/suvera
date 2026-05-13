@@ -280,6 +280,13 @@
   <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="filter-section">
+      <h4 id="collectionCategoryHeading">Kategori</h4>
+      <div class="filter-opts" id="collectionCategoryFilters">
+        <label class="filter-check"><input type="radio" name="collectionCategory" value="" checked/> Tüm Ürünler</label>
+      </div>
+    </div>
+
+    <div class="filter-section">
       <h4>Renk</h4>
       <div class="color-filter-opts" id="collectionColorFilters">
         <div class="cf-dot" style="background:#111" title="Renk yükleniyor"></div>
@@ -298,24 +305,6 @@
       <div class="price-range">
         <input type="range" min="0" max="5000" value="5000" id="priceRange" oninput="document.getElementById('priceVal').textContent=this.value+' TL'"/>
         <div class="price-vals"><span>0 TL</span><span id="priceVal">5.000 TL</span></div>
-      </div>
-    </div>
-
-    <div class="filter-section">
-      <h4 id="collectionCategoryHeading">Kategori</h4>
-      <div class="filter-opts" id="collectionCategoryFilters">
-        <label class="filter-check"><input type="radio" name="collectionCategory" value="" checked/> Tüm Ürünler</label>
-      </div>
-    </div>
-
-    <div class="filter-section">
-      <h4>Koleksiyon</h4>
-      <div class="filter-opts">
-        <label class="filter-check"><input type="checkbox" checked/> Yeni Gelenler</label>
-        <label class="filter-check"><input type="checkbox"/> Günlük Seçki</label>
-        <label class="filter-check"><input type="checkbox"/> Zamansız Parçalar</label>
-        <label class="filter-check"><input type="checkbox"/> Özel Seri</label>
-        <label class="filter-check"><input type="checkbox"/> Outlet</label>
       </div>
     </div>
 
