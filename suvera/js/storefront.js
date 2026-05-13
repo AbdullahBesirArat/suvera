@@ -443,7 +443,8 @@
     }
   }
 
-  async function renderFeaturedStrip(target, limit, sourceProducts) {
+  // filterFeatured: true → show only products with featured_in_category=true (if any; else all)
+  async function renderFeaturedStrip(target, limit, sourceProducts, filterFeatured) {
     if (!window.SuveraAPI || !target) return;
 
     target.innerHTML = skeletonCards(limit || 5);
@@ -453,10 +454,16 @@
       const products = Array.isArray(sourceProducts)
         ? sourceProducts
         : await window.SuveraAPI.products.list('?status=active&limit=' + limit);
-      const items = (products || []).slice(0, limit);
+
+      var pool = products || [];
+      if (filterFeatured) {
+        var featured = pool.filter(function (p) { return p.featured_in_category; });
+        if (featured.length) pool = featured;
+      }
+      var items = pool.slice(0, limit);
 
       if (!items.length) {
-        target.innerHTML = '<div class="empty-state">One cikan urunler hazirlaniyor.</div>';
+        target.innerHTML = '<div class="empty-state">Öne çıkan ürünler hazırlanıyor.</div>';
         return;
       }
 
@@ -724,7 +731,8 @@
         grid.innerHTML = filtered.map(productCard).join('');
       }
 
-      renderFeaturedStrip(document.getElementById('featuredProductsStrip'), 5, collectionProducts);
+      // Pass filterFeatured=true when a category is selected so only featured_in_category products show
+      renderFeaturedStrip(document.getElementById('featuredProductsStrip'), 5, collectionProducts, !!selectedCategoryId);
       if (window.Suvera && window.Suvera.refreshWishlistButtons) {
         window.Suvera.refreshWishlistButtons();
       }

@@ -509,7 +509,11 @@
 
   // ── PRODUCT CARD HEARTS ─────────────────────────
   function initWishlistBtns() {
-    document.addEventListener('click', e => {
+    // Capture-phase delegation: inline onclick="event.stopPropagation()" on dynamic
+    // product cards blocks bubble-phase handlers from firing. Capture phase runs
+    // before the event reaches the button, so stopPropagation() on the element has
+    // no effect on us here.
+    document.addEventListener('click', function(e) {
       const btn = e.target.closest('.prod-wish, .quick-fav');
       if (!btn) return;
       e.stopPropagation();
@@ -520,12 +524,13 @@
       const isActive = result.active;
       btn.textContent = isActive ? '❤️' : '🤍';
       showToast(isActive ? 'Favorilere eklendi ❤️' : 'Favorilerden çıkarıldı', isActive ? 'green' : 'dark');
-    });
+    }, true); // useCapture = true
   }
 
   // ── QUICK VIEW MODAL ────────────────────────────
   function initQuickView() {
-    document.addEventListener('click', e => {
+    // Capture-phase so we intercept before the parent .prod-card onclick fires.
+    document.addEventListener('click', function(e) {
       const btn = e.target.closest('.quick-view');
       if (!btn) return;
       e.stopPropagation();
@@ -582,7 +587,7 @@
 
       modal.classList.add('open');
       document.body.style.overflow = 'hidden';
-    });
+    }, true); // useCapture = true
   }
 
   function initQuickAddButtons() {
@@ -990,7 +995,11 @@
     }
 
     try {
-      const campaigns = await api.request('/campaigns');
+      // Use campaigns.list() which includes the organizationSlug query param.
+      // Falling back to api.request('/campaigns') omits the slug and returns 400.
+      const campaigns = await (api.campaigns && typeof api.campaigns.list === 'function'
+        ? api.campaigns.list()
+        : api.request('/campaigns'));
 
       if (!Array.isArray(campaigns) || !campaigns.length) {
         announce.style.display = 'none';
