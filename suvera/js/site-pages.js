@@ -274,21 +274,6 @@
     }
   }
 
-  async function fetchSignedInAccount() {
-    const api = window.SuveraAPI;
-    if (!api || !api.customerToken || !api.customerToken() || !api.customerAuth || !api.customerAuth.me) return null;
-
-    try {
-      const session = await api.customerAuth.me();
-      return {
-        customer: session.account || {},
-        orders: Array.isArray(session.orders) ? session.orders.map(normalizeOrder).filter(Boolean) : [],
-      };
-    } catch (err) {
-      return null;
-    }
-  }
-
   function getState() {
     return window.Suvera || {};
   }
@@ -410,15 +395,14 @@
     if (state.syncFavoritesFromServer) {
       await state.syncFavoritesFromServer();
     }
-    let profile = state.loadProfile ? state.loadProfile() : {};
+    const profile = state.loadProfile ? state.loadProfile() : {};
     const localOrders = state.loadOrderHistory ? state.loadOrderHistory() : [];
     const latestLocal = localOrders[0] || null;
     const accountEmail = profile.email || orderEmail(latestLocal);
     const accountOrderCode = latestLocal && (latestLocal.orderCode || latestLocal.id);
-    const account = await fetchSignedInAccount() || await fetchAccount(accountEmail, accountOrderCode);
+    const account = await fetchAccount(accountEmail, accountOrderCode);
     if (account && account.customer && state.saveProfile) {
       state.saveProfile(account.customer);
-      profile = state.loadProfile ? state.loadProfile() : profile;
     }
     const backendOrders = account && account.orders.length ? account.orders : await fetchOrders(localOrders);
     const orders = backendOrders.length ? backendOrders : localOrders.map(normalizeOrder).filter(Boolean);

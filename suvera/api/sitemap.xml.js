@@ -1,6 +1,6 @@
 const UPSTREAM_API = process.env.UPSTREAM_API || 'https://panelya-api-production.up.railway.app/api';
 const PUBLIC_ACCESS_TOKEN = process.env.SUVERA_PUBLIC_ACCESS_TOKEN || '';
-const SITE_ORIGIN = (process.env.SUVERA_SITE_ORIGIN || 'https://suvera-web.vercel.app').replace(/\/$/, '');
+const SITE_ORIGIN = (process.env.SUVERA_SITE_ORIGIN || 'https://suvera.com.tr').replace(/\/$/, '');
 const ORGANIZATION_SLUG = process.env.SUVERA_ORGANIZATION_SLUG || 'suvera';
 
 const STATIC_PATHS = [

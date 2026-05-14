@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hesabim | SUVERA</title>
+  <title>Hesabim | Suvera</title>
   <meta name="description" content="Suvera hesabinizda siparis gecmisi, favoriler ve temel profil bilgilerini goruntuleyin." />
   <link rel="canonical" href="https://suvera.com.tr/hesabim" />
   <meta property="og:type" content="website" />
@@ -24,9 +24,9 @@
   <link rel="stylesheet" href="css/site-pages.css" />
 </head>
 <body class="site-page-body">
-  <div class="announce" id="campaignAnnouncement">&#x2756; SUVERA</div>
+  <div class="announce">Hesabinizdaki siparis ve favoriler tek ekranda</div>
   <nav id="mainNav">
-    <a class="nav-logo" href="anasayfa">SUVERA</a>
+    <a class="nav-logo" href="anasayfa">Suvera</a>
     <ul class="nav-menu-wrap">
       <li><a href="anasayfa">Ana Sayfa</a></li>
       <li><a href="urunler">Urunler</a></li>
@@ -96,6 +96,20 @@
           </div>
           <div id="accountFavorites" class="page-empty">Favori urunler yukleniyor.</div>
         </article>
+        <article class="page-card">
+          <div class="page-section-head">
+            <h2 class="page-section-title">E-posta Degistir</h2>
+            <span class="page-section-subtitle">Onay linki</span>
+          </div>
+          <form id="emailChangeForm" class="page-form">
+            <label for="emailChangeNew">Yeni e-posta</label>
+            <input id="emailChangeNew" type="email" name="new_email" required placeholder="yeni@mail.com" />
+            <label for="emailChangePassword">Mevcut parola</label>
+            <input id="emailChangePassword" type="password" name="password" required placeholder="Mevcut sifre" />
+            <button class="page-btn" type="submit">Onay linki gonder</button>
+            <p id="emailChangeNote" class="page-form-note">Yeni adrese onay baglantisi gonderilir. Onaylamadan once mevcut adres degismez.</p>
+          </form>
+        </article>
       </aside>
     </section>
   </main>
@@ -103,10 +117,10 @@
   <footer class="site-footer">
     <hr class="footer-divider" />
     <div class="footer-grid">
-      <div class="footer-brand"><a class="nav-logo" href="anasayfa">SUVERA</a><p>Rafine urun secimi, guvenli checkout ve duzenli siparis takibi.</p></div>
+      <div class="footer-brand"><a class="nav-logo" href="anasayfa">Suvera</a><p>Rafine urun secimi, guvenli checkout ve duzenli siparis takibi.</p></div>
       <div class="footer-col"><h5>Bilgiler</h5><ul><li><a href="kvkk">KVKK</a></li><li><a href="sozlesme">Mesafeli Satis</a></li><li><a href="kargo">Kargo</a></li><li><a href="iade">Iade</a></li></ul></div>
       <div class="footer-col"><h5>Musteri</h5><ul><li><a href="siparis-takip">Siparis Takip</a></li><li><a href="favoriler">Favoriler</a></li><li><a href="sifre-sifirla">Sifre Sifirla</a></li></ul></div>
-      <div class="footer-col"><h5>SUVERA</h5><ul><li><a href="hakkimizda">Hakkimizda</a></li><li><a href="blog">Blog</a></li><li><a href="iletisim">Iletisim</a></li></ul></div>
+      <div class="footer-col"><h5>Suvera</h5><ul><li><a href="hakkimizda">Hakkimizda</a></li><li><a href="blog">Blog</a></li><li><a href="iletisim">Iletisim</a></li></ul></div>
     </div>
     <div class="footer-bottom"><span>© 2026 Suvera.</span><span>Hesap deneyimi checkout akisiyla bagli.</span></div>
   </footer>
@@ -116,5 +130,28 @@
   <script src="js/site-seo.js"></script>
   <script src="js/site-pages.js"></script>
   <script src="shared.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var form = document.getElementById('emailChangeForm');
+      var note = document.getElementById('emailChangeNote');
+      if (!form || !window.SuveraAPI) return;
+      form.addEventListener('submit', async function (event) {
+        event.preventDefault();
+        var newEmail = (document.getElementById('emailChangeNew').value || '').trim();
+        var password = document.getElementById('emailChangePassword').value || '';
+        if (!newEmail || !password) {
+          note.textContent = 'Yeni e-posta ve mevcut parolanizi girin.';
+          return;
+        }
+        try {
+          await window.SuveraAPI.customerAuth.requestEmailChange(newEmail, password);
+          note.textContent = 'Onay linki ' + newEmail + ' adresine gonderildi. Postanizi kontrol edin.';
+          form.reset();
+        } catch (err) {
+          note.textContent = (err && err.message) || 'E-posta degistirme talebi gonderilemedi.';
+        }
+      });
+    });
+  </script>
 </body>
 </html>

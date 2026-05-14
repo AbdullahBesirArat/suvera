@@ -13,8 +13,6 @@
     imageEntries: [],
     categoryId: null,
     variants: [],
-    stock: 0,
-    status: 'draft',
   };
   let activeImageIndex = 0;
   let lightboxScrollY = 0;
@@ -282,97 +280,32 @@
         currentProduct.selectedColor = button.dataset.color || '';
         if (label) label.textContent = colorMeta(currentProduct.selectedColor).label;
         renderGallery(product, currentProduct.selectedColor);
-        renderSizes(product);
-        updateStockDisplay();
       });
     });
   }
 
-  function variantsForSelectedColor(product) {
-    const variants = Array.isArray(product && product.variants) ? product.variants : [];
-    const selectedColor = normalizeColor(currentProduct.selectedColor);
-    return selectedColor
-      ? variants.filter(function (variant) { return normalizeColor(variant.color) === selectedColor; })
-      : variants;
-  }
-
-  function variantForSelection(product) {
-    const variants = Array.isArray(product && product.variants) ? product.variants : [];
-    const selectedColor = normalizeColor(currentProduct.selectedColor);
-    const selectedSize = String(currentProduct.selectedSize || '').trim().toLocaleLowerCase('tr-TR');
-    return variants.find(function (variant) {
-      const colorMatches = !selectedColor || normalizeColor(variant.color) === selectedColor;
-      const sizeMatches = !selectedSize || String(variant.size || '').trim().toLocaleLowerCase('tr-TR') === selectedSize;
-      return colorMatches && sizeMatches;
-    }) || null;
-  }
-
-  function optionInStock(option) {
-    return Number(option && option.stock || 0) > 0 && (option.status || 'active') === 'active';
-  }
-
-  function updateStockDisplay() {
-    const variant = variantForSelection(currentProduct);
-    const stock = variant ? Number(variant.stock || 0) : Number(currentProduct.stock || 0);
-    const active = currentProduct.status === 'active' && (!variant || optionInStock(variant));
-    const stockText = document.getElementById('detailStockText');
-    const stockBadge = document.getElementById('stockBadge');
-    const addButton = document.getElementById('detailAddCartBtn');
-    const buyButton = document.querySelector('.buy-btn.secondary');
-
-    if (stockText) {
-      stockText.innerHTML = '<strong>Stok durumu</strong> ' + (active && stock > 0 ? stock + ' adet hazır' : 'Tükendi');
-    }
-    if (stockBadge) {
-      stockBadge.textContent = active && stock > 0 ? 'Stokta' : 'Tükendi';
-    }
-    if (addButton) {
-      addButton.disabled = !(active && stock > 0);
-    }
-    if (buyButton) {
-      buyButton.disabled = !(active && stock > 0);
-    }
-  }
-
   function renderSizes(product) {
-    const variantOptions = variantsForSelectedColor(product);
-    const sizes = variantOptions.length
-      ? [...new Set(variantOptions.map(function (variant) { return String(variant.size || '').trim(); }).filter(Boolean))]
-      : (Array.isArray(product.sizes) && product.sizes.length ? product.sizes : ['Standart']);
-    const selectedVariant = variantOptions.find(function (variant) {
-      return String(variant.size || '').trim() === currentProduct.selectedSize;
-    });
-    const firstInStock = variantOptions.find(optionInStock);
-    currentProduct.selectedSize = sizes.includes(currentProduct.selectedSize) && (!variantOptions.length || optionInStock(selectedVariant))
-      ? currentProduct.selectedSize
-      : (firstInStock ? String(firstInStock.size || '').trim() : sizes[0]);
+    const sizes = Array.isArray(product.sizes) && product.sizes.length ? product.sizes : ['Standart'];
+    currentProduct.selectedSize = sizes[0];
 
     const wrap = document.getElementById('detailSizes');
     const label = document.getElementById('detailSizeLabel');
     if (!wrap) return;
 
     wrap.innerHTML = sizes.map(function (size, index) {
-      const variant = variantOptions.find(function (item) { return String(item.size || '').trim() === String(size); });
-      const disabled = variantOptions.length && !optionInStock(variant);
-      return '<button class="size-btn' + (size === currentProduct.selectedSize || (!currentProduct.selectedSize && index === 0) ? ' active' : '') + '" type="button" data-size="' + escapeHtml(size) + '"' + (disabled ? ' disabled aria-disabled="true"' : '') + '>' + escapeHtml(size) + '</button>';
+      return '<button class="size-btn' + (index === 0 ? ' active' : '') + '" type="button" data-size="' + escapeHtml(size) + '">' + escapeHtml(size) + '</button>';
     }).join('');
 
-    if (label) label.textContent = currentProduct.selectedSize || sizes[0] || '';
+    if (label) label.textContent = sizes[0];
 
     wrap.querySelectorAll('.size-btn').forEach(function (button) {
       button.addEventListener('click', function () {
-        if (button.disabled) {
-          showCartFeedback('Bu beden bu renk icin stokta yok. Lutfen farkli beden/renk deneyin.', { success: false });
-          return;
-        }
         wrap.querySelectorAll('.size-btn').forEach(function (item) { item.classList.remove('active'); });
         button.classList.add('active');
         currentProduct.selectedSize = button.dataset.size || '';
         if (label) label.textContent = currentProduct.selectedSize;
-        updateStockDisplay();
       });
     });
-    updateStockDisplay();
   }
 
   function renderInfo(product) {
@@ -382,8 +315,7 @@
     const measure = measurementLines(text);
     const story = articleLines(text);
     const details = product.details && typeof product.details === 'object' ? product.details : {};
-    const storyText = (product.product_story && product.product_story.trim())
-      || details.story || story.join(' ') || 'Bu ürün, sade çizgiyi yumuşak kumaş hissiyle bir araya getirir.';
+    const storyText = details.story || story.join(' ') || 'Bu ürün, sade çizgiyi yumuşak kumaş hissiyle bir araya getirir.';
     const shortText = details.short_description || story[0] || 'Rahat kalıp, dengeli duruş ve sezon boyunca sık kullanılacak bir parça.';
     const deliveryText = details.delivery_note || 'Siparişler 1-3 iş günü içinde hazırlanır. Kargo çıktığında takip numarası hesabınıza ve sipariş ekranına işlenir.\nKullanılmamış ürünlerde değişim ve iade desteği için bizimle iletişime geçebilirsiniz.';
     const customMeasurements = details.measurements
@@ -398,8 +330,6 @@
     currentProduct.emoji = product.emoji || '👗';
     currentProduct.categoryId = product.category_id || null;
     currentProduct.variants = Array.isArray(product.variants) ? product.variants : [];
-    currentProduct.stock = stock;
-    currentProduct.status = product.status || 'draft';
 
     document.title = currentProduct.name + ' – Suvera';
     document.getElementById('detailProductTitle').textContent = currentProduct.name;
@@ -412,7 +342,8 @@
     oldPriceNode.style.display = oldPrice ? '' : 'none';
     oldPriceNode.textContent = oldPrice ? money(oldPrice) : '';
 
-    updateStockDisplay();
+    document.getElementById('detailStockText').innerHTML = '<strong>Stok durumu</strong> ' + (stock > 0 ? stock + ' adet hazır' : 'Tükendi');
+    document.getElementById('stockBadge').textContent = stock > 0 ? 'Stokta' : 'Tükendi';
 
     const meta = [];
     if (product.tags) meta.push(product.tags.split(',')[0]);
@@ -425,6 +356,10 @@
     document.getElementById('detailShortDesc').textContent = shortText;
     document.getElementById('detailDescriptionBody').innerHTML = story.length
       ? story.map(function (line) { return '<p>' + escapeHtml(line) + '</p>'; }).join('')
+      : '<p>Ürün açıklaması hazırlanıyor.</p>';
+
+    document.getElementById('detailDescriptionBody').innerHTML = (details.story || story.length)
+      ? (details.story ? details.story.split('\n').filter(Boolean).map(function (line) { return '<p>' + escapeHtml(line.trim()) + '</p>'; }).join('') : story.map(function (line) { return '<p>' + escapeHtml(line) + '</p>'; }).join(''))
       : '<p>Ürün açıklaması hazırlanıyor.</p>';
 
     document.getElementById('detailMeasurementBody').innerHTML = measurementData.length

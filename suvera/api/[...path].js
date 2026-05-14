@@ -39,10 +39,14 @@ function storefrontOrigin(req) {
   const forwardedProto = String(req.headers['x-forwarded-proto'] || '').split(',')[0].trim();
   const forwardedHost = String(req.headers['x-forwarded-host'] || req.headers.host || '').split(',')[0].trim();
   const proto = forwardedProto || 'https';
-  const host = forwardedHost || 'suvera-web.vercel.app';
+  const host = forwardedHost || 'suvera.com.tr';
 
   if (/^(localhost|127\.0\.0\.1)(:\d+)?$/i.test(host)) {
-    return 'https://suvera-web.vercel.app';
+    return 'https://suvera.com.tr';
+  }
+
+  if (/\.vercel\.app$/i.test(host)) {
+    return 'https://suvera.com.tr';
   }
 
   return `${proto}://${host}`;
@@ -95,33 +99,6 @@ function shouldAttachRefreshCookie(path) {
   return /^auth\/session\/(refresh|logout)$/.test(path);
 }
 
-function sameSiteRequest(req) {
-  const unsafe = !['GET', 'HEAD', 'OPTIONS'].includes(String(req.method || 'GET').toUpperCase());
-  if (!unsafe) return true;
-
-  const origin = String(req.headers.origin || '').trim();
-  if (!origin) return true;
-
-  const expected = storefrontOrigin(req);
-  try {
-    const actualUrl = new URL(origin);
-    const expectedUrl = new URL(expected);
-    if (/^(localhost|127\.0\.0\.1)$/i.test(actualUrl.hostname)) return true;
-    return actualUrl.protocol === expectedUrl.protocol && actualUrl.host === expectedUrl.host;
-  } catch (_) {
-    return false;
-  }
-}
-
-function validProxyPath(path) {
-  try {
-    const decoded = decodeURIComponent(String(path || ''));
-    return decoded && !decoded.includes('..') && !/^[a-z][a-z0-9+.-]*:/i.test(decoded);
-  } catch (_) {
-    return false;
-  }
-}
-
 function bodyWithRefreshCookie(path, body, cookies, headers) {
   if (!shouldAttachRefreshCookie(path) || !cookies[REFRESH_COOKIE]) return body;
 
@@ -148,18 +125,6 @@ function bodyWithRefreshCookie(path, body, cookies, headers) {
 module.exports = async function handler(req, res) {
   const incoming = new URL(req.url, 'https://suvera.local');
   const path = incoming.pathname.replace(/^\/api\/?/, '');
-  if (req.method === 'OPTIONS') {
-    res.statusCode = 204;
-    res.setHeader('Allow', 'GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS');
-    res.end();
-    return;
-  }
-  if (!validProxyPath(path) || !sameSiteRequest(req)) {
-    res.statusCode = 403;
-    res.setHeader('Content-Type', 'application/json; charset=utf-8');
-    res.end(JSON.stringify({ error: 'Forbidden request' }));
-    return;
-  }
   const upstream = new URL(`${UPSTREAM_API}/${path}`);
   upstream.search = incoming.search;
   const cookies = parseCookies(req.headers.cookie);
