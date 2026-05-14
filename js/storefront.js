@@ -773,9 +773,37 @@
     }
   };
 
+  function bindNewsletterForm() {
+    var form = document.getElementById('newsletterForm');
+    var status = document.getElementById('newsletterStatus');
+    var input = document.getElementById('newsletterEmail');
+    if (!form || !input || !window.SuveraAPI || !window.SuveraAPI.newsletter) return;
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      var email = (input.value || '').trim();
+      if (!email || !email.includes('@')) {
+        if (status) status.textContent = 'Gecerli bir e-posta girin.';
+        return;
+      }
+      var kvkk = document.getElementById('kvkk');
+      if (kvkk && !kvkk.checked) {
+        if (status) status.textContent = 'Devam etmek icin KVKK onayini isaretleyin.';
+        return;
+      }
+      if (status) status.textContent = 'Gonderiliyor...';
+      window.SuveraAPI.newsletter.subscribe(email).then(function () {
+        if (status) status.textContent = 'Bultene kayit alindi. Tesekkurler!';
+        form.reset();
+      }).catch(function (err) {
+        if (status) status.textContent = (err && err.message) || 'Kayit gerceklestirilemedi.';
+      });
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     renderHeroSlider();
     renderCampaignAnnouncement();
+    bindNewsletterForm();
     renderCategories(document.getElementById('homeCategoryGrid'), 6);
     var homeProductsPromise = renderProducts(document.getElementById('homeProductsGrid'), 8);
     renderCollectionPage();

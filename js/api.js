@@ -206,6 +206,13 @@
       me: () => customerRequest('/customer-auth/me?' + new URLSearchParams(withOrganizationPayload({})).toString()),
       requestReset: (email) => request('/customer-auth/password-reset/request', { method: 'POST', body: JSON.stringify(withOrganizationPayload({ email })) }),
       confirmReset: (token, password) => request('/customer-auth/password-reset/confirm', { method: 'POST', body: JSON.stringify(withOrganizationPayload({ token, password })) }),
+      verifyEmail: (token) => request('/customer-auth/verify-email', { method: 'POST', body: JSON.stringify(withOrganizationPayload({ token })) }),
+      resendVerification: (email) => request('/customer-auth/resend-verification', { method: 'POST', body: JSON.stringify(withOrganizationPayload({ email })) }),
+      requestEmailChange: (newEmail, password) => request('/customer-auth/email-change/request', { method: 'POST', body: JSON.stringify(withOrganizationPayload({ new_email: newEmail, password })) }),
+      confirmEmailChange: (token) => request('/customer-auth/email-change/confirm', { method: 'POST', body: JSON.stringify(withOrganizationPayload({ token })) }),
+    },
+    newsletter: {
+      subscribe: (email) => request('/customer-auth/newsletter/subscribe', { method: 'POST', body: JSON.stringify(withOrganizationPayload({ email })) }),
     },
     slider: {
       list: () => request(withOrganizationSlug('/slider')),

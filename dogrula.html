@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>E-posta Dogrulama | Suvera</title>
+  <meta name="description" content="Suvera hesabinizin e-posta dogrulamasini tamamlayin." />
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="canonical" href="https://suvera.com.tr/dogrula" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="site.webmanifest" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="shared.css" />
+  <link rel="stylesheet" href="css/site-pages.css" />
+</head>
+<body class="site-page-body">
+  <div class="announce">E-posta dogrulama</div>
+  <nav id="mainNav">
+    <a class="nav-logo" href="anasayfa">Suvera</a>
+    <ul class="nav-menu-wrap">
+      <li><a href="anasayfa">Ana Sayfa</a></li>
+      <li><a href="giris">Giris</a></li>
+      <li><a href="hesabim">Hesabim</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="sepet" class="nav-icon-btn" style="position:relative">SEPETIM <span class="cart-dot">0</span></a>
+      <button class="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+
+  <main class="info-page-shell">
+    <div class="page-breadcrumb"><a href="anasayfa">Ana Sayfa</a><span>›</span><span>E-posta Dogrulama</span></div>
+    <section class="page-hero">
+      <div class="page-hero-card">
+        <div class="hero-kicker">Hesap</div>
+        <h1 class="hero-title" id="verifyTitle">E-postaniz dogrulaniyor...</h1>
+        <p class="page-copy" id="verifyMessage">Lutfen bekleyin, baglantiyi dogruluyoruz.</p>
+      </div>
+      <aside class="page-side-card">
+        <div class="page-checklist">
+          <div class="page-check"><strong>Tek kullanim</strong><span>Linkler tek seferlik ve 24 saat gecerlidir.</span></div>
+          <div class="page-check"><strong>Guvenli</strong><span>Tokenlar yalnizca hash olarak saklanir.</span></div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="page-grid single">
+      <article class="page-card">
+        <div class="page-section-head">
+          <h2 class="page-section-title">Sonuc</h2>
+          <span class="page-section-subtitle" id="verifyBadge">Bekleniyor</span>
+        </div>
+        <p class="page-form-note" id="verifyNote">Baglanti dogrulamasi devam ediyor.</p>
+        <div class="page-form-actions" style="margin-top:16px;">
+          <a class="page-btn" href="hesabim">Hesabima git</a>
+          <a class="page-btn-secondary" href="giris">Giris</a>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <hr class="footer-divider" />
+    <div class="footer-bottom"><span>© 2026 Suvera.</span></div>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const params = new URLSearchParams(location.search);
+      const token = (params.get('token') || '').trim();
+      const purpose = (params.get('purpose') || '').trim();
+      const title = document.getElementById('verifyTitle');
+      const message = document.getElementById('verifyMessage');
+      const note = document.getElementById('verifyNote');
+      const badge = document.getElementById('verifyBadge');
+
+      function setState(kind, headline, body) {
+        title.textContent = headline;
+        message.textContent = body;
+        note.textContent = body;
+        badge.textContent = kind === 'ok' ? 'Tamamlandi' : (kind === 'err' ? 'Hata' : 'Bekleniyor');
+      }
+
+      if (!token) {
+        setState('err', 'Gecersiz baglanti', 'Dogrulama linki eksik veya hatali.');
+        return;
+      }
+
+      (async function () {
+        try {
+          if (purpose === 'email_change') {
+            await window.SuveraAPI.customerAuth.confirmEmailChange(token);
+            setState('ok', 'E-posta degisikligi onaylandi', 'Yeni e-posta adresinizi kullanmaya basliyabilirsiniz.');
+          } else {
+            await window.SuveraAPI.customerAuth.verifyEmail(token);
+            setState('ok', 'E-postaniz dogrulandi', 'Tesekkurler. Artik hesabinizdaki tum islemleri yapabilirsiniz.');
+          }
+        } catch (err) {
+          setState('err', 'Dogrulama basarisiz', (err && err.message) || 'Link gecersiz veya suresi dolmus olabilir.');
+        }
+      })();
+    });
+  </script>
+  <script src="js/site-pages.js"></script>
+  <script src="shared.js"></script>
+</body>
+</html>

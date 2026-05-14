@@ -1173,14 +1173,15 @@
   <p>✦ Bültenimize Katıl</p>
   <h2>Yenilikleri <em>ilk sen</em> öğren</h2>
   <span>Kampanya ve yeni koleksiyonlardan haberdar olmak için e-bültenimize abone ol.</span>
-  <div class="nl-form">
-    <input type="email" placeholder="E-posta adresinizi giriniz"/>
-    <button>Kayıt Ol</button>
-  </div>
+  <form class="nl-form" id="newsletterForm" novalidate>
+    <input id="newsletterEmail" type="email" placeholder="E-posta adresinizi giriniz" required/>
+    <button type="submit">Kayıt Ol</button>
+  </form>
   <div class="kvkk-check">
     <input type="checkbox" id="kvkk"/>
     <label for="kvkk"><a href="kvkk">KVKK Sözleşmesi</a>'ni okudum, kabul ediyorum.</label>
   </div>
+  <div id="newsletterStatus" style="margin-top:10px;font-size:13px;color:rgba(255,255,255,.7);"></div>
 </div>
 
 <!-- FOOTER -->
