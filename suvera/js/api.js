@@ -5,6 +5,7 @@
     (['localhost', '127.0.0.1'].includes(location.hostname) ? 'http://localhost:3000/api' : '/api');
   const ORGANIZATION_SLUG = String(window.SUVERA_ORGANIZATION_SLUG || 'suvera').trim();
   const PUBLIC_ACCESS_TOKEN = String(window.SUVERA_PUBLIC_ACCESS_TOKEN || '').trim();
+  const CUSTOMER_SESSION_KEY = 'suveraCustomerSession';
   // FIX: Dedupe short-lived storefront GETs that are triggered by multiple renderers.
   const GET_CACHE_TTL_MS = 15000;
   const getCache = new Map();
@@ -85,8 +86,28 @@
     return resultPromise;
   }
 
+  function hasCustomerSession() {
+    try {
+      return localStorage.getItem(CUSTOMER_SESSION_KEY) === 'active';
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function rememberCustomerSession() {
+    try {
+      localStorage.setItem(CUSTOMER_SESSION_KEY, 'active');
+    } catch (_) {}
+  }
+
+  function forgetCustomerSession() {
+    try {
+      localStorage.removeItem(CUSTOMER_SESSION_KEY);
+    } catch (_) {}
+  }
+
   function customerToken() {
-    return 'httpOnly-cookie';
+    return hasCustomerSession() ? 'httpOnly-cookie' : '';
   }
 
   function customerRequest(path, options = {}) {
@@ -106,6 +127,7 @@
   }
 
   function saveCustomerSession(result) {
+    if (result && result.account) rememberCustomerSession();
     if (result && result.account && window.Suvera && window.Suvera.saveProfile) {
       window.Suvera.saveProfile(result.account);
     }
@@ -113,9 +135,22 @@
   }
 
   function logoutCustomer() {
+    forgetCustomerSession();
     return request('/customer-auth/logout', {
       method: 'POST',
     }).catch(() => null);
+  }
+
+  async function currentCustomer() {
+    try {
+      return saveCustomerSession(await customerRequest(
+        '/customer-auth/me?' + new URLSearchParams(withOrganizationPayload({})).toString(),
+        { cache: 'no-store' }
+      ));
+    } catch (err) {
+      forgetCustomerSession();
+      throw err;
+    }
   }
 
   function assetUrl(url) {
@@ -164,6 +199,7 @@
     login,
     logout,
     customerToken,
+    hasCustomerSession,
     logoutCustomer,
     request,
     clearGetCache,
@@ -203,16 +239,9 @@
     customerAuth: {
       register: (payload) => request('/customer-auth/register', { method: 'POST', body: JSON.stringify(withOrganizationPayload(payload)) }).then(saveCustomerSession),
       login: (payload) => request('/customer-auth/login', { method: 'POST', body: JSON.stringify(withOrganizationPayload(payload)) }).then(saveCustomerSession),
-      me: () => customerRequest('/customer-auth/me?' + new URLSearchParams(withOrganizationPayload({})).toString()),
+      me: currentCustomer,
       requestReset: (email) => request('/customer-auth/password-reset/request', { method: 'POST', body: JSON.stringify(withOrganizationPayload({ email })) }),
       confirmReset: (token, password) => request('/customer-auth/password-reset/confirm', { method: 'POST', body: JSON.stringify(withOrganizationPayload({ token, password })) }),
-      verifyEmail: (token) => request('/customer-auth/verify-email', { method: 'POST', body: JSON.stringify(withOrganizationPayload({ token })) }),
-      resendVerification: (email) => request('/customer-auth/resend-verification', { method: 'POST', body: JSON.stringify(withOrganizationPayload({ email })) }),
-      requestEmailChange: (newEmail, password) => request('/customer-auth/email-change/request', { method: 'POST', body: JSON.stringify(withOrganizationPayload({ new_email: newEmail, password })) }),
-      confirmEmailChange: (token) => request('/customer-auth/email-change/confirm', { method: 'POST', body: JSON.stringify(withOrganizationPayload({ token })) }),
-    },
-    newsletter: {
-      subscribe: (email) => request('/customer-auth/newsletter/subscribe', { method: 'POST', body: JSON.stringify(withOrganizationPayload({ email })) }),
     },
     slider: {
       list: () => request(withOrganizationSlug('/slider')),
