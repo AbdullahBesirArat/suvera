@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8"/>
@@ -17,7 +17,7 @@
   <meta name="theme-color" content="#2a4827" />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="manifest" href="site.webmanifest" />
-  <title>Elbise – Suvera</title>
+  <title>Elbise – SUVERA</title>
   <link rel="stylesheet" href="shared.css"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet"/>
@@ -62,6 +62,7 @@
     .editorial-col h3{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:#4d7443;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--light);}
     .editorial-link{display:flex;justify-content:space-between;gap:10px;padding:10px 0;color:var(--mid);text-decoration:none;font-size:14px;transition:color .2s,transform .2s;}
     .editorial-link:hover{color:var(--black);transform:translateX(2px);}
+    .editorial-link.act{color:var(--black);font-weight:600;}
     .editorial-link span{color:#aaa;font-size:12px;}
     .editorial-feature{padding:20px;display:flex;flex-direction:column;justify-content:space-between;background:linear-gradient(180deg,#f8f4ed 0%,#f2ede6 100%);}
     .editorial-visual{min-height:180px;border-radius:6px;background:linear-gradient(140deg,#dfd6c8,#cfc3b4);display:flex;align-items:center;justify-content:center;font-size:66px;margin-bottom:18px;background-size:cover;background-position:center;}
@@ -101,6 +102,10 @@
     .size-btn:hover,.size-btn.act{background:var(--black);color:#fff;border-color:var(--black);}
     .filter-reset{width:100%;background:none;border:1px solid var(--light);padding:10px;font-family:var(--sans);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;color:var(--mid);transition:all .2s;margin-top:8px;}
     .filter-reset:hover{border-color:var(--accent);color:var(--accent);}
+    .sub-cat-link{display:flex;align-items:center;gap:8px;padding:5px 2px;font-size:13px;color:var(--mid);text-decoration:none;border-radius:3px;transition:color .15s;}
+    .sub-cat-link:hover{color:var(--black);}
+    .sub-cat-link.act{color:var(--black);font-weight:600;}
+    .sub-cat-arrow{color:#ccc;font-size:11px;flex-shrink:0;}
 
     /* CONTENT AREA */
     .content{padding:8px 40px 28px;}
@@ -194,7 +199,7 @@
 <div class="announce" id="campaignAnnouncement">✦ Suvera seçkileri yükleniyor ✦</div>
 
 <nav id="mainNav">
-  <a class="nav-logo" href="anasayfa">Suvera</a>
+  <a class="nav-logo" href="anasayfa">SUVERA</a>
   <ul class="nav-menu-wrap">
     <li><a href="urunler">Yeni <span class="nav-chevron">▾</span></a>
       <div class="simple-drop"><a href="urunler">Yeni Gelenler</a><a href="urunler">Çok Satanlar</a><a href="urunler">Editörün Seçimleri</a></div>
@@ -238,22 +243,22 @@
     <div class="editorial-kicker" id="collectionKicker">Suvera Seçkisi</div>
     <div class="editorial-grid">
       <div class="editorial-col">
-        <h3>Kategoriler</h3>
+        <h3 id="editorialCategoryHeading">Kategoriler</h3>
         <div id="editorialCategoryLinks">
-          <a class="editorial-link" href="urunler">Seçki hazırlanıyor <span>Suvera</span></a>
+          <a class="editorial-link" href="urunler">Seçki hazırlanıyor <span>SUVERA</span></a>
         </div>
       </div>
       <div class="editorial-col">
         <h3>Koleksiyonlar</h3>
         <div id="editorialCollectionLinks">
-          <a class="editorial-link" href="urunler">Koleksiyonlar yükleniyor <span>Suvera</span></a>
+          <a class="editorial-link" href="urunler">Koleksiyonlar yükleniyor <span>SUVERA</span></a>
         </div>
       </div>
       <div class="editorial-feature">
         <div class="editorial-visual" id="editorialFeatureVisual">🥻</div>
         <div>
           <small id="editorialFeatureTag">Öne Çıkan</small>
-          <h2 id="editorialFeatureTitle">Suvera<br/>Yeni<br/>Seçki</h2>
+          <h2 id="editorialFeatureTitle">SUVERA<br/>Yeni<br/>Seçki</h2>
           <p id="editorialFeatureDescription">Panelya panelinden yayına alınan ürünler burada öne çıkar.</p>
           <a class="editorial-cta" href="urunler" id="editorialFeatureLink">Keşfet →</a>
         </div>
@@ -264,7 +269,7 @@
     <div class="editorial-visual" id="collectionFeatureVisual">🧕</div>
     <div>
       <small id="collectionFeatureTag">Yaz Koleksiyonu</small>
-      <h2 id="collectionFeatureTitle">Suvera<br/>seçkisine<br/>yakından bak</h2>
+      <h2 id="collectionFeatureTitle">SUVERA<br/>seçkisine<br/>yakından bak</h2>
       <p id="collectionFeatureDescription">Yayındaki ürünler Panelya panelinden gelir; kategori ve stok bilgileri canlı veriye göre güncellenir.</p>
       <a class="editorial-cta" href="#prodsGrid">Ürünlere in →</a>
     </div>
@@ -275,6 +280,13 @@
 
   <!-- SIDEBAR -->
   <aside class="sidebar">
+    <div class="filter-section">
+      <h4 id="collectionCategoryHeading">Kategori</h4>
+      <div class="filter-opts" id="collectionCategoryFilters">
+        <label class="filter-check"><input type="radio" name="collectionCategory" value="" checked/> Tüm Ürünler</label>
+      </div>
+    </div>
+
     <div class="filter-section">
       <h4>Renk</h4>
       <div class="color-filter-opts" id="collectionColorFilters">
@@ -294,24 +306,6 @@
       <div class="price-range">
         <input type="range" min="0" max="5000" value="5000" id="priceRange" oninput="document.getElementById('priceVal').textContent=this.value+' TL'"/>
         <div class="price-vals"><span>0 TL</span><span id="priceVal">5.000 TL</span></div>
-      </div>
-    </div>
-
-    <div class="filter-section">
-      <h4>Kategori</h4>
-      <div class="filter-opts" id="collectionCategoryFilters">
-        <label class="filter-check"><input type="radio" name="collectionCategory" value="" checked/> Tüm Ürünler</label>
-      </div>
-    </div>
-
-    <div class="filter-section">
-      <h4>Koleksiyon</h4>
-      <div class="filter-opts">
-        <label class="filter-check"><input type="checkbox" checked/> Yeni Gelenler</label>
-        <label class="filter-check"><input type="checkbox"/> Günlük Seçki</label>
-        <label class="filter-check"><input type="checkbox"/> Zamansız Parçalar</label>
-        <label class="filter-check"><input type="checkbox"/> Özel Seri</label>
-        <label class="filter-check"><input type="checkbox"/> Outlet</label>
       </div>
     </div>
 
@@ -529,7 +523,7 @@
   <hr class="footer-divider"/>
   <div class="footer-grid">
     <div class="footer-brand">
-      <a class="nav-logo" href="anasayfa">Suvera</a>
+      <a class="nav-logo" href="anasayfa">SUVERA</a>
       <p>Modern tesettür giyimde zarafet ve sadelik.</p>
       <div class="socials">
         <a href="iletisim#iletisim-kanallari" class="social-btn">INSTAGRAM</a> <span style="color:rgba(255,255,255,.15)">·</span>
@@ -539,7 +533,7 @@
     </div>
     <div class="footer-col"><h5>Kategoriler</h5><ul><li><a href="urunler">Elbise</a></li><li><a href="urunler">Abaya</a></li><li><a href="urunler">Takım</a></li><li><a href="urunler">Eşarp</a></li><li><a href="urunler">Dış Giyim</a></li></ul></div>
     <div class="footer-col"><h5>Bilgiler</h5><ul><li><a href="kvkk">KVKK</a></li><li><a href="kargo">Kargo</a></li><li><a href="iade">İade & Değişim</a></li><li><a href="uyelik-sozlesmesi">Üyelik Sözleşmesi</a></li></ul></div>
-    <div class="footer-col"><h5>Suvera</h5><ul><li><a href="hakkimizda">Hakkımızda</a></li><li><a href="blog">Blog</a></li><li><a href="iletisim#iletisim-kanallari">Mağazalar</a></li></ul></div>
+    <div class="footer-col"><h5>SUVERA</h5><ul><li><a href="hakkimizda">Hakkımızda</a></li><li><a href="blog">Blog</a></li><li><a href="iletisim#iletisim-kanallari">Mağazalar</a></li></ul></div>
     <div class="footer-col"><h5>İletişim</h5><ul><li><a href="tel:+908500007872">0850 000 78 72</a></li><li><a href="iletisim#iletisim-kanallari">WhatsApp</a></li><li><a href="mailto:destek@suvera.com">destek@suvera.com</a></li></ul></div>
   </div>
   <div class="footer-bottom"><span>© 2025 Suvera. Tüm hakları saklıdır.</span><span>SSL Güvenli Alışveriş 🔒</span></div>

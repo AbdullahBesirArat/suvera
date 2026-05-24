@@ -90,6 +90,26 @@
     return '';
   }
 
+  function stockLabel(product) {
+    const stock = Number(product.stock ?? product.stock_quantity ?? product.quantity ?? 0);
+    if (Number.isFinite(stock) && stock > 0 && stock <= 3) return 'Son ' + stock + ' urun';
+    if (product.in_stock === false || product.is_active === false) return 'Stokta yok';
+    return 'Stokta';
+  }
+
+  function skeletonCards(count) {
+    return '<div class="product-skeleton-grid" aria-hidden="true">' + Array.from({ length: count || 6 }).map(function () {
+      return '<div class="product-skeleton-card">' +
+        '<div class="product-skeleton-media skeleton"></div>' +
+        '<div class="product-skeleton-body">' +
+        '<div class="product-skeleton-line skeleton"></div>' +
+        '<div class="product-skeleton-line short skeleton"></div>' +
+        '<div class="product-skeleton-line skeleton"></div>' +
+        '</div>' +
+        '</div>';
+    }).join('') + '</div>';
+  }
+
   function productCard(product) {
     const price = Number(product.sale_price || product.price || 0);
     const oldPrice = product.sale_price ? Number(product.price || 0) : null;
@@ -124,6 +144,7 @@
             <span class="p-new">${money(price)}</span>
             ${oldPrice ? '<span class="p-old">' + money(oldPrice) + '</span>' : ''}
           </div>
+          <span class="prod-stock-chip">${escapeHtml(stockLabel(product))}</span>
         </div>
       </div>`;
   }
@@ -395,7 +416,7 @@
   async function renderProducts(target, limit) {
     if (!window.SuveraAPI || !target) return;
 
-    target.innerHTML = '<div class="empty-state">Suvera ürünleri yükleniyor.</div>';
+    target.innerHTML = skeletonCards(limit || 6);
 
     try {
       const products = await window.SuveraAPI.products.list('?status=active&limit=' + limit);
@@ -422,20 +443,27 @@
     }
   }
 
-  async function renderFeaturedStrip(target, limit, sourceProducts) {
+  // filterFeatured: true → show only products with featured_in_category=true (if any; else all)
+  async function renderFeaturedStrip(target, limit, sourceProducts, filterFeatured) {
     if (!window.SuveraAPI || !target) return;
 
-    target.innerHTML = '<div class="empty-state">Öne çıkan ürünler yükleniyor.</div>';
+    target.innerHTML = skeletonCards(limit || 5);
 
     try {
       // FIX: Reuse the product list already loaded on the page instead of refetching.
       const products = Array.isArray(sourceProducts)
         ? sourceProducts
         : await window.SuveraAPI.products.list('?status=active&limit=' + limit);
-      const items = (products || []).slice(0, limit);
+
+      var pool = products || [];
+      if (filterFeatured) {
+        var featured = pool.filter(function (p) { return p.featured_in_category; });
+        if (featured.length) pool = featured;
+      }
+      var items = pool.slice(0, limit);
 
       if (!items.length) {
-        target.innerHTML = '<div class="empty-state">One cikan urunler hazirlaniyor.</div>';
+        target.innerHTML = '<div class="empty-state">Öne çıkan ürünler hazırlanıyor.</div>';
         return;
       }
 
@@ -515,6 +543,7 @@
     if (sortSelect) sortSelect.value = selectedSort;
     if (priceRange) priceRange.value = String(maxPrice);
     if (priceVal) priceVal.textContent = maxPrice + ' TL';
+    grid.innerHTML = skeletonCards(8);
 
     try {
       var categories = await window.SuveraAPI.categories.list();
@@ -537,21 +566,6 @@
           return String(collection.slug || '').toLocaleLowerCase('tr-TR') === selectedCollectionKey.toLocaleLowerCase('tr-TR')
             || String(collection.id) === selectedCollectionKey;
         }) || null;
-      }
-
-      if (categoryWrap) {
-        categoryWrap.innerHTML = '<label class="filter-check"><input type="radio" name="collectionCategory" value="" ' + (activeCategory ? '' : 'checked') + '/> Tüm Ürünler</label>' +
-          (categories || []).map(function (category) {
-            var checked = String(category.id) === String(selectedCategoryId) ? 'checked' : '';
-            return '<label class="filter-check"><input type="radio" name="collectionCategory" value="' + escapeHtml(category.id) + '" ' + checked + '/> ' + escapeHtml(category.name) + '</label>';
-          }).join('');
-      }
-
-      if (editorLinks) {
-        editorLinks.innerHTML = (categories || []).slice(0, 5).map(function (category) {
-          return '<a class="editorial-link" href="urunler?category_id=' + encodeURIComponent(category.id) + '">' +
-            escapeHtml(category.name) + ' <span>' + escapeHtml(category.slug || 'Suvera') + '</span></a>';
-        }).join('');
       }
 
       if (collectionLinks) {
@@ -578,6 +592,77 @@
       var collectionProducts = activeCollection
         ? (products || []).filter(function (product) { return productBelongsToCollection(product, activeCollection); })
         : (products || []);
+
+      // ── Koleksiyon alt-kategori haritası ─────────────────────────────────
+      // Computed once, used in both the sidebar and the editorial card below.
+      var colParam = activeCollection ? 'collection=' + encodeURIComponent(selectedCollectionKey) : '';
+      var subCats = [];
+      if (activeCollection) {
+        var catCountMap = {};
+        collectionProducts.forEach(function (product) {
+          var key = String(product.category_id || '');
+          if (!key) return;
+          if (!catCountMap[key]) {
+            var cat = categoryMap.get(key);
+            catCountMap[key] = { id: product.category_id, name: cat ? cat.name : key, count: 0 };
+          }
+          catCountMap[key].count++;
+        });
+        subCats = Object.values(catCountMap).sort(function (a, b) { return b.count - a.count; });
+      }
+
+      // ── Editorial panel kategori sütunu ──────────────────────────────────
+      var editorialCategoryHeading = document.getElementById('editorialCategoryHeading');
+      if (editorLinks) {
+        if (activeCollection) {
+          // Koleksiyon aktifken: o koleksiyonun kategori dağılımını göster
+          if (editorialCategoryHeading) editorialCategoryHeading.textContent = activeCollection.title || 'Koleksiyon';
+          editorLinks.innerHTML = subCats.length
+            ? subCats.map(function (cat) {
+                var href = 'urunler?' + colParam + '&category_id=' + encodeURIComponent(cat.id);
+                return '<a class="editorial-link' + (String(cat.id) === String(selectedCategoryId) ? ' act' : '') + '" href="' + escapeHtml(href) + '">' +
+                  escapeHtml(cat.name) + ' <span>' + cat.count + ' ürün</span></a>';
+              }).join('')
+            : '<a class="editorial-link" href="urunler?' + escapeHtml(colParam) + '">Ürünler yükleniyor <span>' + escapeHtml(activeCollection.slug || '') + '</span></a>';
+        } else {
+          // Koleksiyon yok: genel kategori linkleri
+          if (editorialCategoryHeading) editorialCategoryHeading.textContent = 'Kategoriler';
+          editorLinks.innerHTML = (categories || []).slice(0, 5).map(function (category) {
+            return '<a class="editorial-link" href="urunler?category_id=' + encodeURIComponent(category.id) + '">' +
+              escapeHtml(category.name) + ' <span>' + escapeHtml(category.slug || 'Suvera') + '</span></a>';
+          }).join('');
+        }
+      }
+
+      // ── Sidebar kategori listesi ──────────────────────────────────────────
+      var categoryHeading = document.getElementById('collectionCategoryHeading');
+      if (categoryWrap) {
+        if (activeCollection) {
+          if (categoryHeading) categoryHeading.textContent = activeCollection.title || 'Koleksiyon';
+
+          var totalAllActive = !selectedCategoryId;
+          categoryWrap.innerHTML =
+            '<a class="sub-cat-link' + (totalAllActive ? ' act' : '') + '" href="urunler?' + escapeHtml(colParam) + '">' +
+              'Tüm Ürünler <span class="filter-count">' + collectionProducts.length + '</span></a>' +
+            subCats.map(function (cat) {
+              var isActive = String(cat.id) === String(selectedCategoryId);
+              var href = 'urunler?' + colParam + '&category_id=' + encodeURIComponent(cat.id);
+              return '<a class="sub-cat-link' + (isActive ? ' act' : '') + '" href="' + escapeHtml(href) + '">' +
+                '<span class="sub-cat-arrow">└</span>' +
+                escapeHtml(cat.name) + ' <span class="filter-count">' + cat.count + '</span></a>';
+            }).join('');
+          // link-based navigation — event listener gerekmez
+        } else {
+          // Koleksiyon seçili değil: normal kategori radio listesi
+          if (categoryHeading) categoryHeading.textContent = 'Kategori';
+
+          categoryWrap.innerHTML = '<label class="filter-check"><input type="radio" name="collectionCategory" value="" ' + (activeCategory ? '' : 'checked') + '/> Tüm Ürünler</label>' +
+            (categories || []).map(function (category) {
+              var checked = String(category.id) === String(selectedCategoryId) ? 'checked' : '';
+              return '<label class="filter-check"><input type="radio" name="collectionCategory" value="' + escapeHtml(category.id) + '" ' + checked + '/> ' + escapeHtml(category.name) + '</label>';
+            }).join('');
+        }
+      }
 
       var availableColors = [];
       var availableSizes = [];
@@ -667,12 +752,13 @@
         grid.innerHTML = filtered.map(productCard).join('');
       }
 
-      renderFeaturedStrip(document.getElementById('featuredProductsStrip'), 5, collectionProducts);
+      // Pass filterFeatured=true when a category is selected so only featured_in_category products show
+      renderFeaturedStrip(document.getElementById('featuredProductsStrip'), 5, collectionProducts, !!selectedCategoryId);
       if (window.Suvera && window.Suvera.refreshWishlistButtons) {
         window.Suvera.refreshWishlistButtons();
       }
 
-      if (categoryWrap) {
+      if (categoryWrap && !activeCollection) {
         categoryWrap.querySelectorAll('input[name="collectionCategory"]').forEach(function (input) {
           input.addEventListener('change', function () {
             params.set('category_id', input.value);
