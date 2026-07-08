@@ -218,11 +218,11 @@
 
     if (pageCount) {
       const qty = cart.reduce((sum, item) => sum + Number(item.qty || 1), 0);
-      pageCount.textContent = `(${qty} ÃœrÃ¼n)`;
+      pageCount.textContent = `(${qty} Ürün)`;
     }
 
     if (!cart.length) {
-      container.innerHTML = '<p style="padding:40px 0;text-align:center;color:#aaa;font-size:20px">Sepetiniz boÅŸ.</p>';
+      container.innerHTML = '<p style="padding:40px 0;text-align:center;color:#aaa;font-size:20px">Sepetiniz boş.</p>';
     } else {
       container.innerHTML = cart.map((item, index) => {
         const qty = Number(item.qty || 1);
@@ -232,9 +232,9 @@
             <div class="cart-item-img">${itemVisual(item)}</div>
             <div class="cart-item-body">
               <p class="cart-item-brand">Suvera</p>
-              <h3 class="cart-item-name">${escapeHtml(item.name || 'ÃœrÃ¼n')}</h3>
+              <h3 class="cart-item-name">${escapeHtml(item.name || 'Ürün')}</h3>
               <p class="cart-item-variant">${escapeHtml(item.variant || item.size || 'Standart')}</p>
-              <p class="cart-item-unit">Birim FiyatÄ±: ${money(price)}</p>
+              <p class="cart-item-unit">Birim Fiyatı: ${money(price)}</p>
               <div class="qty-row">
                 <button class="qty-btn" onclick="changeQty(${index},-1)">âˆ’</button>
                 <span class="qty-num">${qty}</span>
@@ -273,12 +273,12 @@
             <span class="order-qty-badge">${qty}</span>
           </div>
           <div class="order-item-info">
-            <h5>${escapeHtml(item.name || 'ÃœrÃ¼n')}</h5>
+            <h5>${escapeHtml(item.name || 'Ürün')}</h5>
             <p>${escapeHtml(item.variant || item.size || 'Standart')}</p>
           </div>
           <span class="order-item-price">${money(price * qty)}</span>
         </div>`;
-    }).join('') : '<p style="padding:20px 0;color:#888">Sepetiniz boÅŸ.</p>';
+    }).join('') : '<p style="padding:20px 0;color:#888">Sepetiniz boş.</p>';
 
     summary.querySelectorAll('.order-item').forEach((el) => el.remove());
     const coupon = summary.querySelector('.coupon-row');
@@ -299,11 +299,11 @@
 
     if (productTotal) productTotal.textContent = money(subtotal);
     if (shippingCost) {
-      shippingCost.textContent = checkoutShipping ? money(checkoutShipping) : 'Ãœcretsiz';
+      shippingCost.textContent = checkoutShipping ? money(checkoutShipping) : 'Ücretsiz';
       shippingCost.style.color = checkoutShipping ? 'var(--black)' : '#4a7c59';
     }
     if (grandTotal) grandTotal.textContent = money(total);
-    if (payAmountBtn) payAmountBtn.textContent = money(total) + ' Ã–DE';
+    if (payAmountBtn) payAmountBtn.textContent = money(total) + ' ÖDE';
   }
 
   window.changeQty = function (indexOrBtn, delta) {
@@ -327,7 +327,7 @@
   };
 
   window.clearCart = function () {
-    if (!confirm('Sepeti temizlemek istediÄŸinize emin misiniz?')) return;
+    if (!confirm('Sepeti temizlemek istediğinize emin misiniz?')) return;
     saveCart([]);
     renderCartPage();
   };

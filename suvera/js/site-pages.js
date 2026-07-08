@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
   'use strict';
 
   function money(value) {
@@ -53,7 +53,7 @@
 
   function blogArticleHtml(content) {
     const lines = String(content || '').split(/\n+/).map(function (line) { return line.trim(); }).filter(Boolean);
-    if (!lines.length) return '<p>Bu blog yazÄ±sÄ±nÄ±n detaylarÄ± hazÄ±rlanÄ±yor.</p>';
+    if (!lines.length) return '<p>Bu blog yazısının detayları hazırlanıyor.</p>';
 
     const html = [];
     let list = [];
@@ -94,7 +94,7 @@
 
   function trackingLink(url) {
     const href = safeHref(url, '');
-    return href ? ' â€¢ <a href="' + escapeHtml(href) + '">Takip Linki</a>' : '';
+    return href ? ' • <a href="' + escapeHtml(href) + '">Takip Linki</a>' : '';
   }
 
   function productMatches(product, query) {
@@ -214,12 +214,12 @@
   function orderStatusNote(order) {
     const status = String(order && order.status || '').toLowerCase();
     if (isIbanOrder(order)) {
-      return 'IBAN / havale sipariÅŸiniz alÄ±ndÄ±. Ã–deme aÃ§Ä±klamasÄ±na sipariÅŸ kodunu ekleyin; Ã¶deme onaylanana kadar durum Panelyaâ€™da Ã¶deme bekliyor olarak kalÄ±r.';
+      return 'IBAN / havale siparişiniz alındı. Ödeme açıklamasına sipariş kodunu ekleyin; ödeme onaylanana kadar durum Panelya’da ödeme bekliyor olarak kalır.';
     }
     if (status === 'payment_failed') {
-      return 'Kart Ã¶demeniz tamamlanamadÄ±. SipariÅŸi yeniden deneyebilir veya destek ekibimizle iletiÅŸime geÃ§ebilirsiniz.';
+      return 'Kart ödemeniz tamamlanamadı. Siparişi yeniden deneyebilir veya destek ekibimizle iletişime geçebilirsiniz.';
     }
-    return 'SipariÅŸ durumu Panelya backend verisinden okunuyor. Kargo numarasÄ± oluÅŸtuÄŸunda bu alana otomatik yansÄ±r.';
+    return 'Sipariş durumu Panelya backend verisinden okunuyor. Kargo numarası oluştuğunda bu alana otomatik yansır.';
   }
 
   function orderEmail(order) {
@@ -387,7 +387,7 @@
     if (paymentState) {
       noteNode.textContent = paymentState.note;
     } else if (isIbanOrder(effectiveOrder)) {
-      noteNode.innerHTML = 'SipariÅŸiniz oluÅŸturuldu. IBAN / havale Ã¶demesi onaylanana kadar durum <strong>Ã¶deme bekleniyor</strong> olarak kalÄ±r.';
+      noteNode.innerHTML = 'Siparişiniz oluşturuldu. IBAN / havale ödemesi onaylanana kadar durum <strong>ödeme bekleniyor</strong> olarak kalır.';
     } else {
       noteNode.textContent = 'Odeme saglayicisi tarafinda islem tamamlandiginda durum bu sayfadan ve hesabim alanindan takip edilebilir.';
     }
@@ -398,7 +398,7 @@
       (isIbanOrder(effectiveOrder) ? ibanInfoHtml(effectiveOrder.orderCode || effectiveOrder.id, effectiveOrder) : '') +
       ((effectiveOrder.tracking_number || effectiveOrder.tracking_url)
         ? '<div class="page-info-banner" style="margin-top:16px;">Kargo: <strong>' + escapeHtml(effectiveOrder.shipping_company || 'Hazirlaniyor') + '</strong>' +
-          (effectiveOrder.tracking_number ? ' â€¢ Takip No: <strong>' + escapeHtml(effectiveOrder.tracking_number) + '</strong>' : '') +
+          (effectiveOrder.tracking_number ? ' • Takip No: <strong>' + escapeHtml(effectiveOrder.tracking_number) + '</strong>' : '') +
           trackingLink(effectiveOrder.tracking_url) +
           '</div>'
         : '');
@@ -566,7 +566,7 @@
         return '<article class="page-blog-card" onclick="location.href=\'' + escapeHtml(blogUrl(post)) + '\'"><div class="page-blog-media">' + media + '</div><span class="page-badge good">' +
           escapeHtml(publishedLabel(post.published_at)) + '</span><h3>' +
           escapeHtml(post.title) + '</h3><p>' + escapeHtml(post.excerpt || 'Suvera blog yazisi') +
-          '</p><div class="page-inline-actions"><a class="page-btn-secondary" href="' + escapeHtml(blogUrl(post)) + '">YazÄ±yÄ± oku</a></div></article>';
+          '</p><div class="page-inline-actions"><a class="page-btn-secondary" href="' + escapeHtml(blogUrl(post)) + '">Yazıyı oku</a></div></article>';
       }).join('');
     } catch (err) {
       grid.innerHTML = '<div class="page-empty">Blog yazilari yuklenemedi. Lutfen daha sonra tekrar deneyin.</div>';
@@ -587,7 +587,7 @@
     const aside = document.getElementById('blogDetailAside');
 
     if (!id || !window.SuveraAPI || !window.SuveraAPI.blog || !window.SuveraAPI.blog.get) {
-      if (body) body.innerHTML = '<div class="page-empty">Blog yazÄ±sÄ± bulunamadÄ±.</div>';
+      if (body) body.innerHTML = '<div class="page-empty">Blog yazısı bulunamadı.</div>';
       return;
     }
 
@@ -602,14 +602,14 @@
           return String(item.id) === String(id) || String(item.slug || '') === String(id);
         });
       }
-      if (!post) throw new Error('Blog yazÄ±sÄ± bulunamadÄ±');
+      if (!post) throw new Error('Blog yazısı bulunamadı');
       const image = post.image_url ? assetUrl(post.image_url) : '';
       const pageTitle = post.title || 'Suvera Blog';
-      const pageExcerpt = post.excerpt || 'Suvera stil, bakÄ±m ve seÃ§ki rehberi.';
+      const pageExcerpt = post.excerpt || 'Suvera stil, bakım ve seçki rehberi.';
       if (title) title.textContent = pageTitle;
       if (excerpt) excerpt.textContent = pageExcerpt;
-      if (meta) meta.textContent = publishedLabel(post.published_at) + ' â€¢ Suvera Ä°Ã§erik Merkezi';
-      if (breadcrumb) breadcrumb.innerHTML = '<a href="anasayfa">Ana Sayfa</a><span>â€º</span><a href="blog">Blog</a><span>â€º</span><span>' + escapeHtml(pageTitle) + '</span>';
+      if (meta) meta.textContent = publishedLabel(post.published_at) + ' • Suvera İçerik Merkezi';
+      if (breadcrumb) breadcrumb.innerHTML = '<a href="anasayfa">Ana Sayfa</a><span>›</span><a href="blog">Blog</a><span>›</span><span>' + escapeHtml(pageTitle) + '</span>';
       if (hero) {
         hero.innerHTML = image
           ? '<img src="' + escapeHtml(image) + '" alt="' + escapeHtml(pageTitle) + '" decoding="async" />'
@@ -617,8 +617,8 @@
       }
       if (body) body.innerHTML = blogArticleHtml(post.content);
       if (aside) {
-        aside.innerHTML = '<div class="page-check"><strong>Okuma Ã¶nerisi</strong><span>Bu yazÄ±daki bakÄ±m ve stil Ã¶nerilerini Ã¼rÃ¼n detayÄ±ndaki Ã¶lÃ§Ã¼ bilgileriyle birlikte deÄŸerlendirin.</span></div>' +
-          '<div class="page-check"><strong>Sonraki adÄ±m</strong><span>Ä°lgili Ã¼rÃ¼nleri inceleyerek kombini tamamlayabilirsiniz.</span></div>';
+        aside.innerHTML = '<div class="page-check"><strong>Okuma önerisi</strong><span>Bu yazıdaki bakım ve stil önerilerini ürün detayındaki ölçü bilgileriyle birlikte değerlendirin.</span></div>' +
+          '<div class="page-check"><strong>Sonraki adım</strong><span>İlgili ürünleri inceleyerek kombini tamamlayabilirsiniz.</span></div>';
       }
 
       document.title = pageTitle + ' | Suvera Blog';
@@ -633,7 +633,7 @@
         });
       }
     } catch (err) {
-      if (body) body.innerHTML = '<div class="page-empty">Blog yazÄ±sÄ± yÃ¼klenemedi. LÃ¼tfen blog listesine geri dÃ¶nÃ¼n.</div>';
+      if (body) body.innerHTML = '<div class="page-empty">Blog yazısı yüklenemedi. Lütfen blog listesine geri dönün.</div>';
     }
   }
 
@@ -810,7 +810,7 @@
         escapeHtml(match.customer && match.customer.name || '-') + '</strong></div><div class="page-kv"><small>Toplam</small><strong>' +
         money(match.total || 0) + '</strong></div></div><div class="page-info-banner" style="margin-top:16px;">' +
         (match.tracking_number
-          ? 'Kargo: <strong>' + escapeHtml(match.shipping_company || 'Hazirlaniyor') + '</strong> â€¢ Takip No: <strong>' + escapeHtml(match.tracking_number) + '</strong>' +
+          ? 'Kargo: <strong>' + escapeHtml(match.shipping_company || 'Hazirlaniyor') + '</strong> • Takip No: <strong>' + escapeHtml(match.tracking_number) + '</strong>' +
             trackingLink(match.tracking_url)
           : escapeHtml(orderStatusNote(match))) +
         '</div>' +
