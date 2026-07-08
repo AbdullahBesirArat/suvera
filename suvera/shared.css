@@ -710,7 +710,11 @@ footer .footer-bottom span {
   position: fixed;
   top: 0;
   right: 0;
-  bottom: 0;
+  /* Viewport'a sabit tam yukseklik: mobil dinamik toolbar icin dvh, fallback vh. */
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100vh;
+  max-height: 100dvh;
   z-index: 10031;
   width: min(420px, 100vw);
   background: #fff;
@@ -718,11 +722,13 @@ footer .footer-bottom span {
   transition: transform .32s cubic-bezier(.22,1,.36,1);
   display: flex;
   flex-direction: column;
+  overflow: hidden; /* sadece govde listesi scroll olur, panel tasmaz */
   box-shadow: -24px 0 55px rgba(28, 24, 20, .18);
   outline: none;
 }
 .cart-drawer.open { transform: translateX(0); }
 .cart-drawer-head {
+  flex: 0 0 auto;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -754,8 +760,12 @@ footer .footer-bottom span {
   line-height: 1;
 }
 .cart-drawer-body {
-  flex: 1;
+  flex: 1 1 auto;
+  /* min-height:0 kritik: flex cocugu icerik yuksekligine buyuyup footer'i asagi
+     itmesin; bunun yerine kendi icinde scroll etsin. */
+  min-height: 0;
   overflow-y: auto;
+  overscroll-behavior: contain; /* scroll arka sayfaya zincirlenmesin */
   padding: 8px 24px 18px;
 }
 .cart-drawer-item {
@@ -816,8 +826,7 @@ footer .footer-bottom span {
   font-size: 11px;
 }
 .cart-drawer-foot {
-  position: sticky;
-  bottom: 0;
+  flex: 0 0 auto; /* her zaman panelin gorunen alt kisminda kalir */
   display: grid;
   gap: 10px;
   padding: 18px 24px 24px;
