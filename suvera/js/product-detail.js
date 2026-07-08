@@ -557,8 +557,12 @@
       const rect = wrap.getBoundingClientRect();
       if (!rect.width || !rect.height) return;
 
-      const previewH = Math.min(rect.height, window.innerHeight - 32);
+      // Preview boyutu: header altinda kalacak ve viewport'a sigacak sekilde.
+      const HEADER_OFFSET = 120;   // header altinda sabit ust konum (top)
+      const RIGHT_MARGIN = 48;     // sag kenardan bosluk
+      const BOTTOM_MARGIN = 24;    // alt kenardan bosluk
       const previewW = Math.min(rect.width, 460);
+      const previewH = Math.min(rect.height, window.innerHeight - HEADER_OFFSET - BOTTOM_MARGIN);
       const lensW = previewW / ZOOM;
       const lensH = previewH / ZOOM;
       const bgW = rect.width * ZOOM;
@@ -571,15 +575,14 @@
       lens.style.transform = 'translate(0px, 0px)';
       if (!lens.parentNode) wrap.appendChild(lens);
 
-      // Preview'i gorselin sagina yerlestir; sigmiyorsa sola/viewport kenarina
-      // clamp et (yatay scroll olusmaz).
-      let left = rect.right + 16;
-      if (left + previewW > window.innerWidth - 12) left = rect.left - previewW - 16;
-      if (left < 12) left = window.innerWidth - previewW - 12;
+      // Preview VIEWPORT'a gore SABIT konumlanir (position:fixed): sag tarafta,
+      // header ALTINDA. Konum, gorselin scroll'a bagli rect.top'undan BAGIMSIZDIR;
+      // boylece sayfa asagida iken hover yapilsa da preview yukarida kalip kopuk
+      // gorunmez. Dar ekranda viewport icine clamp edilir (yatay scroll olusmaz,
+      // header'in ustune cikmaz).
+      let left = window.innerWidth - previewW - RIGHT_MARGIN;
       if (left < 12) left = 12;
-      let top = rect.top;
-      if (top + previewH > window.innerHeight - 12) top = window.innerHeight - previewH - 12;
-      if (top < 12) top = 12;
+      const top = HEADER_OFFSET;
 
       preview.style.width = previewW + 'px';
       preview.style.height = previewH + 'px';
