@@ -644,7 +644,8 @@
           variant_id: item.variant_id || item.variantId || null,
           quantity: item.qty || item.quantity || 1,
         })),
-        shipping_fee: shippingFee,
+        // Kargo ucreti ve toplam yalnizca sunucuda hesaplanir; istemciden
+        // shipping_fee gonderilmez (guvenlik).
         paymentMethod: selectedPaymentMethod === 'iban' ? 'iban' : 'card',
       };
 
@@ -687,12 +688,20 @@
         const orderCode = orderCodeFromResult(result);
         const provider = result && result.provider || snapshot.provider || 'provider';
         const paymentPageUrl = safePaymentUrl(result && result.paymentPageUrl);
+        // Sunucunun dondurdugu canonical total/shipping_fee'yi kullan; local
+        // hesap yalnizca gorsel on izlemeydi. API'nin dondurdugu deger tek
+        // gecerli kaynaktir.
+        const canonicalOrder = (result && result.order) || result || {};
+        const canonicalTotal = Number(canonicalOrder.total);
+        const canonicalShipping = Number(canonicalOrder.shipping_fee);
         const savedOrder = {
           ...snapshot,
           orderCode,
           provider,
           status: 'payment_pending',
           paymentPageUrl,
+          total: Number.isFinite(canonicalTotal) ? canonicalTotal : snapshot.total,
+          shipping_fee: Number.isFinite(canonicalShipping) ? canonicalShipping : snapshot.shipping_fee,
         };
         if (window.Suvera && window.Suvera.recordOrder) {
           window.Suvera.recordOrder(savedOrder);

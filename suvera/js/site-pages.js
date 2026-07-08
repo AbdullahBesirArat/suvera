@@ -484,22 +484,17 @@
       const orderCode = orderInput ? orderInput.value.trim() : '';
       if (message) {
         message.style.display = 'block';
-        message.textContent = 'Hesap bilgisi yukleniyor.';
+        message.textContent = 'Siparis bilgisi yukleniyor.';
       }
 
-      const account = await fetchAccount(email, orderCode);
-      if (!account) {
-        if (message) message.textContent = 'Bu e-posta ve siparis kodu ile hesap bulunamadi.';
+      const order = await fetchOrder(orderCode, email);
+      if (!order) {
+        if (message) message.textContent = 'Bu bilgilerle siparis bulunamadi.';
         return;
       }
 
-      if (state.saveProfile) state.saveProfile(account.customer);
-      if (state.recordOrder) {
-        account.orders.forEach(function (order) {
-          state.recordOrder(order);
-        });
-      }
-      if (message) message.textContent = 'Hesap bilgisi guncellendi.';
+      if (state.recordOrder) state.recordOrder(order);
+      if (message) message.textContent = 'Siparis bilgisi guncellendi. Tam hesap gecmisi icin uye girisi yapin.';
       await renderAccount();
     });
   }

@@ -231,8 +231,8 @@
     },
     customers: {
       list: (params = '') => request(`/customers${params}`),
-      account: (email, orderCode) => {
-        const params = new URLSearchParams(withOrganizationPayload({ email, orderCode })).toString();
+      account: () => {
+        const params = new URLSearchParams(withOrganizationPayload({})).toString();
         return customerRequest('/customers/account?' + params);
       },
     },
@@ -242,6 +242,13 @@
       me: currentCustomer,
       requestReset: (email) => request('/customer-auth/password-reset/request', { method: 'POST', body: JSON.stringify(withOrganizationPayload({ email })) }),
       confirmReset: (token, password) => request('/customer-auth/password-reset/confirm', { method: 'POST', body: JSON.stringify(withOrganizationPayload({ token, password })) }),
+      verifyEmail: (token) => request('/customer-auth/verify-email', { method: 'POST', body: JSON.stringify(withOrganizationPayload({ token })) }),
+      resendVerification: (email) => request('/customer-auth/resend-verification', { method: 'POST', body: JSON.stringify(withOrganizationPayload({ email })) }),
+      requestEmailChange: (newEmail, password) => request('/customer-auth/email-change/request', { method: 'POST', body: JSON.stringify(withOrganizationPayload({ new_email: newEmail, password })) }),
+      confirmEmailChange: (token) => request('/customer-auth/email-change/confirm', { method: 'POST', body: JSON.stringify(withOrganizationPayload({ token })) }),
+    },
+    newsletter: {
+      subscribe: (email) => request('/customer-auth/newsletter/subscribe', { method: 'POST', body: JSON.stringify(withOrganizationPayload({ email })) }),
     },
     slider: {
       list: () => request(withOrganizationSlug('/slider')),
@@ -273,9 +280,9 @@
       remove: (id) => request(`/blog/${id}`, { method: 'DELETE' }),
     },
     wishlist: {
-      list: (email) => request('/wishlist?' + new URLSearchParams(withOrganizationPayload({ email })).toString()),
-      add: (email, productId) => request('/wishlist', { method: 'POST', body: JSON.stringify(withOrganizationPayload({ email, productId })) }),
-      remove: (email, productId) => request('/wishlist/' + encodeURIComponent(productId) + '?' + new URLSearchParams(withOrganizationPayload({ email })).toString(), { method: 'DELETE' }),
+      list: () => customerRequest('/wishlist?' + new URLSearchParams(withOrganizationPayload({})).toString(), { cache: 'no-store' }),
+      add: (productId) => customerRequest('/wishlist', { method: 'POST', body: JSON.stringify(withOrganizationPayload({ productId })) }),
+      remove: (productId) => customerRequest('/wishlist/' + encodeURIComponent(productId) + '?' + new URLSearchParams(withOrganizationPayload({})).toString(), { method: 'DELETE' }),
     },
     upload: {
       images: (files) => {

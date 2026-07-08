@@ -135,16 +135,6 @@
     }
   }
 
-  function favoriteEmail() {
-    const profile = loadProfile();
-    const lastOrder = getLastOrder();
-    return String(
-      profile.email ||
-      (lastOrder && lastOrder.customer && lastOrder.customer.email) ||
-      ''
-    ).trim().toLowerCase();
-  }
-
   function mapRemoteFavorite(item) {
     const id = productKey(item);
     return normalizeFavorite({
@@ -158,34 +148,30 @@
   }
 
   async function syncFavoritesFromServer() {
-    const email = favoriteEmail();
-    if (!email || !window.SuveraAPI || !window.SuveraAPI.wishlist) {
+    const api = window.SuveraAPI;
+    if (!api || !api.wishlist || !api.hasCustomerSession || !api.hasCustomerSession()) {
       return loadFavorites();
     }
 
     try {
-      const remote = await window.SuveraAPI.wishlist.list(email);
-      const merged = loadFavorites();
-      (Array.isArray(remote) ? remote : []).forEach(function(item) {
-        const favorite = mapRemoteFavorite(item);
-        if (favoriteIndex(favorite, merged) < 0) merged.push(favorite);
-      });
-      saveFavorites(merged);
+      const remote = await api.wishlist.list();
+      const serverFavorites = (Array.isArray(remote) ? remote : []).map(mapRemoteFavorite);
+      saveFavorites(serverFavorites);
       refreshWishlistButtons();
-      return merged;
+      return serverFavorites;
     } catch (_) {
       return loadFavorites();
     }
   }
 
   function persistFavoriteChange(active, item) {
-    const email = favoriteEmail();
+    const api = window.SuveraAPI;
     const productId = productKey(item);
-    if (!email || !productId || !window.SuveraAPI || !window.SuveraAPI.wishlist) return;
+    if (!productId || !api || !api.wishlist || !api.hasCustomerSession || !api.hasCustomerSession()) return;
 
     const action = active
-      ? window.SuveraAPI.wishlist.add(email, productId)
-      : window.SuveraAPI.wishlist.remove(email, productId);
+      ? api.wishlist.add(productId)
+      : api.wishlist.remove(productId);
     action.catch(function() {});
   }
 
@@ -520,6 +506,12 @@
       e.preventDefault();
       const product = productFromButton(btn);
       if (!product) return;
+      const api = window.SuveraAPI;
+      if (!api || !api.hasCustomerSession || !api.hasCustomerSession()) {
+        showToast('Favorilere eklemek icin uye girisi yapin', 'dark');
+        setTimeout(function () { window.location.href = 'giris'; }, 450);
+        return;
+      }
       const result = toggleFavorite(product);
       const isActive = result.active;
       btn.textContent = isActive ? '❤️' : '🤍';

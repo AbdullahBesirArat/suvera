@@ -57,6 +57,10 @@
       "destination": "/sifre-sifirla.html"
     },
     {
+      "source": "/dogrula",
+      "destination": "/dogrula.html"
+    },
+    {
       "source": "/siparis-takip",
       "destination": "/siparis-takip.html"
     },

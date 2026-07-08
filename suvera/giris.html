@@ -156,6 +156,11 @@
 <div class="form-page">
   <div class="form-box">
     <h1 class="form-title">Üye Girişi</h1>
+    <div id="verifyBanner" style="display:none;background:#fff7e6;border:1px solid #f0c976;color:#7a4a00;padding:12px 14px;margin-bottom:18px;font-size:13px;">
+      <span id="verifyBannerMessage">E-postanizi dogrulayin.</span>
+      <a href="#" id="resendVerificationLink" style="margin-left:8px;color:var(--accent);text-decoration:underline;">Yeniden gonder</a>
+    </div>
+    <div id="loginToast" style="display:none;background:#eaf5e8;border:1px solid #9cc593;color:#234e1f;padding:12px 14px;margin-bottom:18px;font-size:13px;"></div>
 
     <!-- TABS -->
     <div class="tab-row">
@@ -270,12 +275,48 @@
     document.getElementById('loginToggle').style.display = 'none';
     switchTab('email');
   }
+  function showToast(message, kind) {
+    const toast = document.getElementById('loginToast');
+    if (!toast) return;
+    toast.textContent = message;
+    toast.style.display = 'block';
+    if (kind === 'error') {
+      toast.style.background = '#fdecea';
+      toast.style.borderColor = '#e2999b';
+      toast.style.color = '#7a2727';
+    } else {
+      toast.style.background = '#eaf5e8';
+      toast.style.borderColor = '#9cc593';
+      toast.style.color = '#234e1f';
+    }
+  }
+  function showVerifyBanner(email) {
+    const banner = document.getElementById('verifyBanner');
+    const link = document.getElementById('resendVerificationLink');
+    if (!banner || !link) return;
+    document.getElementById('verifyBannerMessage').textContent = 'E-postanizi dogrulayin. Postaniza gelen baglantiyi acin.';
+    banner.style.display = 'block';
+    link.onclick = async function (event) {
+      event.preventDefault();
+      try {
+        await window.SuveraAPI.customerAuth.resendVerification(email);
+        link.textContent = 'Gonderildi';
+      } catch (err) {
+        link.textContent = err.message || 'Hata';
+      }
+    };
+  }
   async function doLogin() {
     const e = document.getElementById('emailInput').value;
     const p = document.getElementById('pwInput').value;
     if(!e || !p) { alert('Lutfen e-posta ve sifrenizi giriniz.'); return; }
     try {
-      await window.SuveraAPI.customerAuth.login({ email: e, password: p });
+      const result = await window.SuveraAPI.customerAuth.login({ email: e, password: p });
+      if (result && result.account && !result.account.email_verified_at) {
+        showVerifyBanner(e);
+        showToast('Hesabiniz dogrulanmamis. Postanizi kontrol edin.', 'error');
+        return;
+      }
       window.location.href = 'hesabim';
     } catch (err) {
       alert(err.message || 'Giris bilgileri hatali.');
@@ -288,7 +329,8 @@
     if (!name || !email || !password) { alert('Lutfen tum alanlari doldurun.'); return; }
     try {
       await window.SuveraAPI.customerAuth.register({ name, email, password });
-      window.location.href = 'hesabim';
+      showToast('Kayit tamamlandi — e-postaniza dogrulama baglantisi gonderildi.');
+      showVerifyBanner(email);
     } catch (err) {
       alert(err.message || 'Uyelik olusturulamadi.');
     }
