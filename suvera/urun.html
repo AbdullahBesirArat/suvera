@@ -206,13 +206,9 @@
         <div class="sizes" id="detailSizes"></div>
       </div>
 
-      <div class="section-block">
+      <div class="section-block" id="shoppingNotesBlock" hidden>
         <div class="section-head"><h3>Alışveriş Notları</h3><span>Hızlı bilgilendirme</span></div>
-        <div class="service-grid">
-          <div class="service-card"><strong>Ücretsiz Kargo</strong><p>600 TL üzeri siparişlerde Türkiye geneli ücretsiz teslimat.</p></div>
-          <div class="service-card"><strong>Kolay İade</strong><p>İade ve değişim süreci için sipariş sonrası destek ekibi yanınızda.</p></div>
-          <div class="service-card"><strong>Güvenli Ödeme</strong><p>İyzico ve havale seçenekleriyle tamamlanan güvenli checkout akışı.</p></div>
-        </div>
+        <div class="service-grid" id="shoppingNotesGrid"></div>
       </div>
 
       <div class="cta-row">
@@ -225,12 +221,8 @@
 
       <div class="info-accordions">
         <div class="info-item">
-          <button class="info-trigger" type="button" onclick="toggleDetailAccordion(this)">Ürün Hikayesi</button>
-          <div class="info-body show" id="detailDescriptionBody"></div>
-        </div>
-        <div class="info-item">
           <button class="info-trigger" type="button" onclick="toggleDetailAccordion(this)">Beden ve Ölçü</button>
-          <div class="info-body" id="detailMeasurementBody"></div>
+          <div class="info-body show" id="detailMeasurementBody"></div>
         </div>
         <div class="info-item">
           <button class="info-trigger" type="button" onclick="toggleDetailAccordion(this)">Teslimat ve İade</button>

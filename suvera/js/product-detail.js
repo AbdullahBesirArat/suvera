@@ -17,6 +17,7 @@
     status: 'draft',
   };
   let activeImageIndex = 0;
+  let storeSettings = {};
   let lightboxScrollY = 0;
   // Hover-zoom controller tarafindan doldurulur; gorsel degisince state temizler.
   let detailZoomReset = function () {};
@@ -64,6 +65,113 @@
       .map(function (line) { return line.trim(); })
       .filter(Boolean)
       .slice(0, 4);
+  }
+
+  async function loadStoreSettings() {
+    if (!window.SuveraAPI || !window.SuveraAPI.organization) {
+      storeSettings = {};
+      return storeSettings;
+    }
+    try {
+      const organization = await window.SuveraAPI.organization.current();
+      storeSettings = organization && organization.store_settings ? organization.store_settings : {};
+    } catch (_) {
+      storeSettings = {};
+    }
+    return storeSettings;
+  }
+
+  function shoppingNotesFromSettings(settings) {
+    if (Array.isArray(settings.publicShoppingNotes)) {
+      return settings.publicShoppingNotes.filter(function (note) {
+        return note && note.title && note.description;
+      });
+    }
+
+    const notes = [];
+    const shopping = settings.shoppingNotes || {};
+    const freeShipping = shopping.freeShipping || {};
+    const returns = shopping.returns || {};
+    const payment = shopping.payment || {};
+    const threshold = Number(settings.freeShippingThreshold || 0);
+    const paymentProvider = String(settings.paymentProvider || 'manual').toLowerCase();
+    const paymentEnabled = settings.paymentEnabled !== false;
+    const hasIban = !!String(settings.iban || '').trim();
+    const cardEnabled = paymentEnabled && paymentProvider === 'iyzico';
+    const ibanEnabled = paymentEnabled && hasIban;
+
+    if (freeShipping.enabled !== false && threshold > 0) {
+      const template = freeShipping.description || '{amount} TL üzeri siparişlerde Türkiye geneli ücretsiz teslimat.';
+      notes.push({
+        key: 'freeShipping',
+        title: 'Ücretsiz Kargo',
+        description: String(template).replace(/\{amount\}/g, String(threshold)),
+      });
+    }
+
+    if (returns.enabled !== false) {
+      const title = returns.title || 'Kolay İade';
+      const description = returns.description || 'İade ve değişim süreci için sipariş sonrası destek ekibi yanınızda.';
+      if (title && description) {
+        notes.push({ key: 'returns', title: title, description: description });
+      }
+    }
+
+    if (payment.enabled !== false && (cardEnabled || ibanEnabled)) {
+      let description = payment.description || '';
+      if (!description) {
+        if (cardEnabled && ibanEnabled) description = 'Kart ve havale seçenekleriyle güvenli ödeme.';
+        else if (cardEnabled) description = 'Kart ile güvenli ödeme.';
+        else description = 'Havale/EFT ile güvenli ödeme.';
+      }
+      notes.push({
+        key: 'payment',
+        title: payment.title || 'Güvenli Ödeme',
+        description: description,
+      });
+    }
+
+    return notes.filter(function (note) {
+      return note.title && note.description;
+    });
+  }
+
+  function renderShoppingNotes() {
+    const block = document.getElementById('shoppingNotesBlock');
+    const grid = document.getElementById('shoppingNotesGrid');
+    if (!block || !grid) return;
+
+    const notes = shoppingNotesFromSettings(storeSettings);
+    if (!notes.length) {
+      block.hidden = true;
+      grid.innerHTML = '';
+      return;
+    }
+
+    grid.innerHTML = notes.map(function (note) {
+      return '<div class="service-card"><strong>' + escapeHtml(note.title) + '</strong><p>' + escapeHtml(note.description) + '</p></div>';
+    }).join('');
+    block.hidden = false;
+  }
+
+  function deliveryTextFromSettings(productDetails) {
+    if (productDetails.delivery_note) return productDetails.delivery_note;
+
+    const shopping = storeSettings.shoppingNotes || {};
+    const returns = shopping.returns || {};
+    const threshold = Number(storeSettings.freeShippingThreshold || 0);
+    const lines = ['Siparişler 1-3 iş günü içinde hazırlanır. Kargo çıktığında takip numarası hesabınıza ve sipariş ekranına işlenir.'];
+
+    if (returns.enabled !== false && returns.description) {
+      lines.push(String(returns.description));
+    } else if (returns.enabled !== false) {
+      lines.push('Kullanılmamış ürünlerde değişim ve iade desteği için bizimle iletişime geçebilirsiniz.');
+    }
+    if (threshold > 0) {
+      lines.push(threshold + ' TL üzeri siparişlerde ücretsiz kargo uygulanır.');
+    }
+
+    return lines.join('\n');
   }
 
   function imageUrl(path) {
@@ -387,10 +495,9 @@
     const measure = measurementLines(text);
     const story = articleLines(text);
     const details = product.details && typeof product.details === 'object' ? product.details : {};
-    const storyText = (product.product_story && product.product_story.trim())
-      || details.story || story.join(' ') || 'Bu ürün, sade çizgiyi yumuşak kumaş hissiyle bir araya getirir.';
+    const storyText = (product.product_story && product.product_story.trim()) || details.story || '';
     const shortText = details.short_description || story[0] || 'Rahat kalıp, dengeli duruş ve sezon boyunca sık kullanılacak bir parça.';
-    const deliveryText = details.delivery_note || 'Siparişler 1-3 iş günü içinde hazırlanır. Kargo çıktığında takip numarası hesabınıza ve sipariş ekranına işlenir.\nKullanılmamış ürünlerde değişim ve iade desteği için bizimle iletişime geçebilirsiniz.';
+    const deliveryText = deliveryTextFromSettings(details);
     const customMeasurements = details.measurements
       ? details.measurements.split('\n').map(function (line) { return line.trim(); }).filter(Boolean)
       : [];
@@ -428,15 +535,16 @@
     }).join('');
 
     document.getElementById('detailShortDesc').textContent = shortText;
-    document.getElementById('detailDescriptionBody').innerHTML = story.length
-      ? story.map(function (line) { return '<p>' + escapeHtml(line) + '</p>'; }).join('')
-      : '<p>Ürün açıklaması hazırlanıyor.</p>';
-
     document.getElementById('detailMeasurementBody').innerHTML = measurementData.length
       ? '<table>' + measurementData.map(function (line) { return '<tr><td>' + escapeHtml(line) + '</td></tr>'; }).join('') + '</table>'
       : '<p>Ölçü bilgisi hazırlanıyor.</p>';
 
-    document.getElementById('detailStoryCopy').textContent = storyText;
+    const storyCopy = document.getElementById('detailStoryCopy');
+    const storySection = storyCopy ? storyCopy.closest('.story-section') : null;
+    if (storyCopy) storyCopy.textContent = storyText;
+    if (storySection) storySection.hidden = !storyText;
+
+    renderShoppingNotes();
 
     const measureList = document.getElementById('detailMeasureList');
     measureList.innerHTML = measurementData.slice(0, 5).map(function (line, index) {
@@ -828,6 +936,7 @@
         history.replaceState({}, '', 'urun?' + params.toString());
       }
       const product = await window.SuveraAPI.products.get(id);
+      await loadStoreSettings();
       renderInfo(product);
       renderSwatches(product);
       renderGallery(product, currentProduct.selectedColor);
