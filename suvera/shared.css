@@ -665,6 +665,232 @@ footer .footer-bottom span {
 .suvera-toast.toast-green { background:#3d6b38; }
 .suvera-toast.toast-red   { background:#dc2626; }
 .suvera-toast-icon { font-size:16px; flex-shrink:0; }
+
+.floating-whatsapp {
+  position: fixed;
+  left: 18px;
+  bottom: 22px;
+  z-index: 10020;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: #25d366;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  font-size: 0;
+  box-shadow: 0 16px 36px rgba(20, 120, 62, .28);
+}
+.floating-whatsapp::before {
+  content: "WA";
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: .4px;
+}
+.floating-whatsapp:hover { background: #1fb85a; }
+
+.cart-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10030;
+  background: rgba(24, 21, 18, .42);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity .24s ease, visibility .24s ease;
+}
+.cart-drawer-overlay.open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+.cart-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10031;
+  width: min(420px, 100vw);
+  background: #fff;
+  transform: translateX(100%);
+  transition: transform .32s cubic-bezier(.22,1,.36,1);
+  display: flex;
+  flex-direction: column;
+  box-shadow: -24px 0 55px rgba(28, 24, 20, .18);
+  outline: none;
+}
+.cart-drawer.open { transform: translateX(0); }
+.cart-drawer-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px 24px 18px;
+  border-bottom: 1px solid #eee7dc;
+}
+.cart-drawer-kicker {
+  margin: 0 0 6px;
+  font-size: 10px;
+  letter-spacing: 2.4px;
+  text-transform: uppercase;
+  color: #8e867d;
+}
+.cart-drawer-head h2 {
+  margin: 0;
+  font-family: var(--serif, 'Cormorant Garamond', serif);
+  font-size: 31px;
+  font-weight: 400;
+}
+.cart-drawer-close {
+  width: 38px;
+  height: 38px;
+  border: 1px solid #eee7dc;
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+  font-size: 24px;
+  line-height: 1;
+}
+.cart-drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 24px 18px;
+}
+.cart-drawer-item {
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr);
+  gap: 14px;
+  position: relative;
+  padding: 18px 0;
+  border-bottom: 1px solid #f0e9df;
+}
+.cart-drawer-img {
+  width: 84px;
+  height: 112px;
+  background: linear-gradient(145deg,#ede8df,#d8d0c4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-size: 34px;
+}
+.cart-drawer-info h3 {
+  margin: 0 0 6px;
+  font-family: var(--serif, 'Cormorant Garamond', serif);
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1.1;
+}
+.cart-drawer-info p {
+  margin: 0 0 8px;
+  color: #7d756b;
+  font-size: 12px;
+}
+.cart-drawer-info strong,
+.cart-drawer-line-total {
+  color: #202020;
+  font-size: 13px;
+}
+.cart-drawer-line-total {
+  grid-column: 2;
+  color: #70685f;
+}
+.cart-drawer-qty {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+.cart-drawer-qty button {
+  min-width: 32px;
+  height: 32px;
+  border: 1px solid #e6ded2;
+  background: #fff;
+  cursor: pointer;
+}
+.cart-drawer-remove {
+  padding: 0 10px;
+  color: #9b3b3b;
+  font-size: 11px;
+}
+.cart-drawer-foot {
+  position: sticky;
+  bottom: 0;
+  display: grid;
+  gap: 10px;
+  padding: 18px 24px 24px;
+  border-top: 1px solid #eee7dc;
+  background: #fff;
+}
+.cart-drawer-total {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 13px;
+}
+.cart-drawer-total.muted { color: #7e766d; }
+.cart-drawer-total.grand {
+  font-size: 17px;
+  font-weight: 700;
+  padding-top: 6px;
+}
+.cart-drawer-checkout,
+.cart-drawer-secondary {
+  display: flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: #202020;
+  color: #fff;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 1.8px;
+  font-size: 11px;
+  cursor: pointer;
+}
+.cart-drawer-link {
+  text-align: center;
+  color: #5f564e;
+  font-size: 12px;
+}
+.cart-drawer-empty {
+  display: grid;
+  gap: 12px;
+  place-items: center;
+  min-height: 55vh;
+  text-align: center;
+  color: #746d64;
+}
+.cart-drawer-empty h3 {
+  margin: 0;
+  font-family: var(--serif, 'Cormorant Garamond', serif);
+  font-size: 34px;
+  font-weight: 400;
+  color: #202020;
+}
+
+body.cart-drawer-open .mobile-bottom-nav { transform: translateY(110%); }
+
+@media (max-width: 640px) {
+  .floating-whatsapp {
+    left: 14px;
+    bottom: calc(88px + env(safe-area-inset-bottom));
+    width: 52px;
+    height: 52px;
+  }
+  .cart-drawer {
+    width: 100vw;
+  }
+  .cart-drawer-head,
+  .cart-drawer-body,
+  .cart-drawer-foot {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+}
 .empty-state {
   grid-column: 1 / -1;
   padding: 34px 18px;
@@ -701,6 +927,28 @@ footer .footer-bottom span {
   width:100%; height:100%; object-fit:cover;
 }
 .img-zoom-wrap:hover .zoom-inner { transform:scale(1.08); }
+
+/* Desktop hover zoom: yan onizleme kutusu + lens (urun detay) */
+.detail-zoom-lens {
+  position:absolute; top:0; left:0; z-index:4; display:none; pointer-events:none;
+  border:1px solid rgba(255,255,255,.9); background:rgba(120,120,120,.16);
+  box-shadow:0 0 0 9999px rgba(0,0,0,.04); will-change:transform;
+}
+.img-zoom-wrap.detail-zoom-active .detail-zoom-lens { display:block; }
+.detail-zoom-preview {
+  position:fixed; z-index:900; display:none; pointer-events:none; overflow:hidden;
+  background-repeat:no-repeat; background-color:#f0ebe3;
+  border:1px solid var(--line,#e4ddd3); border-radius:8px;
+  box-shadow:0 24px 60px rgba(0,0,0,.22);
+}
+.detail-zoom-preview.open { display:block; }
+/* Sepet drawer acikken zoom gizlenir; drawer/floating butonlarin ustune cikmaz */
+body.cart-drawer-open .detail-zoom-preview,
+body.cart-drawer-open .detail-zoom-lens { display:none !important; }
+/* Mobil/touch/hover destegi olmayan cihazlarda hover zoom devre disi */
+@media (max-width:1023px), (hover:none), (pointer:coarse) {
+  .detail-zoom-preview, .detail-zoom-lens { display:none !important; }
+}
 
 /* ══════════════════════════════════════════════
    STICKY ADD TO CART (mobile, ürün detay)

@@ -18,6 +18,8 @@
   };
   let activeImageIndex = 0;
   let lightboxScrollY = 0;
+  // Hover-zoom controller tarafindan doldurulur; gorsel degisince state temizler.
+  let detailZoomReset = function () {};
 
   function money(value) {
     return Number(value || 0).toLocaleString('tr-TR', {
@@ -217,6 +219,9 @@
     const counter = document.getElementById('galleryCounter');
 
     if (mainMedia) {
+      // innerHTML degisimi lens'i de kaldirir; zoom state'i temizle ki eski
+      // gorsel background olarak kalmasin ve yeni gorselle devam etsin.
+      detailZoomReset();
       mainMedia.innerHTML = imageMarkup(media, currentProduct.name, 'main-fallback');
       mainMedia.onclick = function () {
         openImageLightbox(activeImageIndex);
@@ -504,6 +509,135 @@
     }
   }
 
+  // Masaustu hover zoom: ana gorsel uzerinde fare gezdikce sag tarafta buyutulmus
+  // preview + gorsel ustunde lens gosterir. Sadece hover destekleyen desktop'ta.
+  function setupDetailZoom() {
+    const wrap = document.getElementById('detailMainMedia');
+    if (!wrap || typeof window.matchMedia !== 'function') return;
+
+    const desktopQuery = window.matchMedia('(min-width: 1024px) and (pointer: fine) and (hover: hover)');
+    const ZOOM = 2.5;
+
+    const lens = document.createElement('div');
+    lens.className = 'detail-zoom-lens';
+    lens.setAttribute('aria-hidden', 'true');
+
+    const preview = document.createElement('div');
+    preview.className = 'detail-zoom-preview';
+    preview.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(preview);
+
+    let active = false;
+    let rafId = 0;
+    let lastEvent = null;
+    let geom = null;
+
+    function drawerOpen() {
+      return document.body.classList.contains('cart-drawer-open');
+    }
+
+    function stop() {
+      active = false;
+      if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
+      lastEvent = null;
+      geom = null;
+      wrap.classList.remove('detail-zoom-active');
+      if (lens.parentNode) lens.parentNode.removeChild(lens);
+      preview.classList.remove('open');
+      preview.style.backgroundImage = '';
+    }
+    detailZoomReset = stop;
+
+    function begin() {
+      if (active || !desktopQuery.matches || drawerOpen()) return;
+      const img = wrap.querySelector('img');
+      // Gorsel yuklenmemisse preview acilmaz.
+      if (!img || !img.complete || !img.naturalWidth) return;
+
+      const rect = wrap.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+
+      const previewH = Math.min(rect.height, window.innerHeight - 32);
+      const previewW = Math.min(rect.width, 460);
+      const lensW = previewW / ZOOM;
+      const lensH = previewH / ZOOM;
+      const bgW = rect.width * ZOOM;
+      const bgH = rect.height * ZOOM;
+
+      geom = { rect, previewW, previewH, lensW, lensH, bgW, bgH };
+
+      lens.style.width = lensW + 'px';
+      lens.style.height = lensH + 'px';
+      lens.style.transform = 'translate(0px, 0px)';
+      if (!lens.parentNode) wrap.appendChild(lens);
+
+      // Preview'i gorselin sagina yerlestir; sigmiyorsa sola/viewport kenarina
+      // clamp et (yatay scroll olusmaz).
+      let left = rect.right + 16;
+      if (left + previewW > window.innerWidth - 12) left = rect.left - previewW - 16;
+      if (left < 12) left = window.innerWidth - previewW - 12;
+      if (left < 12) left = 12;
+      let top = rect.top;
+      if (top + previewH > window.innerHeight - 12) top = window.innerHeight - previewH - 12;
+      if (top < 12) top = 12;
+
+      preview.style.width = previewW + 'px';
+      preview.style.height = previewH + 'px';
+      preview.style.left = left + 'px';
+      preview.style.top = top + 'px';
+      preview.style.backgroundImage = 'url("' + String(img.currentSrc || img.src).replace(/"/g, '\\"') + '")';
+      preview.style.backgroundSize = bgW + 'px ' + bgH + 'px';
+
+      active = true;
+      wrap.classList.add('detail-zoom-active');
+      preview.classList.add('open');
+    }
+
+    function apply() {
+      rafId = 0;
+      if (!active || !geom || !lastEvent) return;
+      if (drawerOpen()) { stop(); return; }
+
+      const g = geom;
+      const x = lastEvent.clientX - g.rect.left;
+      const y = lastEvent.clientY - g.rect.top;
+      // Lens sol-ust koordinati; gorsel sinirlari icinde kalir (disari tasmaz).
+      const lensLeft = Math.min(Math.max(x - g.lensW / 2, 0), g.rect.width - g.lensW);
+      const lensTop = Math.min(Math.max(y - g.lensH / 2, 0), g.rect.height - g.lensH);
+      lens.style.transform = 'translate(' + lensLeft + 'px,' + lensTop + 'px)';
+
+      // Preview arka plan konumu lens'e oranli; kenarlarda bosluk olusmaz.
+      const denomX = g.rect.width - g.lensW;
+      const denomY = g.rect.height - g.lensH;
+      const bgX = denomX > 0 ? (lensLeft / denomX) * (g.bgW - g.previewW) : 0;
+      const bgY = denomY > 0 ? (lensTop / denomY) * (g.bgH - g.previewH) : 0;
+      preview.style.backgroundPosition = '-' + bgX + 'px -' + bgY + 'px';
+    }
+
+    function onMove(event) {
+      if (!active) { begin(); if (!active) return; }
+      lastEvent = event;
+      if (!rafId) rafId = requestAnimationFrame(apply);
+    }
+
+    wrap.addEventListener('mouseenter', onMove);
+    wrap.addEventListener('mousemove', onMove);
+    wrap.addEventListener('mouseleave', stop);
+    window.addEventListener('resize', stop, { passive: true });
+    window.addEventListener('scroll', stop, { passive: true });
+    if (typeof desktopQuery.addEventListener === 'function') {
+      desktopQuery.addEventListener('change', stop);
+    }
+
+    // Sepet drawer acilinca (body class) zoom'u kapat.
+    if (typeof MutationObserver === 'function') {
+      const observer = new MutationObserver(function () {
+        if (active && drawerOpen()) stop();
+      });
+      observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    }
+  }
+
   function bindImageLightbox() {
     const lightbox = document.getElementById('imageLightbox');
     const closeButton = document.getElementById('imageLightboxClose');
@@ -712,15 +846,14 @@
     }
   };
 
-  document.addEventListener('click', function (event) {
-    const waBtn = event.target.closest('.wa-btn');
-    if (!waBtn) return;
-    const text = encodeURIComponent('Merhaba, ' + currentProduct.name + ' ürünü hakkında bilgi almak istiyorum.');
-    window.open('https://wa.me/905555555555?text=' + text, '_blank');
-  });
+  // NOT: Urun detay ".wa-btn" butonu, floating WhatsApp ile AYNI kaynaktan
+  // (shared.js initFloatingWhatsApp -> store_settings.whatsappPhone) yonetilir:
+  // numara varsa magaza ayarindaki normalize numarayla acilir, yoksa buton
+  // gizlenir. Hardcoded numara/ikinci handler bilerek kaldirildi.
 
   document.addEventListener('DOMContentLoaded', function () {
     bindImageLightbox();
+    setupDetailZoom();
     loadProduct();
   });
 })();

@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
   'use strict';
 
   function money(value) {
@@ -53,7 +53,7 @@
 
   function blogArticleHtml(content) {
     const lines = String(content || '').split(/\n+/).map(function (line) { return line.trim(); }).filter(Boolean);
-    if (!lines.length) return '<p>Bu blog yazısının detayları hazırlanıyor.</p>';
+    if (!lines.length) return '<p>Bu blog yazÄ±sÄ±nÄ±n detaylarÄ± hazÄ±rlanÄ±yor.</p>';
 
     const html = [];
     let list = [];
@@ -94,7 +94,7 @@
 
   function trackingLink(url) {
     const href = safeHref(url, '');
-    return href ? ' • <a href="' + escapeHtml(href) + '">Takip Linki</a>' : '';
+    return href ? ' â€¢ <a href="' + escapeHtml(href) + '">Takip Linki</a>' : '';
   }
 
   function productMatches(product, query) {
@@ -191,33 +191,35 @@
     return method === 'iban' || provider === 'manual';
   }
 
-  function ibanInfoHtml(orderCode) {
-    const info = window.SUVERA_IBAN_INFO || {};
-    const accountName = info.accountName || 'Suvera';
-    const bankName = info.bankName || '';
+  function ibanInfoHtml(orderCode, order) {
+    const serverInfo = order && (order.paymentInstructions || order.payment_instructions) || {};
+    const info = serverInfo.iban ? serverInfo : (window.SUVERA_IBAN_INFO || {});
+    const accountName = info.iban_holder_name || info.ibanHolderName || info.accountName || 'Suvera';
+    const bankName = info.bank_name || info.bankName || '';
     const iban = info.iban || '';
+    const paymentNote = info.payment_note || info.paymentNote || '';
 
     if (!iban) {
-      return '<div class="page-warning-banner" style="margin-top:16px;"><strong>IBAN bilgileri yapılandırılmadı.</strong><br/>Lütfen ödeme için Suvera destek ekibiyle iletişime geçin. Sipariş kodunuz: <strong>' +
+      return '<div class="page-warning-banner" style="margin-top:16px;"><strong>IBAN bilgileri yapilandirilmadi.</strong><br/>Lutfen odeme icin Suvera destek ekibiyle iletisime gecin. Siparis kodunuz: <strong>' +
         escapeHtml(orderCode || '-') + '</strong></div>';
     }
 
     return '<div class="page-info-banner" style="margin-top:16px;"><strong>IBAN / havale bilgileri</strong><br/>' +
       (bankName ? 'Banka: <strong>' + escapeHtml(bankName) + '</strong><br/>' : '') +
-      'Alıcı: <strong>' + escapeHtml(accountName) + '</strong><br/>' +
+      'Alici: <strong>' + escapeHtml(accountName) + '</strong><br/>' +
       'IBAN: <strong>' + escapeHtml(iban) + '</strong><br/>' +
-      'Açıklama: <strong>' + escapeHtml(orderCode || '-') + '</strong></div>';
+      'Aciklama: <strong>' + escapeHtml(paymentNote || orderCode || '-') + '</strong></div>';
   }
 
   function orderStatusNote(order) {
     const status = String(order && order.status || '').toLowerCase();
     if (isIbanOrder(order)) {
-      return 'IBAN / havale siparişiniz alındı. Ödeme açıklamasına sipariş kodunu ekleyin; ödeme onaylanana kadar durum Panelya’da ödeme bekliyor olarak kalır.';
+      return 'IBAN / havale sipariÅŸiniz alÄ±ndÄ±. Ã–deme aÃ§Ä±klamasÄ±na sipariÅŸ kodunu ekleyin; Ã¶deme onaylanana kadar durum Panelyaâ€™da Ã¶deme bekliyor olarak kalÄ±r.';
     }
     if (status === 'payment_failed') {
-      return 'Kart ödemeniz tamamlanamadı. Siparişi yeniden deneyebilir veya destek ekibimizle iletişime geçebilirsiniz.';
+      return 'Kart Ã¶demeniz tamamlanamadÄ±. SipariÅŸi yeniden deneyebilir veya destek ekibimizle iletiÅŸime geÃ§ebilirsiniz.';
     }
-    return 'Sipariş durumu Panelya backend verisinden okunuyor. Kargo numarası oluştuğunda bu alana otomatik yansır.';
+    return 'SipariÅŸ durumu Panelya backend verisinden okunuyor. Kargo numarasÄ± oluÅŸtuÄŸunda bu alana otomatik yansÄ±r.';
   }
 
   function orderEmail(order) {
@@ -385,7 +387,7 @@
     if (paymentState) {
       noteNode.textContent = paymentState.note;
     } else if (isIbanOrder(effectiveOrder)) {
-      noteNode.innerHTML = 'Siparişiniz oluşturuldu. IBAN / havale ödemesi onaylanana kadar durum <strong>ödeme bekleniyor</strong> olarak kalır.';
+      noteNode.innerHTML = 'SipariÅŸiniz oluÅŸturuldu. IBAN / havale Ã¶demesi onaylanana kadar durum <strong>Ã¶deme bekleniyor</strong> olarak kalÄ±r.';
     } else {
       noteNode.textContent = 'Odeme saglayicisi tarafinda islem tamamlandiginda durum bu sayfadan ve hesabim alanindan takip edilebilir.';
     }
@@ -393,10 +395,10 @@
     summary.innerHTML = '<div class="page-table-wrap"><table class="page-table"><thead><tr><th>Urun</th><th>Adet</th><th>Tutar</th></tr></thead><tbody>' +
       renderOrderItems(effectiveOrder.items || []) +
       '</tbody></table></div>' +
-      (isIbanOrder(effectiveOrder) ? ibanInfoHtml(effectiveOrder.orderCode || effectiveOrder.id) : '') +
+      (isIbanOrder(effectiveOrder) ? ibanInfoHtml(effectiveOrder.orderCode || effectiveOrder.id, effectiveOrder) : '') +
       ((effectiveOrder.tracking_number || effectiveOrder.tracking_url)
         ? '<div class="page-info-banner" style="margin-top:16px;">Kargo: <strong>' + escapeHtml(effectiveOrder.shipping_company || 'Hazirlaniyor') + '</strong>' +
-          (effectiveOrder.tracking_number ? ' • Takip No: <strong>' + escapeHtml(effectiveOrder.tracking_number) + '</strong>' : '') +
+          (effectiveOrder.tracking_number ? ' â€¢ Takip No: <strong>' + escapeHtml(effectiveOrder.tracking_number) + '</strong>' : '') +
           trackingLink(effectiveOrder.tracking_url) +
           '</div>'
         : '');
@@ -564,7 +566,7 @@
         return '<article class="page-blog-card" onclick="location.href=\'' + escapeHtml(blogUrl(post)) + '\'"><div class="page-blog-media">' + media + '</div><span class="page-badge good">' +
           escapeHtml(publishedLabel(post.published_at)) + '</span><h3>' +
           escapeHtml(post.title) + '</h3><p>' + escapeHtml(post.excerpt || 'Suvera blog yazisi') +
-          '</p><div class="page-inline-actions"><a class="page-btn-secondary" href="' + escapeHtml(blogUrl(post)) + '">Yazıyı oku</a></div></article>';
+          '</p><div class="page-inline-actions"><a class="page-btn-secondary" href="' + escapeHtml(blogUrl(post)) + '">YazÄ±yÄ± oku</a></div></article>';
       }).join('');
     } catch (err) {
       grid.innerHTML = '<div class="page-empty">Blog yazilari yuklenemedi. Lutfen daha sonra tekrar deneyin.</div>';
@@ -585,7 +587,7 @@
     const aside = document.getElementById('blogDetailAside');
 
     if (!id || !window.SuveraAPI || !window.SuveraAPI.blog || !window.SuveraAPI.blog.get) {
-      if (body) body.innerHTML = '<div class="page-empty">Blog yazısı bulunamadı.</div>';
+      if (body) body.innerHTML = '<div class="page-empty">Blog yazÄ±sÄ± bulunamadÄ±.</div>';
       return;
     }
 
@@ -600,14 +602,14 @@
           return String(item.id) === String(id) || String(item.slug || '') === String(id);
         });
       }
-      if (!post) throw new Error('Blog yazısı bulunamadı');
+      if (!post) throw new Error('Blog yazÄ±sÄ± bulunamadÄ±');
       const image = post.image_url ? assetUrl(post.image_url) : '';
       const pageTitle = post.title || 'Suvera Blog';
-      const pageExcerpt = post.excerpt || 'Suvera stil, bakım ve seçki rehberi.';
+      const pageExcerpt = post.excerpt || 'Suvera stil, bakÄ±m ve seÃ§ki rehberi.';
       if (title) title.textContent = pageTitle;
       if (excerpt) excerpt.textContent = pageExcerpt;
-      if (meta) meta.textContent = publishedLabel(post.published_at) + ' • Suvera İçerik Merkezi';
-      if (breadcrumb) breadcrumb.innerHTML = '<a href="anasayfa">Ana Sayfa</a><span>›</span><a href="blog">Blog</a><span>›</span><span>' + escapeHtml(pageTitle) + '</span>';
+      if (meta) meta.textContent = publishedLabel(post.published_at) + ' â€¢ Suvera Ä°Ã§erik Merkezi';
+      if (breadcrumb) breadcrumb.innerHTML = '<a href="anasayfa">Ana Sayfa</a><span>â€º</span><a href="blog">Blog</a><span>â€º</span><span>' + escapeHtml(pageTitle) + '</span>';
       if (hero) {
         hero.innerHTML = image
           ? '<img src="' + escapeHtml(image) + '" alt="' + escapeHtml(pageTitle) + '" decoding="async" />'
@@ -615,8 +617,8 @@
       }
       if (body) body.innerHTML = blogArticleHtml(post.content);
       if (aside) {
-        aside.innerHTML = '<div class="page-check"><strong>Okuma önerisi</strong><span>Bu yazıdaki bakım ve stil önerilerini ürün detayındaki ölçü bilgileriyle birlikte değerlendirin.</span></div>' +
-          '<div class="page-check"><strong>Sonraki adım</strong><span>İlgili ürünleri inceleyerek kombini tamamlayabilirsiniz.</span></div>';
+        aside.innerHTML = '<div class="page-check"><strong>Okuma Ã¶nerisi</strong><span>Bu yazÄ±daki bakÄ±m ve stil Ã¶nerilerini Ã¼rÃ¼n detayÄ±ndaki Ã¶lÃ§Ã¼ bilgileriyle birlikte deÄŸerlendirin.</span></div>' +
+          '<div class="page-check"><strong>Sonraki adÄ±m</strong><span>Ä°lgili Ã¼rÃ¼nleri inceleyerek kombini tamamlayabilirsiniz.</span></div>';
       }
 
       document.title = pageTitle + ' | Suvera Blog';
@@ -631,7 +633,7 @@
         });
       }
     } catch (err) {
-      if (body) body.innerHTML = '<div class="page-empty">Blog yazısı yüklenemedi. Lütfen blog listesine geri dönün.</div>';
+      if (body) body.innerHTML = '<div class="page-empty">Blog yazÄ±sÄ± yÃ¼klenemedi. LÃ¼tfen blog listesine geri dÃ¶nÃ¼n.</div>';
     }
   }
 
@@ -808,11 +810,11 @@
         escapeHtml(match.customer && match.customer.name || '-') + '</strong></div><div class="page-kv"><small>Toplam</small><strong>' +
         money(match.total || 0) + '</strong></div></div><div class="page-info-banner" style="margin-top:16px;">' +
         (match.tracking_number
-          ? 'Kargo: <strong>' + escapeHtml(match.shipping_company || 'Hazirlaniyor') + '</strong> • Takip No: <strong>' + escapeHtml(match.tracking_number) + '</strong>' +
+          ? 'Kargo: <strong>' + escapeHtml(match.shipping_company || 'Hazirlaniyor') + '</strong> â€¢ Takip No: <strong>' + escapeHtml(match.tracking_number) + '</strong>' +
             trackingLink(match.tracking_url)
           : escapeHtml(orderStatusNote(match))) +
         '</div>' +
-        (isIbanOrder(match) ? ibanInfoHtml(match.orderCode || match.id) : '');
+        (isIbanOrder(match) ? ibanInfoHtml(match.orderCode || match.id, match) : '');
     }
 
     input.value = initialCode;

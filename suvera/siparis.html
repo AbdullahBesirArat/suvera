@@ -68,6 +68,13 @@
     .method-detail{display:none;border-top:1px solid var(--line);padding:14px 16px;background:#fafafa;color:var(--muted);font-size:13px;line-height:1.55}
     .method:has(input:checked){border-color:#9cadb9;box-shadow:0 0 0 1px #9cadb9}
     .method:has(input:checked) .method-detail{display:block}
+    .iban-panel{display:none;margin-top:14px;border:1px solid #dfe8d8;background:#f7fbf5;padding:16px;color:#2f3d2b}
+    .iban-panel.show{display:block}
+    .iban-panel h3{margin:0 0 10px;font-size:13px;letter-spacing:1.6px;text-transform:uppercase}
+    .iban-row{display:flex;justify-content:space-between;gap:14px;border-top:1px solid rgba(47,61,43,.12);padding:9px 0;font-size:13px}
+    .iban-row:first-of-type{border-top:0}
+    .iban-row strong{text-align:right;word-break:break-word}
+    .iban-copy{border:1px solid #c9d9c1;background:#fff;color:#294d25;padding:7px 10px;font-size:11px;letter-spacing:1px;text-transform:uppercase;cursor:pointer}
     .guest-choice{border:1px solid #dfe4dc;background:#f7faf5;border-radius:12px;padding:16px;margin-bottom:18px}
     .guest-choice-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:12px}
     .guest-choice h3{margin:0;font-size:13px;letter-spacing:1.8px;text-transform:uppercase}
@@ -258,6 +265,7 @@
                 <div class="method-detail">Sipariş numaranızı açıklama alanına ekleyerek ödeme yapabilirsiniz. Onaydan sonra siparişiniz hazırlanır.</div>
               </div>
             </div>
+            <div class="iban-panel" id="ibanPanel" aria-live="polite"></div>
             <div class="trust-grid">
               <div class="trust-card"><strong>SSL</strong>Form verileri güvenli bağlantı üzerinden iletilir.</div>
               <div class="trust-card"><strong>3D Secure</strong>Sağlayıcı aktif olduğunda doğrulama ekranında tamamlanır.</div>
@@ -477,6 +485,47 @@
       return Number.isFinite(fee) && fee > 0 ? fee : 0;
     }
 
+    function ibanSettings() {
+      return {
+        iban: String(checkoutSettings.iban || '').trim(),
+        holder: String(checkoutSettings.ibanHolderName || checkoutSettings.iban_holder_name || '').trim(),
+        bank: String(checkoutSettings.bankName || checkoutSettings.bank_name || '').trim(),
+        note: String(checkoutSettings.paymentNote || checkoutSettings.payment_note || '').trim(),
+      };
+    }
+
+    function renderIbanPanel() {
+      const panel = document.getElementById('ibanPanel');
+      const selectedPaymentMethod = (document.querySelector('input[name="paymentMethod"]:checked') || {}).value || 'card';
+      if (!panel) return;
+      panel.classList.toggle('show', selectedPaymentMethod === 'iban');
+      if (selectedPaymentMethod !== 'iban') return;
+
+      const info = ibanSettings();
+      if (!info.iban) {
+        panel.innerHTML = '<h3>IBAN / Havale Bilgileri</h3><p>Bu mağaza için IBAN bilgisi henüz tanımlanmamış. Siparişi tamamlamadan önce mağaza ile iletişime geçebilirsiniz.</p>';
+        return;
+      }
+
+      panel.innerHTML = [
+        '<h3>IBAN / Havale Bilgileri</h3>',
+        '<div class="iban-row"><span>IBAN</span><strong>' + escapeHtml(info.iban) + '</strong></div>',
+        info.holder ? '<div class="iban-row"><span>Hesap sahibi</span><strong>' + escapeHtml(info.holder) + '</strong></div>' : '',
+        info.bank ? '<div class="iban-row"><span>Banka</span><strong>' + escapeHtml(info.bank) + '</strong></div>' : '',
+        '<p>' + escapeHtml(info.note || 'Havale sonrası açıklama kısmına sipariş numaranızı yazınız.') + '</p>',
+        '<button class="iban-copy" type="button" id="ibanCopyBtn">IBAN Kopyala</button>',
+      ].filter(Boolean).join('');
+
+      document.getElementById('ibanCopyBtn')?.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(info.iban);
+          showCheckoutMessage('IBAN kopyalandı.');
+        } catch (_) {
+          showCheckoutMessage('IBAN kopyalanamadı. Lütfen elle seçip kopyalayın.');
+        }
+      });
+    }
+
     function applyCheckoutSettings() {
       const subtotal = cartSubtotal(loadCart());
       const shippingFee = checkoutShippingFee(subtotal);
@@ -490,6 +539,7 @@
         cardInput.disabled = true;
         if (ibanInput) ibanInput.checked = true;
       }
+      renderIbanPanel();
     }
 
     function hydrateCheckoutProfile() {
@@ -694,6 +744,9 @@
         const canonicalOrder = (result && result.order) || result || {};
         const canonicalTotal = Number(canonicalOrder.total);
         const canonicalShipping = Number(canonicalOrder.shipping_fee);
+        const paymentInstructions = (result && (result.paymentInstructions || result.payment_instructions)) ||
+          canonicalOrder.payment_instructions ||
+          null;
         const savedOrder = {
           ...snapshot,
           orderCode,
@@ -702,6 +755,7 @@
           paymentPageUrl,
           total: Number.isFinite(canonicalTotal) ? canonicalTotal : snapshot.total,
           shipping_fee: Number.isFinite(canonicalShipping) ? canonicalShipping : snapshot.shipping_fee,
+          paymentInstructions,
         };
         if (window.Suvera && window.Suvera.recordOrder) {
           window.Suvera.recordOrder(savedOrder);
@@ -762,6 +816,9 @@
       hydrateCheckoutProfile();
       populateCities();
       document.getElementById('city').addEventListener('change', populateDistricts);
+      document.querySelectorAll('input[name="paymentMethod"]').forEach((input) => {
+        input.addEventListener('change', renderIbanPanel);
+      });
       loadCheckoutSettings().finally(() => {
         applyCheckoutSettings();
         renderSummary();

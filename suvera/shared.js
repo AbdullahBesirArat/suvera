@@ -313,10 +313,22 @@
     return { active, item };
   }
 
+  function cartLineKey(item) {
+    return [
+      item.product_id || item.productId || item.id || item.name || '',
+      item.variant_id || item.variantId || '',
+      item.color || '',
+      item.size || '',
+      item.variant || '',
+    ].map(function(part) { return String(part || '').trim().toLocaleLowerCase('tr-TR'); }).join('|');
+  }
+
   window.Suvera.addToCart = function(name, price, emoji, meta = {}) {
-    const existing = cart.find(i => i.name === name);
+    const nextItem = { name, price, emoji: emoji || 'SU', qty: 1, ...meta };
+    const nextKey = cartLineKey(nextItem);
+    const existing = cart.find(function(item) { return cartLineKey(item) === nextKey; });
     if (existing) existing.qty++;
-    else cart.push({ name, price, emoji: emoji || '🧕', qty: 1, ...meta });
+    else cart.push(nextItem);
     localStorage.setItem('suveraCart', JSON.stringify(cart));
     updateCartCount();
     document.querySelectorAll('.prod-card').forEach(function(card) {
@@ -326,6 +338,9 @@
       }
     });
     window.showToast('Sepete eklendi', 'green');
+    if (window.SuveraCartUI && typeof window.SuveraCartUI.openCartDrawer === 'function') {
+      window.SuveraCartUI.openCartDrawer();
+    }
   };
 
   // ── ANNOUNCE + NAV SCROLL ────────────────────────
@@ -642,6 +657,51 @@
       }
       banner.textContent = 'Bakım modu açık. Sitede güncelleme yapılıyor.';
     }
+  }
+
+  function whatsappHref(settings) {
+    const phone = String(settings && (settings.whatsappPhone || settings.whatsapp_phone) || '').replace(/\D/g, '');
+    if (!/^90\d{10}$/.test(phone)) return '';
+    const message = encodeURIComponent('Merhaba, urunleriniz hakkinda bilgi almak istiyorum.');
+    return 'https://wa.me/' + phone + '?text=' + message;
+  }
+
+  async function initFloatingWhatsApp() {
+    const api = window.SuveraAPI;
+    if (!api || !api.organization || !siteSettings.features || siteSettings.features.whatsapp !== false) {
+      // continue; this branch only keeps the feature opt-out readable
+    }
+    if (siteSettings.features && siteSettings.features.whatsapp === false) return;
+
+    let settings = {};
+    try {
+      const organization = await api.organization.current();
+      settings = organization && organization.store_settings ? organization.store_settings : {};
+    } catch (_) {
+      settings = {};
+    }
+
+    const href = whatsappHref(settings);
+    document.querySelectorAll('.wa-btn').forEach(function(button) {
+      if (!href) {
+        button.style.display = 'none';
+        return;
+      }
+      button.addEventListener('click', function() {
+        window.open(href, '_blank', 'noopener');
+      });
+    });
+    if (!href || document.querySelector('.floating-whatsapp')) return;
+
+    const link = document.createElement('a');
+    link.className = 'floating-whatsapp';
+    link.href = href;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.setAttribute('aria-label', 'WhatsApp ile iletisime gec');
+    link.title = 'WhatsApp ile iletisime gec';
+    link.textContent = 'WhatsApp';
+    document.body.appendChild(link);
   }
 
   // ── FILTER DRAWER (mobile) ──────────────────────
@@ -1044,6 +1104,7 @@
   function init() {
     injectSkipLink();
     applySiteSettings();
+    initFloatingWhatsApp().catch(function () {});
     initCampaignBanner().catch(function () {});
     redirectPaymentReturn();
     initSeoDefaults();
