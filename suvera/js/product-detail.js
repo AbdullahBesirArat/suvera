@@ -544,6 +544,14 @@
     if (storyCopy) storyCopy.textContent = storyText;
     if (storySection) storySection.hidden = !storyText;
 
+    // Kumaş Bilgisi: mağaza/panelden details.fabric_info olarak gelir. Duz metin
+    // olarak (textContent) render edilir; HTML/script calismaz. Bossa gizlenir.
+    const fabricText = String(details.fabric_info || details.fabricInfo || '').trim();
+    const fabricSection = document.getElementById('detailFabricInfo');
+    const fabricNode = document.getElementById('detailFabricText');
+    if (fabricNode) fabricNode.textContent = fabricText;
+    if (fabricSection) fabricSection.hidden = !fabricText;
+
     renderShoppingNotes();
 
     const measureList = document.getElementById('detailMeasureList');
