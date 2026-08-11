@@ -1,36 +1,6 @@
+import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseImageEntry, safeHref, productFinalPrice } from './core/storefront-utils.js';
 (function () {
   'use strict';
-
-  function money(value) {
-    return Number(value || 0).toLocaleString('tr-TR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }) + ' TL';
-  }
-
-  function escapeHtml(value) {
-    return String(value || '').replace(/[&<>"']/g, function (char) {
-      return ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#39;',
-      })[char];
-    });
-  }
-
-  function assetUrl(path) {
-    return window.SuveraAPI && window.SuveraAPI.assetUrl ? window.SuveraAPI.assetUrl(path) : path;
-  }
-
-  function parseImageEntry(value) {
-    const raw = String(value || '').trim();
-    if (!raw) return null;
-    const parts = raw.split('|').map(function (part) { return part.trim(); }).filter(Boolean);
-    if (parts.length >= 2) return { color: parts[0], url: parts[parts.length - 1] };
-    return { color: '', url: raw };
-  }
 
   function productImage(product) {
     const entry = (Array.isArray(product.images) ? product.images : [])
@@ -81,17 +51,6 @@
   }
 
   // FIX: Block unsafe link protocols from API and localStorage-backed content.
-  function safeHref(value, fallback) {
-    const href = String(value || '').trim();
-    if (!href) return fallback || '';
-    try {
-      const parsed = new URL(href, location.href);
-      if (['http:', 'https:'].includes(parsed.protocol)) return href;
-    } catch (_) {}
-    if (/^(\/|\.\/|\.\.\/|#|[a-z0-9_-]+(?:\.html)?(?:[?#].*)?)/i.test(href)) return href;
-    return fallback || '';
-  }
-
   function trackingLink(url) {
     const href = safeHref(url, '');
     return href ? ' • <a href="' + escapeHtml(href) + '">Takip Linki</a>' : '';
@@ -114,10 +73,6 @@
     }).filter(Boolean))).sort(function (a, b) {
       return a.localeCompare(b, 'tr');
     });
-  }
-
-  function productFinalPrice(product) {
-    return Number(product && (product.sale_price || product.price) || 0);
   }
 
   function productHasValue(product, key, value) {
@@ -151,12 +106,17 @@
     const items = Array.isArray(raw.items) ? raw.items.map(function (item) {
       return {
         id: item.product_id || '',
+        orderItemId: item.order_item_id || item.orderItemId || '',
+        variantId: item.variant_id || item.variantId || '',
         name: item.name || 'Urun',
         qty: Number(item.qty || item.quantity || 1),
         quantity: Number(item.qty || item.quantity || 1),
         price: Number(item.price || item.unit_price || 0),
         unit_price: Number(item.price || item.unit_price || 0),
         variant: item.variant || item.size || 'Standart',
+        selectedColor: item.selected_color || item.selectedColor || '',
+        selectedSize: item.selected_size || item.selectedSize || '',
+        sku: item.sku || '',
       };
     }) : [];
 
@@ -174,6 +134,7 @@
       shipped_at: raw.shipped_at || '',
       created_at: raw.created_at || '',
       updated_at: raw.updated_at || '',
+      shipments: Array.isArray(raw.shipments) ? raw.shipments : [],
       customer: raw.customer || {
         name: raw.customer_name || raw.customer || '',
         email: raw.email || '',
@@ -198,11 +159,11 @@
     const iban = info.iban || '';
 
     if (!iban) {
-      return '<div class="page-warning-banner" style="margin-top:16px;"><strong>IBAN bilgileri yapılandırılmadı.</strong><br/>Lütfen ödeme için Suvera destek ekibiyle iletişime geçin. Sipariş kodunuz: <strong>' +
+      return '<div class="page-warning-banner" data-css="margin-top:16px;"><strong>IBAN bilgileri yapılandırılmadı.</strong><br/>Lütfen ödeme için Suvera destek ekibiyle iletişime geçin. Sipariş kodunuz: <strong>' +
         escapeHtml(orderCode || '-') + '</strong></div>';
     }
 
-    return '<div class="page-info-banner" style="margin-top:16px;"><strong>IBAN / havale bilgileri</strong><br/>' +
+    return '<div class="page-info-banner" data-css="margin-top:16px;"><strong>IBAN / havale bilgileri</strong><br/>' +
       (bankName ? 'Banka: <strong>' + escapeHtml(bankName) + '</strong><br/>' : '') +
       'Alıcı: <strong>' + escapeHtml(accountName) + '</strong><br/>' +
       'IBAN: <strong>' + escapeHtml(iban) + '</strong><br/>' +
@@ -335,7 +296,7 @@
   }
 
   async function renderThankYou() {
-    const root = document.getElementById('thankYouPage');
+    const root = document.querySelector('[data-page-root="thankYouPage"]');
     if (!root) return;
 
     const params = new URLSearchParams(location.search);
@@ -395,7 +356,7 @@
       '</tbody></table></div>' +
       (isIbanOrder(effectiveOrder) ? ibanInfoHtml(effectiveOrder.orderCode || effectiveOrder.id) : '') +
       ((effectiveOrder.tracking_number || effectiveOrder.tracking_url)
-        ? '<div class="page-info-banner" style="margin-top:16px;">Kargo: <strong>' + escapeHtml(effectiveOrder.shipping_company || 'Hazirlaniyor') + '</strong>' +
+        ? '<div class="page-info-banner" data-css="margin-top:16px;">Kargo: <strong>' + escapeHtml(effectiveOrder.shipping_company || 'Hazirlaniyor') + '</strong>' +
           (effectiveOrder.tracking_number ? ' • Takip No: <strong>' + escapeHtml(effectiveOrder.tracking_number) + '</strong>' : '') +
           trackingLink(effectiveOrder.tracking_url) +
           '</div>'
@@ -403,7 +364,7 @@
   }
 
   async function renderAccount() {
-    const root = document.getElementById('accountPage');
+    const root = document.querySelector('[data-page-root="accountPage"]');
     if (!root) return;
 
     const state = getState();
@@ -443,10 +404,12 @@
         return '<div class="page-order-card"><strong>' + escapeHtml(order.orderCode || order.id || 'Siparis') + '</strong><p>' +
           escapeHtml(order.customer && order.customer.name || 'Musteri bilgisi yok') + '</p><p>Durum: ' +
           escapeHtml(orderStatusLabel(order.status)) + '</p><p>Toplam: ' + money(order.total || 0) +
-          '</p><div class="page-inline-actions"><a class="page-btn-secondary" href="siparis-takip?order=' +
+          '</p>' + shipmentCards(order.shipments) + '<div class="page-inline-actions"><a class="page-btn-secondary" href="siparis-takip?order=' +
           encodeURIComponent(order.orderCode || order.id || '') + '">Takip Et</a></div></div>';
       }).join('');
     }
+
+    await renderCustomerReturns(orders);
 
     const favoritesNode = document.getElementById('accountFavorites');
     if (!favorites.length) {
@@ -461,6 +424,160 @@
           escapeHtml(safeHref(item.url, 'urun')) + '">Incele</a></div>';
       }).join('');
     }
+  }
+
+  function shipmentStatusLabel(status) {
+    return {
+      pending: 'Hazirlaniyor', label_ready: 'Etiket hazir', shipped: 'Kargoya verildi',
+      in_transit: 'Yolda', delivered: 'Teslim edildi', failed: 'Teslimat sorunu',
+      cancelled: 'Iptal edildi', returned: 'Geri dondu',
+    }[String(status || '')] || 'Hazirlaniyor';
+  }
+
+  function shipmentCards(shipments) {
+    return (shipments || []).map(function (shipment) {
+      return '<div class="page-info-banner" data-css="margin-top:12px;"><strong>' +
+        escapeHtml(shipment.is_return ? 'Iade gonderisi' : shipment.carrier_name || 'Kargo') + '</strong> · ' +
+        escapeHtml(shipmentStatusLabel(shipment.status)) +
+        (shipment.tracking_number ? '<br/>Takip No: <strong>' + escapeHtml(shipment.tracking_number) + '</strong>' : '') +
+        trackingLink(shipment.tracking_url) + '</div>';
+    }).join('');
+  }
+
+  function returnStatusLabel(status) {
+    return {
+      requested: 'Incelemede',
+      approved: 'Onaylandi',
+      rejected: 'Reddedildi',
+      awaiting_shipment: 'Kargo bekleniyor',
+      in_transit: 'Yolda',
+      received: 'Teslim alindi',
+      inspected: 'Kontrol edildi',
+      resolved: 'Sonuclandi',
+      cancelled: 'Iptal edildi',
+    }[String(status || '')] || 'Islemde';
+  }
+
+  async function renderCustomerReturns(orders) {
+    const api = window.SuveraAPI;
+    const listNode = document.getElementById('accountReturns');
+    const message = document.getElementById('returnRequestMessage');
+    const form = document.getElementById('returnRequestForm');
+    if (!listNode || !form) return;
+
+    form._returnOrders = (orders || []).filter(function (order) {
+      return /^\d+$/.test(String(order.id || '')) && order.items.some(function (item) {
+        return /^\d+$/.test(String(item.orderItemId || ''));
+      });
+    });
+    bindReturnRequestForm(form);
+    populateReturnOrderOptions(form);
+
+    if (!api || !api.customerToken || !api.customerToken()) {
+      listNode.innerHTML = '<div class="page-empty">Taleplerinizi gormek ve yeni talep olusturmak icin <a href="giris">hesabiniza giris yapin</a>.</div>';
+      if (message) message.textContent = 'Iade talebi olusturmak icin musteri hesabinizla giris yapmalisiniz.';
+      return;
+    }
+    try {
+      const requests = await api.returns.list();
+      listNode.innerHTML = requests.length ? requests.map(function (request) {
+        return '<div class="page-order-card"><strong>' + escapeHtml(request.order_code || 'Talep') + '</strong>' +
+          '<p>' + escapeHtml({ return: 'Iade', exchange: 'Degisim', cancellation: 'Iptal' }[request.request_type] || request.request_type) +
+          ' · ' + escapeHtml(returnStatusLabel(request.status)) + '</p>' +
+          '<p>Sebep: ' + escapeHtml(request.reason_code || '-') + '</p>' +
+          (request.resolution ? '<p>Sonuc: ' + escapeHtml(request.resolution) + '</p>' : '') +
+          '</div>';
+      }).join('') : '<div class="page-empty">Henuz iade, degisim veya iptal talebiniz yok.</div>';
+      if (message) message.textContent = 'Talep ve durum bilgileri hesabinizla guvenli bicimde eslestirilir.';
+    } catch (err) {
+      listNode.innerHTML = '<div class="page-empty">Talep durumu su anda yuklenemedi.</div>';
+      if (message) message.textContent = (err && err.message) || 'Iade bilgileri yuklenemedi.';
+    }
+  }
+
+  function populateReturnOrderOptions(form) {
+    const select = document.getElementById('returnOrder');
+    if (!select) return;
+    const current = select.value;
+    const options = form._returnOrders || [];
+    select.innerHTML = '<option value="">Siparis secin</option>' + options.map(function (order) {
+      return '<option value="' + escapeHtml(order.id) + '">' + escapeHtml(order.orderCode || order.id) +
+        ' · ' + escapeHtml(orderStatusLabel(order.status)) + '</option>';
+    }).join('');
+    if (options.some(function (order) { return String(order.id) === current; })) select.value = current;
+    renderReturnOrderItems(form);
+  }
+
+  function renderReturnOrderItems(form) {
+    const select = document.getElementById('returnOrder');
+    const container = document.getElementById('returnItems');
+    if (!select || !container) return;
+    const order = (form._returnOrders || []).find(function (item) { return String(item.id) === select.value; });
+    if (!order) {
+      container.innerHTML = 'Siparis sectiginizde uygun kalemler burada gorunur.';
+      return;
+    }
+    container.innerHTML = order.items.filter(function (item) {
+      return /^\d+$/.test(String(item.orderItemId || ''));
+    }).map(function (item) {
+      return '<label class="page-check" style="align-items:center;"><input type="checkbox" data-return-item="' +
+        escapeHtml(item.orderItemId) + '" checked /> <span><strong>' + escapeHtml(item.name) + '</strong><br/>' +
+        escapeHtml([item.selectedColor, item.selectedSize, item.sku].filter(Boolean).join(' · ')) +
+        '</span><input type="number" data-return-quantity="' + escapeHtml(item.orderItemId) +
+        '" min="1" max="' + Number(item.quantity || 1) + '" value="' + Number(item.quantity || 1) + '" aria-label="Talep adedi" /></label>';
+    }).join('');
+  }
+
+  function bindReturnRequestForm(form) {
+    if (form.dataset.bound === 'true') return;
+    form.dataset.bound = 'true';
+    const orderSelect = document.getElementById('returnOrder');
+    if (orderSelect) orderSelect.addEventListener('change', function () { renderReturnOrderItems(form); });
+    form.addEventListener('submit', async function (event) {
+      event.preventDefault();
+      const api = window.SuveraAPI;
+      const message = document.getElementById('returnRequestMessage');
+      if (!api || !api.customerToken || !api.customerToken()) {
+        if (message) message.innerHTML = 'Talep olusturmak icin <a href="giris">giris yapin</a>.';
+        return;
+      }
+      const orderId = document.getElementById('returnOrder').value;
+      const requestType = document.getElementById('returnType').value;
+      const reasonCode = document.getElementById('returnReason').value;
+      const customerNote = document.getElementById('returnNote').value.trim();
+      const selected = Array.from(document.querySelectorAll('[data-return-item]:checked'));
+      const items = selected.map(function (checkbox) {
+        const orderItemId = checkbox.getAttribute('data-return-item');
+        const quantity = document.querySelector('[data-return-quantity="' + CSS.escape(orderItemId) + '"]');
+        return {
+          order_item_id: Number(orderItemId),
+          quantity: Number(quantity && quantity.value || 1),
+          reason_code: reasonCode,
+          requested_resolution: requestType === 'exchange' ? 'exchange' : 'refund',
+        };
+      });
+      if (!orderId || !items.length) {
+        if (message) message.textContent = 'Siparis ve en az bir kalem secin.';
+        return;
+      }
+      const button = form.querySelector('button[type="submit"]');
+      if (button) button.disabled = true;
+      if (message) message.textContent = 'Talebiniz kaydediliyor.';
+      try {
+        await api.returns.create({
+          order_id: Number(orderId), type: requestType, reason_code: reasonCode,
+          customer_note: customerNote, items: items,
+        });
+        form.reset();
+        renderReturnOrderItems(form);
+        if (message) message.textContent = 'Talebiniz alindi. Durumunu bu sayfadan takip edebilirsiniz.';
+        await renderCustomerReturns(form._returnOrders || []);
+      } catch (err) {
+        if (message) message.textContent = (err && err.message) || 'Talep olusturulamadi.';
+      } finally {
+        if (button) button.disabled = false;
+      }
+    });
   }
 
   function bindAccountLookup() {
@@ -505,7 +622,7 @@
   }
 
   async function renderFavorites() {
-    const root = document.getElementById('favoritesPage');
+    const root = document.querySelector('[data-page-root="favoritesPage"]');
     if (!root) return;
 
     const state = getState();
@@ -548,7 +665,7 @@
   }
 
   async function renderBlog() {
-    const root = document.getElementById('blogPage');
+    const root = document.querySelector('[data-page-root="blogPage"]');
     if (!root) return;
 
     const grid = document.getElementById('blogPostsGrid');
@@ -566,7 +683,7 @@
         const media = image
           ? '<img src="' + escapeHtml(image) + '" alt="' + escapeHtml(post.title) + '" loading="lazy" decoding="async"/>'
           : String(index + 1).padStart(2, '0');
-        return '<article class="page-blog-card" onclick="location.href=\'' + escapeHtml(blogUrl(post)) + '\'"><div class="page-blog-media">' + media + '</div><span class="page-badge good">' +
+        return '<article class="page-blog-card" data-nav="' + escapeHtml(blogUrl(post)) + '"><div class="page-blog-media">' + media + '</div><span class="page-badge good">' +
           escapeHtml(publishedLabel(post.published_at)) + '</span><h3>' +
           escapeHtml(post.title) + '</h3><p>' + escapeHtml(post.excerpt || 'Suvera blog yazisi') +
           '</p><div class="page-inline-actions"><a class="page-btn-secondary" href="' + escapeHtml(blogUrl(post)) + '">Yazıyı oku</a></div></article>';
@@ -577,7 +694,7 @@
   }
 
   async function renderBlogDetail() {
-    const root = document.getElementById('blogDetailPage');
+    const root = document.querySelector('[data-page-root="blogDetailPage"]');
     if (!root) return;
     const params = new URLSearchParams(location.search);
     const id = params.get('id') || params.get('slug') || '';
@@ -641,7 +758,7 @@
   }
 
   async function renderSearch() {
-    const root = document.getElementById('searchPage');
+    const root = document.querySelector('[data-page-root="searchPage"]');
     if (!root) return;
 
     const params = new URLSearchParams(location.search);
@@ -771,7 +888,7 @@
   }
 
   async function renderTracking() {
-    const root = document.getElementById('trackingPage');
+    const root = document.querySelector('[data-page-root="trackingPage"]');
     if (!root) return;
 
     const state = getState();
@@ -811,7 +928,7 @@
         escapeHtml(match.orderCode || match.id || '-') + '</strong></div><div class="page-kv"><small>Durum</small><strong>' +
         escapeHtml(orderStatusLabel(match.status)) + '</strong></div><div class="page-kv"><small>Musteri</small><strong>' +
         escapeHtml(match.customer && match.customer.name || '-') + '</strong></div><div class="page-kv"><small>Toplam</small><strong>' +
-        money(match.total || 0) + '</strong></div></div><div class="page-info-banner" style="margin-top:16px;">' +
+        money(match.total || 0) + '</strong></div></div><div class="page-info-banner" data-css="margin-top:16px;">' +
         (match.tracking_number
           ? 'Kargo: <strong>' + escapeHtml(match.shipping_company || 'Hazirlaniyor') + '</strong> • Takip No: <strong>' + escapeHtml(match.tracking_number) + '</strong>' +
             trackingLink(match.tracking_url)
@@ -866,9 +983,335 @@
     }
   }
 
+  // ── A25: customer address book (hesabim) ─────────────────────
+  function titleCaseAddress(value) {
+    return String(value || '')
+      .toLocaleLowerCase('tr-TR')
+      .replace(/(^|[\s/-])\S/g, function (part) { return part.toLocaleUpperCase('tr-TR'); });
+  }
+
+  let addressBookCities = [];
+  let addressBookCache = [];
+  let addressBookBound = false;
+
+  async function populateAddressCities(preferred) {
+    const select = document.getElementById('addressCity');
+    if (!select || !window.SuveraAddressData) return;
+    try {
+      addressBookCities = await window.SuveraAddressData.loadCities();
+      select.innerHTML = '<option value="">İl seçin</option>' + addressBookCities.map(function (city) {
+        const name = titleCaseAddress(city.name);
+        return '<option value="' + escapeHtml(name) + '" data-city-id="' + escapeHtml(city.id) + '">' + escapeHtml(name) + '</option>';
+      }).join('');
+      if (preferred) select.value = preferred;
+    } catch (err) {
+      select.innerHTML = '<option value="">İller yüklenemedi</option>';
+    }
+  }
+
+  async function populateAddressDistricts(preferred) {
+    const citySelect = document.getElementById('addressCity');
+    const districtSelect = document.getElementById('addressDistrict');
+    if (!citySelect || !districtSelect || !window.SuveraAddressData) return;
+    const selectedCity = citySelect.value;
+    districtSelect.value = '';
+    districtSelect.disabled = true;
+    if (!selectedCity) {
+      districtSelect.innerHTML = '<option value="">Önce il seçin</option>';
+      return;
+    }
+    districtSelect.innerHTML = '<option value="">İlçeler yükleniyor</option>';
+    try {
+      const selectedOption = citySelect.options[citySelect.selectedIndex];
+      const districts = await window.SuveraAddressData.loadDistricts((selectedOption && selectedOption.dataset.cityId) || selectedCity);
+      districtSelect.innerHTML = '<option value="">İlçe seçin</option>' + districts.map(function (district) {
+        const name = titleCaseAddress(district.name);
+        return '<option value="' + escapeHtml(name) + '">' + escapeHtml(name) + '</option>';
+      }).join('');
+      districtSelect.disabled = false;
+      if (preferred) districtSelect.value = preferred;
+    } catch (err) {
+      districtSelect.innerHTML = '<option value="">İlçeler yüklenemedi</option>';
+    }
+  }
+
+  function addressSummaryLine(address) {
+    return [address.address_line1, address.neighborhood, address.district, address.city]
+      .map(function (part) { return String(part || '').trim(); })
+      .filter(Boolean)
+      .join(', ');
+  }
+
+  function renderAddressList(addresses) {
+    const listNode = document.getElementById('addressBookList');
+    if (!listNode) return;
+    if (!addresses.length) {
+      listNode.innerHTML = '<div class="page-empty">Henüz kayıtlı adresiniz yok. Yeni adres ekleyerek başlayın.</div>';
+      return;
+    }
+    listNode.innerHTML = addresses.map(function (address) {
+      const badges = [];
+      if (address.is_default_shipping) badges.push('<span class="page-stat">Varsayılan teslimat</span>');
+      if (address.is_default_billing) badges.push('<span class="page-stat">Varsayılan fatura</span>');
+      const actions = [
+        '<button class="page-btn-secondary" type="button" data-address-edit="' + escapeHtml(address.id) + '">Düzenle</button>',
+        address.is_default_shipping ? '' : '<button class="page-btn-secondary" type="button" data-address-default="' + escapeHtml(address.id) + '" data-kind="shipping">Teslimat varsayılanı</button>',
+        address.is_default_billing ? '' : '<button class="page-btn-secondary" type="button" data-address-default="' + escapeHtml(address.id) + '" data-kind="billing">Fatura varsayılanı</button>',
+        '<button class="page-btn-secondary" type="button" data-address-delete="' + escapeHtml(address.id) + '">Sil</button>',
+      ].filter(Boolean).join('');
+      return '<div class="page-order-card"><strong>' + escapeHtml(address.label || address.recipient || 'Adres') + '</strong>' +
+        '<p>' + escapeHtml([address.recipient, address.phone].filter(Boolean).join(' · ')) + '</p>' +
+        '<p>' + escapeHtml(addressSummaryLine(address)) + '</p>' +
+        (badges.length ? '<div class="page-stats" data-css="margin:8px 0;">' + badges.join('') + '</div>' : '') +
+        '<div class="page-inline-actions">' + actions + '</div></div>';
+    }).join('');
+  }
+
+  function syncAddressCompanyFields() {
+    const type = document.getElementById('addressInvoiceType');
+    if (!type) return;
+    document.querySelectorAll('[data-address-company]').forEach(function (node) { node.hidden = type.value !== 'company'; });
+  }
+
+  function resetAddressForm() {
+    const form = document.getElementById('addressForm');
+    if (!form) return;
+    form.reset();
+    document.getElementById('addressId').value = '';
+    document.getElementById('addressSubmit').textContent = 'Kaydet';
+    const message = document.getElementById('addressFormMessage');
+    if (message) message.textContent = '';
+    syncAddressCompanyFields();
+    populateAddressDistricts('');
+  }
+
+  async function openAddressForm(address) {
+    const form = document.getElementById('addressForm');
+    if (!form) return;
+    resetAddressForm();
+    if (address) {
+      document.getElementById('addressId').value = address.id;
+      document.getElementById('addressLabel').value = address.label || '';
+      document.getElementById('addressRecipient').value = address.recipient || '';
+      document.getElementById('addressPhone').value = address.phone || '';
+      document.getElementById('addressNeighborhood').value = address.neighborhood || '';
+      document.getElementById('addressLine1').value = address.address_line1 || '';
+      document.getElementById('addressLine2').value = address.address_line2 || '';
+      document.getElementById('addressPostal').value = address.postal_code || '';
+      document.getElementById('addressInvoiceType').value = address.invoice_type || 'individual';
+      document.getElementById('addressCompany').value = address.company_name || '';
+      document.getElementById('addressVkn').value = address.vkn || '';
+      document.getElementById('addressTaxOffice').value = address.tax_office || '';
+      document.getElementById('addressDefaultShipping').checked = !!address.is_default_shipping;
+      document.getElementById('addressDefaultBilling').checked = !!address.is_default_billing;
+      document.getElementById('addressSubmit').textContent = 'Güncelle';
+      syncAddressCompanyFields();
+      document.getElementById('addressCity').value = address.city || '';
+      await populateAddressDistricts(address.district || '');
+    }
+    form.hidden = false;
+    document.getElementById('addressRecipient').focus();
+  }
+
+  function readAddressForm() {
+    return {
+      label: document.getElementById('addressLabel').value.trim(),
+      recipient: document.getElementById('addressRecipient').value.trim(),
+      phone: document.getElementById('addressPhone').value.trim(),
+      city: document.getElementById('addressCity').value.trim(),
+      district: document.getElementById('addressDistrict').value.trim(),
+      neighborhood: document.getElementById('addressNeighborhood').value.trim(),
+      address_line1: document.getElementById('addressLine1').value.trim(),
+      address_line2: document.getElementById('addressLine2').value.trim(),
+      postal_code: document.getElementById('addressPostal').value.trim(),
+      invoice_type: document.getElementById('addressInvoiceType').value,
+      company_name: document.getElementById('addressCompany').value.trim(),
+      vkn: document.getElementById('addressVkn').value.trim(),
+      tax_office: document.getElementById('addressTaxOffice').value.trim(),
+      is_default_shipping: document.getElementById('addressDefaultShipping').checked,
+      is_default_billing: document.getElementById('addressDefaultBilling').checked,
+    };
+  }
+
+  function bindAddressBook() {
+    const card = document.getElementById('addressBookCard');
+    if (!card || addressBookBound) return;
+    addressBookBound = true;
+    const form = document.getElementById('addressForm');
+    const addButton = document.getElementById('addressAddButton');
+    const cancelButton = document.getElementById('addressCancel');
+    const listNode = document.getElementById('addressBookList');
+    const invoiceType = document.getElementById('addressInvoiceType');
+    const citySelect = document.getElementById('addressCity');
+
+    if (addButton) addButton.addEventListener('click', function () { openAddressForm(null); });
+    if (cancelButton) cancelButton.addEventListener('click', function () { resetAddressForm(); if (form) form.hidden = true; });
+    if (invoiceType) invoiceType.addEventListener('change', syncAddressCompanyFields);
+    if (citySelect) citySelect.addEventListener('change', function () { populateAddressDistricts(''); });
+
+    if (listNode) {
+      listNode.addEventListener('click', async function (event) {
+        const target = event.target.closest('[data-address-edit],[data-address-delete],[data-address-default]');
+        if (!target) return;
+        const api = window.SuveraAPI;
+        if (target.hasAttribute('data-address-edit')) {
+          const id = target.getAttribute('data-address-edit');
+          const address = addressBookCache.find(function (item) { return String(item.id) === String(id); });
+          if (address) await openAddressForm(address);
+          return;
+        }
+        if (target.hasAttribute('data-address-delete')) {
+          const id = target.getAttribute('data-address-delete');
+          if (!window.confirm('Bu adresi silmek istiyor musunuz?')) return;
+          target.disabled = true;
+          try {
+            await api.addresses.remove(id);
+            await renderAddressBook();
+          } catch (err) {
+            target.disabled = false;
+          }
+          return;
+        }
+        if (target.hasAttribute('data-address-default')) {
+          const id = target.getAttribute('data-address-default');
+          const kind = target.getAttribute('data-kind') || 'shipping';
+          target.disabled = true;
+          try {
+            await api.addresses.setDefault(id, kind);
+            await renderAddressBook();
+          } catch (err) {
+            target.disabled = false;
+          }
+        }
+      });
+    }
+
+    if (form) {
+      form.addEventListener('submit', async function (event) {
+        event.preventDefault();
+        const api = window.SuveraAPI;
+        const formMessage = document.getElementById('addressFormMessage');
+        const submit = document.getElementById('addressSubmit');
+        const id = document.getElementById('addressId').value;
+        const payload = readAddressForm();
+        if (submit) submit.disabled = true;
+        if (formMessage) formMessage.textContent = 'Kaydediliyor...';
+        try {
+          if (id) await api.addresses.update(id, payload);
+          else await api.addresses.create(payload);
+          resetAddressForm();
+          form.hidden = true;
+          await renderAddressBook();
+        } catch (err) {
+          if (formMessage) formMessage.textContent = (err && err.message) || 'Adres kaydedilemedi.';
+        } finally {
+          if (submit) submit.disabled = false;
+        }
+      });
+    }
+  }
+
+  async function renderAddressBook() {
+    const card = document.getElementById('addressBookCard');
+    if (!card) return;
+    const api = window.SuveraAPI;
+    const listNode = document.getElementById('addressBookList');
+    const message = document.getElementById('addressBookMessage');
+    const addButton = document.getElementById('addressAddButton');
+    const form = document.getElementById('addressForm');
+
+    if (!api || !api.hasCustomerSession || !api.hasCustomerSession()) {
+      if (listNode) listNode.innerHTML = '<div class="page-empty">Adres defterinizi görmek için <a href="giris">giriş yapın</a>.</div>';
+      if (message) message.textContent = 'Adresleri görmek ve yönetmek için hesabınıza giriş yapın.';
+      if (addButton) addButton.hidden = true;
+      if (form) form.hidden = true;
+      return;
+    }
+    if (addButton) addButton.hidden = false;
+    if (message) message.textContent = '';
+
+    bindAddressBook();
+    await populateAddressCities('');
+
+    try {
+      const data = await api.addresses.list();
+      addressBookCache = (data && data.addresses) || [];
+      renderAddressList(addressBookCache);
+    } catch (err) {
+      if (listNode) listNode.innerHTML = '<div class="page-empty">Adresler yüklenemedi.</div>';
+    }
+  }
+
+  // ── A25: guest order -> account linking (hesabim) ────────────
+  function stripQueryParam(name) {
+    try {
+      const url = new URL(window.location.href);
+      if (!url.searchParams.has(name)) return;
+      url.searchParams.delete(name);
+      const query = url.searchParams.toString();
+      window.history.replaceState({}, document.title, url.pathname + (query ? '?' + query : '') + url.hash);
+    } catch (_) { /* history unavailable */ }
+  }
+
+  async function initOrderClaim() {
+    const form = document.getElementById('orderClaimForm');
+    const message = document.getElementById('orderClaimMessage');
+    if (!form) return;
+    const api = window.SuveraAPI;
+
+    // Consume ?claim_token from the emailed link: strip it from the URL first (token
+    // hygiene — never leave it in history), then confirm only when signed in.
+    let claimToken = '';
+    try { claimToken = new URLSearchParams(window.location.search).get('claim_token') || ''; } catch (_) {}
+    if (claimToken) {
+      stripQueryParam('claim_token');
+      if (api && api.hasCustomerSession && api.hasCustomerSession()) {
+        if (message) message.textContent = 'Sipariş bağlanıyor...';
+        try {
+          await api.orderClaim.confirm(claimToken);
+          if (message) message.textContent = 'Siparişiniz hesabınıza bağlandı. Sipariş geçmişinizde görünecek.';
+          await renderAccount();
+        } catch (err) {
+          if (message) {
+            message.textContent = (err && err.status === 409)
+              ? 'Bu sipariş başka bir hesaba bağlı.'
+              : ((err && err.message) || 'Doğrulama bağlantısı geçersiz veya süresi doldu.');
+          }
+        }
+      } else if (message) {
+        message.innerHTML = 'Siparişi bağlamak için önce <a href="giris">giriş yapın</a>, ardından sipariş kodunuzla tekrar deneyin.';
+      }
+    }
+
+    form.addEventListener('submit', async function (event) {
+      event.preventDefault();
+      if (!api || !api.hasCustomerSession || !api.hasCustomerSession()) {
+        if (message) message.innerHTML = 'Sipariş bağlamak için <a href="giris">giriş yapın</a>.';
+        return;
+      }
+      const codeInput = document.getElementById('orderClaimCode');
+      const code = codeInput ? codeInput.value.trim() : '';
+      if (!code) { if (message) message.textContent = 'Sipariş kodu zorunlu.'; return; }
+      const submit = form.querySelector('button[type="submit"]');
+      if (submit) submit.disabled = true;
+      if (message) message.textContent = 'Doğrulama bağlantısı gönderiliyor...';
+      try {
+        const result = await api.orderClaim.request(code);
+        if (message) message.textContent = (result && result.message) || 'Eğer bu sipariş kodu geçerliyse, siparişin e-posta adresine bir doğrulama bağlantısı gönderildi.';
+        form.reset();
+      } catch (err) {
+        if (message) message.textContent = (err && err.message) || 'İşlem tamamlanamadı.';
+      } finally {
+        if (submit) submit.disabled = false;
+      }
+    });
+  }
+
   async function init() {
     await renderThankYou();
     await renderAccount();
+    await renderAddressBook();
+    await initOrderClaim();
     await renderFavorites();
     await renderTracking();
     await renderBlog();

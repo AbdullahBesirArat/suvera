@@ -5,23 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Suvera checkout akisinda teslimat, iletisim ve odeme adimlarini guvenli sekilde tamamlayin." />
   <link rel="canonical" href="https://suvera.com.tr/siparis" />
-  <meta property="og:type" content="website" />
-  <meta property="og:title" content="Odeme ve Teslimat | Suvera" />
-  <meta property="og:description" content="Suvera checkout akisinda teslimat, iletisim ve odeme adimlarini guvenli sekilde tamamlayin." />
-  <meta property="og:url" content="https://suvera.com.tr/siparis" />
-  <meta property="og:image" content="https://suvera.com.tr/og-cover.svg" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Odeme ve Teslimat | Suvera" />
-  <meta name="twitter:description" content="Suvera checkout akisinda teslimat, iletisim ve odeme adimlarini guvenli sekilde tamamlayin." />
-  <meta name="twitter:image" content="https://suvera.com.tr/og-cover.svg" />
   <meta name="theme-color" content="#2f6041" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="manifest" href="site.webmanifest" />
+  {{> head-defaults}}
   <title>Ödeme | SUVERA</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="shared.css" />
   <style>
     :root{
       --ink:#151515;
@@ -42,8 +28,9 @@
     .brand-row{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:34px}
     .checkout-logo{font-family:'Cormorant Garamond',serif;font-size:30px;letter-spacing:4px;text-decoration:none;color:var(--ink)}
     .cart-link{color:var(--muted);font-size:13px;text-decoration:none}
-    .steps{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:12px;margin-bottom:28px;flex-wrap:wrap}
+    .steps{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:12px;margin-bottom:28px;flex-wrap:wrap;list-style:none;padding:0;margin-left:0;margin-right:0}
     .steps strong{color:var(--ink);font-weight:500}
+    .checkout-heading{font-family:var(--serif,Georgia,serif);font-size:22px;font-weight:500;letter-spacing:.5px;margin:0 0 14px}
     .section{padding:26px 0;border-top:1px solid var(--line)}
     .section:first-of-type{border-top:none;padding-top:0}
     .section-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:16px}
@@ -55,7 +42,7 @@
     label{font-size:12px;color:var(--muted)}
     input,select,textarea{width:100%;border:1px solid var(--line);background:#fff;border-radius:5px;font:inherit;font-size:14px;padding:13px 12px;outline:none}
     textarea{min-height:98px;resize:vertical}
-    input:focus,select:focus,textarea:focus{border-color:#8e9ba9;box-shadow:0 0 0 2px rgba(51,95,214,.08)}
+    input:focus,select:focus,textarea:focus{border-color:#575f69;box-shadow:0 0 0 2px rgba(51,95,214,.08)}
     .check-row{display:flex;align-items:center;gap:10px;margin-top:12px;color:#34383d;font-size:13px}
     .check-row input{width:auto}
     .method-list{display:grid;gap:10px}
@@ -66,7 +53,7 @@
     .method-copy{font-size:12px;color:var(--muted);margin-top:3px}
     .method-tag{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:4px 8px}
     .method-detail{display:none;border-top:1px solid var(--line);padding:14px 16px;background:#fafafa;color:var(--muted);font-size:13px;line-height:1.55}
-    .method:has(input:checked){border-color:#9cadb9;box-shadow:0 0 0 1px #9cadb9}
+    .method:has(input:checked){border-color:#575f69;box-shadow:0 0 0 1px #9cadb9}
     .method:has(input:checked) .method-detail{display:block}
     .guest-choice{border:1px solid #dfe4dc;background:#f7faf5;border-radius:12px;padding:16px;margin-bottom:18px}
     .guest-choice-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:12px}
@@ -96,7 +83,28 @@
     .summary-price{font-size:13px;font-weight:600;white-space:nowrap}
     .discount-row{margin:22px 0;padding:12px 14px;border:1px dashed var(--line);border-radius:6px;background:#fafafa;color:var(--muted);font-size:13px;line-height:1.55}
     .discount-row strong{display:block;color:var(--ink);font-size:11px;letter-spacing:1.3px;text-transform:uppercase;margin-bottom:6px}
+    .coupon-controls{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:10px}
+    .coupon-controls input{min-width:0;border:1px solid var(--line);border-radius:5px;padding:10px;font:inherit;text-transform:uppercase}
+    .coupon-controls button{border:0;border-radius:5px;background:var(--green);color:#fff;padding:10px 12px;font:inherit;cursor:pointer}
+    .gift-options{display:grid;gap:10px}
+    .gift-option{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;border:1px solid var(--line);border-radius:8px;padding:14px}
+    .gift-option-title{display:block;font-weight:600}
+    .gift-option-copy{display:block;font-size:13px;color:var(--muted);margin-top:3px}
+    .gift-option-fee{font-size:13px;font-weight:600;white-space:nowrap}
+    .gift-note-field{margin-top:16px}
+    .gift-note-label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
+    .gift-note-input{width:100%;border:1px solid var(--line);border-radius:6px;padding:10px;font:inherit;resize:vertical}
+    .gift-note-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:8px}
+    .gift-note-counter{font-size:12px;color:var(--muted)}
+    .gift-note-save{border:0;border-radius:5px;background:var(--green);color:#fff;padding:9px 14px;font:inherit;cursor:pointer}
+    .gift-note-save[disabled],.gift-option input[disabled]{opacity:.6;cursor:progress}
+    .gift-status{margin:12px 0 0;min-height:18px;font-size:13px;color:#41673c}
+    .gift-status[data-tone="error"]{color:var(--danger)}
+    .coupon-feedback{margin-top:8px;color:#41673c}
+    .coupon-remove{display:none;border:0;background:none;color:var(--danger);padding:5px 0 0;text-decoration:underline;cursor:pointer;font:inherit}
     .money-row{display:flex;justify-content:space-between;gap:16px;padding:9px 0;color:#34383d;font-size:14px}
+    /* A class-level display wins over the UA [hidden] rule, so restate it here. */
+    .money-row[hidden],.section[hidden]{display:none}
     .money-row.total{border-top:1px solid var(--line);margin-top:12px;padding-top:18px;font-size:20px;color:var(--ink);font-weight:600}
     .currency{font-size:12px;color:var(--muted);font-weight:400;margin-right:6px}
     .empty-note{background:#fff;border:1px solid var(--line);border-radius:6px;padding:14px;color:var(--muted);font-size:13px;line-height:1.5}
@@ -120,17 +128,34 @@
   </style>
 </head>
 <body>
-  <main class="checkout-shell">
+  <main id="main" tabindex="-1" class="checkout-shell">
     <section class="checkout-main">
       <div class="checkout-inner">
-        <div class="brand-row">
+        <!-- A31: checkout deliberately drops the site navigation, so this brand row is the
+             page's own header. It stays inside the checkout column because .checkout-shell
+             is a two-column grid; a sectioning <header> here is correct HTML and does not
+             claim the banner landmark, which this page genuinely does not have. -->
+        <header class="brand-row">
           <a class="checkout-logo" href="anasayfa">SUVERA</a>
           <a class="cart-link" href="sepet">Sepete dön</a>
-        </div>
+        </header>
 
-        <div class="steps">
-          <span>Sepet</span><span>›</span><strong>Bilgiler</strong><span>›</span><span>Kargo</span><span>›</span><span>Ödeme</span>
-        </div>
+        <h1 class="checkout-heading">Siparişi tamamla</h1>
+
+        <!-- A31: a real ordered list inside a named nav, so the position in the flow is
+             conveyed by structure and aria-current rather than by bold text alone. The
+             separators are decorative and hidden from assistive technology. -->
+        <nav aria-label="Sipariş adımları">
+          <ol class="steps">
+            <li>Sepet</li>
+            <li aria-hidden="true">›</li>
+            <li aria-current="step"><strong>Bilgiler</strong></li>
+            <li aria-hidden="true">›</li>
+            <li>Kargo</li>
+            <li aria-hidden="true">›</li>
+            <li>Ödeme</li>
+          </ol>
+        </nav>
 
         <form id="checkoutForm" novalidate>
           <div class="error" id="checkoutError" role="alert" aria-live="assertive"></div>
@@ -164,9 +189,63 @@
             </label>
           </section>
 
+          <section class="section" id="invoiceSection">
+            <div class="section-head">
+              <h2 class="section-title">Fatura bilgileri</h2>
+              <p class="section-note">Teslimat ve fatura adresi ayrı tutulur</p>
+            </div>
+            <div class="field-grid">
+              <div class="field full">
+                <label for="invoiceType">Fatura türü</label>
+                <select id="invoiceType" name="invoiceType">
+                  <option value="individual">Bireysel</option>
+                  <option value="company">Kurumsal</option>
+                </select>
+              </div>
+              <div class="field full" data-invoice-individual>
+                <label for="invoiceFullName">Fatura adı soyadı</label>
+                <input id="invoiceFullName" maxlength="200" autocomplete="billing name" placeholder="Teslimat adından alınır" />
+              </div>
+              <div class="field full" data-invoice-company hidden>
+                <label for="invoiceLegalName">Şirket unvanı</label>
+                <input id="invoiceLegalName" maxlength="240" autocomplete="organization" />
+              </div>
+              <div class="field" data-invoice-company hidden>
+                <label for="invoiceVkn">VKN</label>
+                <input id="invoiceVkn" inputmode="numeric" maxlength="10" autocomplete="off" />
+              </div>
+              <div class="field" data-invoice-company hidden>
+                <label for="invoiceTaxOffice">Vergi dairesi</label>
+                <input id="invoiceTaxOffice" maxlength="160" />
+              </div>
+              <div class="field full">
+                <label class="check-row" for="invoiceSameShipping">
+                  <input id="invoiceSameShipping" type="checkbox" checked />
+                  Fatura adresi teslimat adresiyle aynı
+                </label>
+              </div>
+              <div class="field full" id="invoiceAddressField" hidden>
+                <label for="invoiceAddress">Fatura adresi</label>
+                <input id="invoiceAddress" maxlength="1200" autocomplete="billing street-address" />
+              </div>
+              <div class="field full">
+                <label for="invoiceEmail">Fatura e-postası</label>
+                <input id="invoiceEmail" type="email" maxlength="200" autocomplete="billing email" placeholder="İletişim e-postasından alınır" />
+              </div>
+            </div>
+            <p class="section-note">Kimlik/vergi numarası tarayıcıda saklanmaz; sunucuda şifreli olarak işlenir. Bireysel TCKN isteğe bağlıdır.</p>
+          </section>
+
           <section class="section">
             <div class="section-head">
               <h2 class="section-title">Teslimat</h2>
+            </div>
+            <div class="field full" id="savedAddressPanel" hidden>
+              <label for="savedAddressSelect">Kayıtlı adreslerim</label>
+              <select id="savedAddressSelect" autocomplete="off">
+                <option value="">Yeni adres gir</option>
+              </select>
+              <p class="section-note">Kayıtlı bir adres seçerek teslimat bilgilerini otomatik doldurabilirsiniz.</p>
             </div>
             <div class="field-grid">
               <div class="field full">
@@ -189,10 +268,12 @@
               </div>
               <div class="field">
                 <label for="city">İl</label>
+                <input id="citySearch" type="search" placeholder="İl ara" aria-label="İl ara" aria-controls="city" autocomplete="off" />
                 <select id="city" name="city" autocomplete="shipping address-level1" required>
                   <option value="">İl seçin</option>
                 </select>
               </div>
+              <p class="field full" id="addressDataError" role="alert" hidden></p>
               <div class="field">
                 <label for="district">İlçe</label>
                 <select id="district" name="district" autocomplete="shipping address-line2" required disabled>
@@ -204,18 +285,18 @@
                 <input id="customerPhone" name="phone" autocomplete="shipping tel-national" required maxlength="40" placeholder="05xx xxx xx xx" />
               </div>
             </div>
-            <label class="check-row">
-              <input type="checkbox" />
+            <label class="check-row" for="saveAddress">
+              <input id="saveAddress" type="checkbox" />
               Bir sonraki işlem için bu bilgileri kaydet
             </label>
           </section>
 
           <section class="section">
             <div class="section-head">
-              <h2 class="section-title">Kargo yöntemi</h2>
+              <h2 class="section-title" id="shippingMethodTitle">Kargo yöntemi</h2>
               <p class="section-note">Adres bilgilerine göre hazırlanır</p>
             </div>
-            <div class="method-list">
+            <div class="method-list" role="radiogroup" aria-labelledby="shippingMethodTitle">
               <div class="method">
                 <label>
                   <input type="radio" name="shipping" checked />
@@ -231,10 +312,10 @@
 
           <section class="section">
             <div class="section-head">
-              <h2 class="section-title">Ödeme</h2>
+              <h2 class="section-title" id="paymentMethodTitle">Ödeme</h2>
               <p class="section-note">Kart bilgileri bu sayfada tutulmaz, güvenli ödeme adımına yönlendirilirsiniz.</p>
             </div>
-            <div class="method-list">
+            <div class="method-list" role="radiogroup" aria-labelledby="paymentMethodTitle">
               <div class="method">
                 <label>
                   <input type="radio" name="paymentMethod" value="card" checked />
@@ -265,6 +346,24 @@
             </div>
           </section>
 
+          <section class="section gift-section" id="giftSection" hidden>
+            <div class="section-head">
+              <h2 class="section-title">Hediye paketi</h2>
+              <p class="section-note">Paket ücreti ve notunuz sunucuda saklanır; toplam sipariş özetinde görünür.</p>
+            </div>
+            <div class="gift-options" id="giftOptions" role="radiogroup" aria-label="Hediye paketi seçenekleri"></div>
+            <div class="gift-note-field">
+              <label class="gift-note-label" for="giftNote">Hediye notu</label>
+              <textarea id="giftNote" class="gift-note-input" rows="3" maxlength="500"
+                        placeholder="Kartın üzerine yazılmasını istediğiniz mesaj"></textarea>
+              <div class="gift-note-foot">
+                <span id="giftNoteCounter" class="gift-note-counter">0 / 500</span>
+                <button type="button" id="giftNoteSave" class="gift-note-save">Notu kaydet</button>
+              </div>
+            </div>
+            <p class="gift-status" id="giftStatus" role="status" aria-live="polite"></p>
+          </section>
+
           <div class="pay-row">
             <a class="back-link" href="sepet">Sepete geri dön</a>
             <button class="pay-btn" id="payButton" type="submit">Siparişi Tamamla</button>
@@ -275,7 +374,7 @@
 
     <aside class="checkout-side" id="checkoutSide">
       <div class="summary-logo">SUVERA</div>
-      <button class="mobile-summary-toggle" type="button" onclick="toggleSummary()">
+      <button class="mobile-summary-toggle" type="button" data-action="toggle-summary">
         <span>Sipariş özetini göster</span>
         <strong id="mobileTotal">0,00 TL</strong>
       </button>
@@ -283,46 +382,43 @@
         <div class="summary-list" id="summaryList"></div>
         <div class="discount-row">
           <strong>İndirim kodları</strong>
-          Kampanyalar şu anda ürün ve sepet toplamına doğrudan yansıtılır. Ayrı kupon girişi bu adımda aktif değildir.
+          Kupon checkout sırasında sunucuda yeniden doğrulanır.
+          <div class="coupon-controls">
+            <input id="checkoutCouponCode" aria-label="Kupon kodu" autocomplete="off" placeholder="KUPON KODU" />
+            <button id="checkoutCouponApply" type="button">Uygula</button>
+          </div>
+          <div class="coupon-feedback" id="checkoutCouponFeedback" role="status"></div>
+          <div id="checkoutCouponBreakdown"></div>
+          <button class="coupon-remove" id="checkoutCouponRemove" type="button">Kuponu kaldır</button>
         </div>
         <div class="money-lines">
           <div class="money-row"><span>Alt toplam</span><strong id="summarySubtotal">0,00 TL</strong></div>
           <div class="money-row"><span>Kargo</span><strong id="summaryShipping">Ucretsiz</strong></div>
+          <div class="money-row" id="summaryGiftRow" hidden><span id="summaryGiftLabel">Hediye paketi</span><strong id="summaryGift">0,00 TL</strong></div>
           <div class="money-row total"><span>Toplam</span><span><span class="currency">TRY</span><strong id="summaryTotal">0,00 TL</strong></span></div>
         </div>
       </div>
     </aside>
   </main>
 
-  <script src="js/tr-address-data.js"></script>
-  <script src="js/config.js"></script>
-  <script src="js/api.js"></script>
-  <script src="js/site-seo.js"></script>
-  <script>
+  <script src="js/address-loader.js"></script>
+  {{> scripts}}
+  <script src="js/coupon-ui.js"></script>
+  <script type="module">
+    import { escapeHtml, formatMoney as money, safeHttpUrl as safePaymentUrl } from '/js/core/storefront-utils.js';
+
     const CART_KEY = 'suveraCart';
     const CHECKOUT_NOTE_KEY = 'suveraCheckoutNote';
+    // Legacy key from the pre-A24.5 client-side gift flag. Nothing writes it any more;
+    // it is only cleared on completion so an old browser does not keep it forever.
     const GIFT_WRAP_KEY = 'suveraGiftWrap';
+    const ADDRESS_PREFERENCE_KEY = 'suvera:checkout-address:v1';
+    const CHECKOUT_IDEMPOTENCY_KEY = 'suvera:checkout-idempotency:v1';
     let checkoutSettings = {};
+    let checkoutPromotionPricing = null;
     const SITE_ORIGIN = String(window.SUVERA_SITE_ORIGIN || location.origin).replace(/\/$/, '');
     const CARD_PAYMENT_SUCCESS_URL = SITE_ORIGIN + '/tesekkur';
     const CARD_PAYMENT_FAILURE_URL = SITE_ORIGIN + '/tesekkur?payment=failed';
-
-    function escapeHtml(value) {
-      return String(value || '').replace(/[&<>"']/g, (char) => ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#039;',
-      }[char]));
-    }
-
-    function money(value) {
-      return Number(value || 0).toLocaleString('tr-TR', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      }) + ' TL';
-    }
 
     function loadCart() {
       try {
@@ -336,6 +432,92 @@
       return cart.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.qty || 1), 0);
     }
 
+    function paintCheckoutPricing(pricing, feedback) {
+      checkoutPromotionPricing = pricing || null;
+      const subtotal = cartSubtotal(loadCart());
+      const defaultShipping = checkoutShippingFee(subtotal);
+      const shipping = pricing ? pricing.shippingFee : defaultShipping;
+      const total = (pricing ? pricing.total : subtotal + defaultShipping) + currentGiftFee();
+      document.getElementById('summaryShipping').textContent = shipping ? money(shipping) : 'Ucretsiz';
+      paintGiftSummaryRow();
+      document.getElementById('summaryTotal').textContent = money(total);
+      document.getElementById('mobileTotal').textContent = money(total);
+      const feedbackNode = document.getElementById('checkoutCouponFeedback');
+      const breakdownNode = document.getElementById('checkoutCouponBreakdown');
+      const removeButton = document.getElementById('checkoutCouponRemove');
+      if (feedbackNode) feedbackNode.textContent = feedback || '';
+      if (breakdownNode) {
+        breakdownNode.innerHTML = pricing && pricing.breakdown
+          ? pricing.breakdown.map((row) => '<div>' + escapeHtml(row.label) + ': -' + money(row.amount) + '</div>').join('')
+          : '';
+      }
+      if (removeButton) removeButton.style.display = pricing ? 'inline-block' : 'none';
+    }
+
+    async function refreshCheckoutCoupon(code) {
+      if (!window.SuveraCoupons) return;
+      const target = String(code || window.SuveraCoupons.load() || '').trim();
+      const input = document.getElementById('checkoutCouponCode');
+      if (input && target) input.value = target;
+      if (!target || !loadCart().length) {
+        paintCheckoutPricing(null, '');
+        return;
+      }
+      try {
+        const email = document.getElementById('customerEmail')?.value || '';
+        const result = await window.SuveraCoupons.evaluate(loadCart(), target, email);
+        const coupon = result.pricing && result.pricing.coupon;
+        const feedback = coupon && coupon.applied === false
+          ? (coupon.notAppliedReason || 'Mevcut kampanya daha avantajli')
+          : 'Kupon uygulandi. Checkout sirasinda yeniden dogrulanacak.';
+        paintCheckoutPricing(result.pricing, feedback);
+      } catch (error) {
+        checkoutPromotionPricing = null;
+        paintCheckoutPricing(null, error.message || 'Kupon uygulanamadi');
+      }
+    }
+
+    function bindCheckoutCoupon() {
+      const input = document.getElementById('checkoutCouponCode');
+      const applyButton = document.getElementById('checkoutCouponApply');
+      const removeButton = document.getElementById('checkoutCouponRemove');
+      if (!input || !applyButton) return;
+      input.value = window.SuveraCoupons ? window.SuveraCoupons.load() : '';
+      applyButton.addEventListener('click', () => void refreshCheckoutCoupon(input.value));
+      input.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') { event.preventDefault(); void refreshCheckoutCoupon(input.value); }
+      });
+      removeButton?.addEventListener('click', () => {
+        window.SuveraCoupons?.clear();
+        input.value = '';
+        paintCheckoutPricing(null, 'Kupon kaldirildi');
+      });
+    }
+
+    function checkoutIdempotencyKey(payload) {
+      const fingerprint = JSON.stringify({
+        email: payload.customer && payload.customer.email,
+        address: payload.customer && payload.customer.address,
+        paymentMethod: payload.paymentMethod,
+        items: payload.items,
+      });
+      try {
+        const saved = JSON.parse(sessionStorage.getItem(CHECKOUT_IDEMPOTENCY_KEY) || 'null');
+        if (saved && saved.fingerprint === fingerprint && saved.key) return saved.key;
+        const key = window.crypto && typeof window.crypto.randomUUID === 'function'
+          ? window.crypto.randomUUID()
+          : 'checkout-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2);
+        sessionStorage.setItem(CHECKOUT_IDEMPOTENCY_KEY, JSON.stringify({ fingerprint, key }));
+        return key;
+      } catch (_) {
+        return 'checkout-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2);
+      }
+    }
+
+    function clearCheckoutIdempotencyKey() {
+      try { sessionStorage.removeItem(CHECKOUT_IDEMPOTENCY_KEY); } catch (_) {}
+    }
+
     function orderCodeFromResult(result) {
       return result && (
         result.orderCode ||
@@ -346,18 +528,6 @@
       );
     }
 
-    function safePaymentUrl(value) {
-      const raw = String(value || '').trim();
-      if (!raw) return '';
-      try {
-        const url = new URL(raw, location.href);
-        // FIX: Never navigate checkout to javascript/data URLs returned by an API response.
-        return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
-      } catch (_) {
-        return '';
-      }
-    }
-
     function itemImage(item, qty) {
       const src = item.image && window.SuveraAPI ? window.SuveraAPI.assetUrl(item.image) : item.image;
       const media = src
@@ -366,17 +536,42 @@
       return media + '<span class="qty-badge">' + qty + '</span>';
     }
 
-    function showCheckoutMessage(message) {
+    // A31: the summary is announced (role="alert"), the offending control is marked
+    // invalid and pointed at that summary, and focus moves to it so a keyboard or screen
+    // reader user lands on the thing they have to fix instead of hunting for it.
+    let invalidCheckoutField = null;
+
+    function showCheckoutMessage(message, fieldId) {
       const error = document.getElementById('checkoutError');
-      error.textContent = message;
+      error.textContent = typeof message === 'string' ? message : (message && message.message) || '';
       error.style.display = 'block';
+      clearInvalidCheckoutField();
+
+      const field = fieldId ? document.getElementById(fieldId) : null;
+      if (field) {
+        invalidCheckoutField = field;
+        field.setAttribute('aria-invalid', 'true');
+        field.setAttribute('aria-describedby', 'checkoutError');
+        // Reduced motion is respected by the shared CSS rule; 'smooth' degrades to auto.
+        field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        field.focus({ preventScroll: true });
+        return;
+      }
       error.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function clearInvalidCheckoutField() {
+      if (!invalidCheckoutField) return;
+      invalidCheckoutField.removeAttribute('aria-invalid');
+      invalidCheckoutField.removeAttribute('aria-describedby');
+      invalidCheckoutField = null;
     }
 
     function clearCheckoutMessage() {
       const error = document.getElementById('checkoutError');
       error.textContent = '';
       error.style.display = 'none';
+      clearInvalidCheckoutField();
     }
 
     function getCheckoutErrorMessage(error) {
@@ -397,7 +592,7 @@
       }
 
       if (message.includes('stok') || message.includes('inventory')) {
-        return 'Sepetinizdeki ürünlerden birinin stoğu güncellenmiş olabilir. Sepetinizi yenileyip tekrar deneyin.';
+        return raw + ' Sepetinizde bu ürünün miktarını mevcut stoğa göre düzeltip tekrar deneyin.';
       }
 
       if (
@@ -439,23 +634,33 @@
       const email = document.getElementById('customerEmail').value.trim();
       const phone = normalizePhone(document.getElementById('customerPhone').value);
 
-      if (firstName.length < 2) return 'Lütfen geçerli bir ad girin.';
-      if (lastName.length < 2) return 'Lütfen geçerli bir soyadı girin.';
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'Lütfen geçerli bir e-posta adresi girin.';
-      if (address.length < 10) return 'Lütfen teslimat adresini daha detaylı yazın.';
-      if (!city) return 'Lütfen il seçin.';
-      if (!district) return 'Lütfen ilçe seçin.';
-      if (!(phone.length === 10 || phone.length === 11)) return 'Telefon numaranızı eksiksiz girin.';
-      if (phone.length === 11 && !phone.startsWith('0')) return 'Telefon numarası 0 ile başlamalıdır.';
-      if (phone.length === 10 && !phone.startsWith('5')) return 'Telefon numarası 5xx ile başlamalıdır.';
+      if (firstName.length < 2) return { field: 'firstName', message: 'Lütfen geçerli bir ad girin.' };
+      if (lastName.length < 2) return { field: 'lastName', message: 'Lütfen geçerli bir soyadı girin.' };
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { field: 'customerEmail', message: 'Lütfen geçerli bir e-posta adresi girin.' };
+      if (address.length < 10) return { field: 'address', message: 'Lütfen teslimat adresini daha detaylı yazın.' };
+      if (!city) return { field: 'city', message: 'Lütfen il seçin.' };
+      if (!district) return { field: 'district', message: 'Lütfen ilçe seçin.' };
+      if (!(phone.length === 10 || phone.length === 11)) return { field: 'customerPhone', message: 'Telefon numaranızı eksiksiz girin.' };
+      if (phone.length === 11 && !phone.startsWith('0')) return { field: 'customerPhone', message: 'Telefon numarası 0 ile başlamalıdır.' };
+      if (phone.length === 10 && !phone.startsWith('5')) return { field: 'customerPhone', message: 'Telefon numarası 5xx ile başlamalıdır.' };
+      const invoiceType = document.getElementById('invoiceType').value;
+      const invoiceSameShipping = document.getElementById('invoiceSameShipping').checked;
+      const invoiceAddress = document.getElementById('invoiceAddress').value.trim();
+      const invoiceEmail = document.getElementById('invoiceEmail').value.trim() || email;
+      if (invoiceType === 'company') {
+        if (document.getElementById('invoiceLegalName').value.trim().length < 2) return { field: 'invoiceLegalName', message: 'Şirket unvanını girin.' };
+        if (!/^[1-9]\d{9}$/.test(document.getElementById('invoiceVkn').value.trim())) return { field: 'invoiceVkn', message: 'VKN 10 haneli ve sıfırdan farklı başlamalıdır.' };
+        if (document.getElementById('invoiceTaxOffice').value.trim().length < 2) return { field: 'invoiceTaxOffice', message: 'Vergi dairesini girin.' };
+      }
+      if (!invoiceSameShipping && invoiceAddress.length < 10) return { field: 'invoiceAddress', message: 'Fatura adresini daha detaylı yazın.' };
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(invoiceEmail)) return { field: 'invoiceEmail', message: 'Fatura e-postası geçersiz.' };
 
-      return '';
+      return null;
     }
 
     function loadCheckoutPreferences() {
       return {
         note: (localStorage.getItem(CHECKOUT_NOTE_KEY) || '').trim(),
-        giftWrap: localStorage.getItem(GIFT_WRAP_KEY) === 'true',
       };
     }
 
@@ -521,33 +726,322 @@
         .replace(/(^|[\s/-])\S/g, (part) => part.toLocaleUpperCase('tr-TR'));
     }
 
-    function populateCities() {
-      const citySelect = document.getElementById('city');
-      const cities = Array.isArray(window.TR_ADDRESS_DATA) ? window.TR_ADDRESS_DATA : [];
-      citySelect.innerHTML = '<option value="">İl seçin</option>' + cities.map((city) => {
-        const name = titleCaseAddress(city.name);
-        return '<option value="' + escapeHtml(name) + '">' + escapeHtml(name) + '</option>';
-      }).join('');
+    let checkoutCities = [];
+
+    function showAddressDataError(message) {
+      const error = document.getElementById('addressDataError');
+      error.textContent = message || '';
+      error.hidden = !message;
     }
 
-    function populateDistricts() {
+    function readSavedCheckoutAddress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(ADDRESS_PREFERENCE_KEY) || 'null');
+        return value && typeof value === 'object' ? value : {};
+      } catch {
+        return {};
+      }
+    }
+
+    function persistCheckoutAddress() {
+      if (!document.getElementById('saveAddress').checked) return;
+      const value = {
+        firstName: document.getElementById('firstName').value.trim(),
+        lastName: document.getElementById('lastName').value.trim(),
+        address: document.getElementById('address').value.trim(),
+        city: document.getElementById('city').value.trim(),
+        district: document.getElementById('district').value.trim(),
+        phone: document.getElementById('customerPhone').value.trim(),
+      };
+      try {
+        localStorage.setItem(ADDRESS_PREFERENCE_KEY, JSON.stringify(value));
+      } catch {
+        // Checkout continues when device-local preference storage is unavailable.
+      }
+    }
+
+    function renderCityOptions(cities, preferredValue = '') {
+      const citySelect = document.getElementById('city');
+      citySelect.innerHTML = '<option value="">İl seçin</option>' + cities.map((city) => {
+        const name = titleCaseAddress(city.name);
+        return '<option value="' + escapeHtml(name) + '" data-city-id="' + escapeHtml(city.id) + '">' + escapeHtml(name) + '</option>';
+      }).join('');
+      if (preferredValue) citySelect.value = preferredValue;
+      return !preferredValue || citySelect.value === preferredValue;
+    }
+
+    async function populateCities(preferredValue = '') {
+      const citySelect = document.getElementById('city');
+      citySelect.disabled = true;
+      citySelect.innerHTML = '<option value="">İller yükleniyor</option>';
+      try {
+        checkoutCities = await window.SuveraAddressData.loadCities();
+        const found = renderCityOptions(checkoutCities, preferredValue);
+        citySelect.disabled = false;
+        if (!found) showAddressDataError('Kayıtlı il artık güncel adres listesinde bulunmuyor. Lütfen yeniden seçin.');
+        return found;
+      } catch (error) {
+        showAddressDataError(error.message || 'Adres verisi yüklenemedi.');
+        citySelect.innerHTML = '<option value="">İller yüklenemedi</option>';
+        return false;
+      }
+    }
+
+    async function populateDistricts(preferredValue = '') {
       const citySelect = document.getElementById('city');
       const districtSelect = document.getElementById('district');
-      const cities = Array.isArray(window.TR_ADDRESS_DATA) ? window.TR_ADDRESS_DATA : [];
       const selectedCity = citySelect.value;
-      const city = cities.find((item) => titleCaseAddress(item.name) === selectedCity);
-
-      if (!city) {
+      districtSelect.value = '';
+      districtSelect.disabled = true;
+      if (!selectedCity) {
         districtSelect.innerHTML = '<option value="">Önce il seçin</option>';
-        districtSelect.disabled = true;
         return;
       }
+      districtSelect.innerHTML = '<option value="">İlçeler yükleniyor</option>';
+      showAddressDataError('');
+      try {
+        const selectedOption = citySelect.options[citySelect.selectedIndex];
+        const districts = await window.SuveraAddressData.loadDistricts(selectedOption?.dataset.cityId || selectedCity);
+        districtSelect.innerHTML = '<option value="">İlçe seçin</option>' + districts.map((district) => {
+          const name = titleCaseAddress(district.name);
+          return '<option value="' + escapeHtml(name) + '">' + escapeHtml(name) + '</option>';
+        }).join('');
+        districtSelect.disabled = false;
+        if (preferredValue) {
+          districtSelect.value = preferredValue;
+          if (districtSelect.value !== preferredValue) {
+            showAddressDataError('Kayıtlı ilçe artık güncel adres listesinde bulunmuyor. Lütfen yeniden seçin.');
+          }
+        }
+      } catch (error) {
+        districtSelect.innerHTML = '<option value="">İlçeler yüklenemedi</option>';
+        showAddressDataError(error.message || 'İlçe verisi yüklenemedi.');
+      }
+    }
 
-      districtSelect.disabled = false;
-      districtSelect.innerHTML = '<option value="">İlçe seçin</option>' + city.districts.map((district) => {
-        const name = titleCaseAddress(district.name);
-        return '<option value="' + escapeHtml(name) + '">' + escapeHtml(name) + '</option>';
+    // A25: offer a signed-in customer their saved addresses to auto-fill checkout.
+    // Purely additive — guests and manual entry are unaffected. No token handling here;
+    // the customer session rides in the HttpOnly cookie via the same-origin proxy.
+    async function initSavedAddresses() {
+      const panel = document.getElementById('savedAddressPanel');
+      const select = document.getElementById('savedAddressSelect');
+      const api = window.SuveraAPI;
+      if (!panel || !select || !api || !api.hasCustomerSession || !api.hasCustomerSession() || !api.addresses) return;
+      let addresses = [];
+      try {
+        const data = await api.addresses.list();
+        addresses = (data && data.addresses) || [];
+      } catch {
+        return;
+      }
+      if (!addresses.length) return;
+
+      select.innerHTML = '<option value="">Yeni adres gir</option>' + addresses.map((address) => {
+        const label = [address.label || address.recipient, address.district, address.city].filter(Boolean).join(' · ');
+        return '<option value="' + escapeHtml(String(address.id)) + '">' + escapeHtml(label) + '</option>';
       }).join('');
+      panel.hidden = false;
+
+      select.addEventListener('change', async () => {
+        const address = addresses.find((item) => String(item.id) === select.value);
+        if (!address) return;
+        const [firstName, ...rest] = String(address.recipient || '').trim().split(/\s+/).filter(Boolean);
+        if (firstName) document.getElementById('firstName').value = firstName;
+        document.getElementById('lastName').value = rest.join(' ');
+        document.getElementById('address').value = [address.address_line1, address.address_line2].filter(Boolean).join(' ');
+        if (address.phone) document.getElementById('customerPhone').value = address.phone;
+        if (address.invoice_type === 'company') {
+          document.getElementById('invoiceType').value = 'company';
+          document.getElementById('invoiceLegalName').value = address.company_name || '';
+          document.getElementById('invoiceVkn').value = address.vkn || '';
+          document.getElementById('invoiceTaxOffice').value = address.tax_office || '';
+          document.getElementById('invoiceType').dispatchEvent(new Event('change'));
+        }
+        const found = await populateCities(address.city || '');
+        if (found && address.city) await populateDistricts(address.district || '');
+      });
+    }
+
+    // ── A24.5 GIFT WRAP ──────────────────────────────
+    // Options, their fees and the stored selection all come from the server cart. The
+    // page never sends a fee and never computes one: it reads gift_wrap off the cart
+    // view after each mutation, so the summary always shows the server's number.
+    const giftUi = { options: [], maxNote: 500, busy: false, loaded: false };
+
+    function currentServerCartView() {
+      return (window.Suvera && window.Suvera.currentServerCart) || null;
+    }
+
+    function currentGiftState() {
+      const view = currentServerCartView();
+      return (view && view.gift_wrap) || { option_id: null, title: '', fee: 0, note: '', max_note_length: giftUi.maxNote };
+    }
+
+    function currentGiftFee() {
+      return Number(currentGiftState().fee || 0);
+    }
+
+    function paintGiftSummaryRow() {
+      const row = document.getElementById('summaryGiftRow');
+      if (!row) return;
+      const state = currentGiftState();
+      const fee = Number(state.fee || 0);
+      row.hidden = !state.option_id;
+      if (!state.option_id) return;
+      document.getElementById('summaryGiftLabel').textContent = state.title
+        ? 'Hediye paketi: ' + state.title
+        : 'Hediye paketi';
+      document.getElementById('summaryGift').textContent = fee ? money(fee) : 'Ucretsiz';
+    }
+
+    function setGiftStatus(message, tone) {
+      const node = document.getElementById('giftStatus');
+      if (!node) return;
+      node.textContent = message || '';
+      if (tone) node.setAttribute('data-tone', tone);
+      else node.removeAttribute('data-tone');
+    }
+
+    function setGiftBusy(busy) {
+      giftUi.busy = busy;
+      document.querySelectorAll('#giftOptions input[type="radio"]').forEach((input) => { input.disabled = busy; });
+      const save = document.getElementById('giftNoteSave');
+      if (save) save.disabled = busy;
+    }
+
+    function giftOptionRow(option, selectedId) {
+      const label = document.createElement('label');
+      label.className = 'gift-option';
+      const input = document.createElement('input');
+      input.type = 'radio';
+      input.name = 'giftWrapOption';
+      input.value = option.id === '' ? '' : String(option.id);
+      input.checked = String(option.id || '') === String(selectedId || '');
+      if (option.id !== '') input.setAttribute('data-gift-option-id', String(option.id));
+      const text = document.createElement('span');
+      const title = document.createElement('span');
+      title.className = 'gift-option-title';
+      title.textContent = option.title;
+      text.appendChild(title);
+      if (option.description) {
+        const copy = document.createElement('span');
+        copy.className = 'gift-option-copy';
+        copy.textContent = option.description;
+        text.appendChild(copy);
+      }
+      const fee = document.createElement('span');
+      fee.className = 'gift-option-fee';
+      fee.textContent = option.id === '' ? '' : (Number(option.fee) ? money(Number(option.fee)) : 'Ucretsiz');
+      label.append(input, text, fee);
+      return label;
+    }
+
+    // Titles/descriptions/notes are rendered through textContent, so a hostile value
+    // stored by an admin (or echoed back in a note) is displayed, never executed.
+    function renderGiftSection() {
+      const section = document.getElementById('giftSection');
+      const container = document.getElementById('giftOptions');
+      if (!section || !container) return;
+      if (!giftUi.options.length) {
+        section.hidden = true;
+        return;
+      }
+      section.hidden = false;
+      const state = currentGiftState();
+      const rows = [{ id: '', title: 'Hediye paketi istemiyorum', description: '', fee: 0 }].concat(giftUi.options);
+      container.textContent = '';
+      rows.forEach((option) => container.appendChild(giftOptionRow(option, state.option_id)));
+      const note = document.getElementById('giftNote');
+      if (note && document.activeElement !== note) note.value = state.note || '';
+      if (note) note.maxLength = Number(state.max_note_length || giftUi.maxNote);
+      updateGiftCounter();
+      paintGiftSummaryRow();
+    }
+
+    function updateGiftCounter() {
+      const note = document.getElementById('giftNote');
+      const counter = document.getElementById('giftNoteCounter');
+      if (!note || !counter) return;
+      const max = Number(note.maxLength > 0 ? note.maxLength : giftUi.maxNote);
+      counter.textContent = note.value.length + ' / ' + max;
+    }
+
+    async function applyGiftChange(payload, successMessage) {
+      const api = window.SuveraAPI && window.SuveraAPI.cart;
+      if (!api) return;
+      const view = currentServerCartView();
+      if (!view || !view.id) {
+        setGiftStatus('Sepet henüz hazır değil, lütfen tekrar deneyin.', 'error');
+        return;
+      }
+      setGiftBusy(true);
+      setGiftStatus('Kaydediliyor…');
+      try {
+        const result = await api.setGiftWrap(payload, view.version);
+        if (result && result.cart && window.Suvera && window.Suvera.mirrorServerCart) {
+          window.Suvera.mirrorServerCart(result.cart);
+        }
+        renderGiftSection();
+        renderSummary();
+        setGiftStatus(successMessage);
+      } catch (error) {
+        setGiftStatus((error && error.message) || 'Hediye paketi güncellenemedi.', 'error');
+        await refreshGiftFromServer();
+      } finally {
+        setGiftBusy(false);
+      }
+    }
+
+    async function refreshGiftFromServer() {
+      const api = window.SuveraAPI && window.SuveraAPI.cart;
+      if (!api) return;
+      try {
+        const res = await api.get();
+        if (res && res.cart && window.Suvera && window.Suvera.mirrorServerCart) {
+          window.Suvera.mirrorServerCart(res.cart);
+        }
+        renderGiftSection();
+        renderSummary();
+      } catch (_) {}
+    }
+
+    async function initGiftWrap() {
+      const api = window.SuveraAPI && window.SuveraAPI.cart;
+      const section = document.getElementById('giftSection');
+      if (!api || !api.giftOptions || !section) return;
+      setGiftStatus('Hediye paketi seçenekleri yükleniyor…');
+      try {
+        const result = await api.giftOptions();
+        giftUi.options = (result && Array.isArray(result.options) ? result.options : []);
+        giftUi.maxNote = Number(result && result.max_note_length) || giftUi.maxNote;
+        giftUi.loaded = true;
+        setGiftStatus('');
+      } catch (error) {
+        giftUi.options = [];
+        section.hidden = true;
+        setGiftStatus('Hediye paketi seçenekleri yüklenemedi.', 'error');
+        return;
+      }
+      renderGiftSection();
+
+      document.getElementById('giftOptions').addEventListener('change', (event) => {
+        const input = event.target;
+        if (!input || input.name !== 'giftWrapOption' || giftUi.busy) return;
+        const optionId = input.value ? Number(input.value) : null;
+        void applyGiftChange(
+          { gift_wrap_option_id: optionId },
+          optionId ? 'Hediye paketi eklendi.' : 'Hediye paketi kaldırıldı.'
+        );
+      });
+      const note = document.getElementById('giftNote');
+      note.addEventListener('input', updateGiftCounter);
+      document.getElementById('giftNoteSave').addEventListener('click', () => {
+        if (giftUi.busy) return;
+        void applyGiftChange(
+          { gift_note: note.value },
+          note.value.trim() ? 'Hediye notu kaydedildi.' : 'Hediye notu kaldırıldı.'
+        );
+      });
     }
 
     function renderSummary() {
@@ -558,17 +1052,21 @@
       const missingProductIds = cart.filter((item) => !(item.product_id || item.id));
       const checkoutPrefs = loadCheckoutPreferences();
       const extraRows = [];
+      const giftFee = currentGiftFee();
+      const total = (checkoutPromotionPricing ? checkoutPromotionPricing.total : subtotal + shippingFee) + giftFee;
 
       document.getElementById('summarySubtotal').textContent = money(subtotal);
       document.getElementById('summaryShipping').textContent = shippingFee ? money(shippingFee) : 'Ucretsiz';
-      document.getElementById('summaryTotal').textContent = money(subtotal + shippingFee);
-      document.getElementById('mobileTotal').textContent = money(subtotal + shippingFee);
+      paintGiftSummaryRow();
+      document.getElementById('summaryTotal').textContent = money(total);
+      document.getElementById('mobileTotal').textContent = money(total);
 
       if (!cart.length) {
         list.innerHTML = '<div class="empty-note">Sepetiniz boş. Sipariş oluşturmak için önce ürün ekleyin.</div>';
         document.getElementById('payButton').disabled = true;
         return;
       }
+      document.getElementById('payButton').disabled = false;
 
       list.innerHTML = cart.map((item) => {
         const qty = Number(item.qty || 1);
@@ -584,8 +1082,15 @@
           </div>`;
       }).join('');
 
-      if (checkoutPrefs.giftWrap) {
-        extraRows.push('<div class="empty-note">Hediye paketi tercihi checkout ile birlikte kaydedildi.</div>');
+      const giftState = currentGiftState();
+      if (giftState.option_id && giftState.note) {
+        // The note is rendered as text, never as markup.
+        const noteRow = document.createElement('div');
+        noteRow.className = 'empty-note';
+        const noteTitle = document.createElement('strong');
+        noteTitle.textContent = 'Hediye notu:';
+        noteRow.append(noteTitle, document.createElement('br'), document.createTextNode(giftState.note));
+        extraRows.push(noteRow.outerHTML);
       }
 
       if (checkoutPrefs.note) {
@@ -614,9 +1119,9 @@
         return;
       }
 
-      const validationMessage = validateCheckoutForm();
-      if (validationMessage) {
-        showCheckoutMessage(validationMessage);
+      const validation = validateCheckoutForm();
+      if (validation) {
+        showCheckoutMessage(validation.message, validation.field);
         return;
       }
 
@@ -625,10 +1130,13 @@
         document.getElementById('district').value.trim(),
         document.getElementById('city').value.trim(),
       ].filter(Boolean);
+      persistCheckoutAddress();
 
       const selectedPaymentMethod = (document.querySelector('input[name="paymentMethod"]:checked') || {}).value || 'card';
       const shippingFee = checkoutShippingFee(cartSubtotal(cart));
       const isIbanPayment = selectedPaymentMethod === 'iban';
+      const serverCart = (window.Suvera && window.Suvera.currentServerCart)
+        || (window.SuveraCartUI && window.SuveraCartUI.currentCart ? window.SuveraCartUI.currentCart() : null);
       const payload = {
         customer: {
           name: [
@@ -638,29 +1146,53 @@
           email: document.getElementById('customerEmail').value.trim(),
           phone: normalizePhone(document.getElementById('customerPhone').value),
           address: addressParts.join(' / '),
+          city: document.getElementById('city').value.trim(),
+          district: document.getElementById('district').value.trim(),
+          country: 'TR',
         },
         items: cart.map((item) => ({
           product_id: item.product_id || item.id,
           variant_id: item.variant_id || item.variantId || null,
           quantity: item.qty || item.quantity || 1,
         })),
+        // A21: link the canonical server cart so the order converts it atomically.
+        cart_id: serverCart && serverCart.id ? serverCart.id : undefined,
+        cart_version: serverCart && serverCart.id ? serverCart.version : undefined,
         shipping_fee: shippingFee,
         paymentMethod: selectedPaymentMethod === 'iban' ? 'iban' : 'card',
+        invoice: {
+          type: document.getElementById('invoiceType').value,
+          full_name: document.getElementById('invoiceFullName').value.trim() || [
+            document.getElementById('firstName').value.trim(),
+            document.getElementById('lastName').value.trim(),
+          ].filter(Boolean).join(' '),
+          legal_name: document.getElementById('invoiceLegalName').value.trim(),
+          vkn: document.getElementById('invoiceVkn').value.trim(),
+          tax_office: document.getElementById('invoiceTaxOffice').value.trim(),
+          invoice_address: document.getElementById('invoiceSameShipping').checked
+            ? addressParts.join(' / ')
+            : document.getElementById('invoiceAddress').value.trim(),
+          email: document.getElementById('invoiceEmail').value.trim() || document.getElementById('customerEmail').value.trim(),
+        },
       };
 
       if (checkoutPrefs.note) payload.note = checkoutPrefs.note;
-      if (checkoutPrefs.giftWrap) payload.gift_wrap = true;
+      // A24.5: gift wrap is never sent from here. The server resolves the selection and
+      // its fee from the locked cart referenced by cart_id, so the client cannot pick
+      // its own price (or wrap an order it did not pay for).
+      const couponCode = window.SuveraCoupons ? window.SuveraCoupons.load() : '';
+      if (couponCode) payload.couponCode = couponCode;
 
       const snapshot = {
         orderCode: '',
         provider: isIbanPayment ? 'manual' : 'provider',
         status: 'payment_pending',
         paymentMethod: payload.paymentMethod,
-        total: cartSubtotal(cart) + shippingFee,
+        total: checkoutPromotionPricing ? checkoutPromotionPricing.total : cartSubtotal(cart) + shippingFee,
         shipping_fee: shippingFee,
         customer: payload.customer,
         note: checkoutPrefs.note,
-        giftWrap: checkoutPrefs.giftWrap,
+        giftWrap: Boolean(currentGiftState().option_id),
         items: cart.map((item) => ({
           id: item.product_id || item.id || '',
           name: item.name || 'Urun',
@@ -674,16 +1206,21 @@
 
       try {
         payButton.disabled = true;
+        // A31: the label change alone is invisible to assistive technology if focus is
+        // elsewhere; aria-busy states that the control is working, and the duplicate-submit
+        // protection provided by disabled is unchanged.
+        payButton.setAttribute('aria-busy', 'true');
         payButton.textContent = 'Sipariş oluşturuluyor...';
+        const idempotencyKey = checkoutIdempotencyKey(payload);
         const result = isIbanPayment
-          ? await window.SuveraAPI.orders.create(payload)
+          ? await window.SuveraAPI.orders.create(payload, idempotencyKey)
           : await window.SuveraAPI.payment.initialize({
               ...payload,
               successUrl: CARD_PAYMENT_SUCCESS_URL,
               failureUrl: CARD_PAYMENT_FAILURE_URL,
               success_url: CARD_PAYMENT_SUCCESS_URL,
               failure_url: CARD_PAYMENT_FAILURE_URL,
-            });
+            }, idempotencyKey);
         const orderCode = orderCodeFromResult(result);
         const provider = result && result.provider || snapshot.provider || 'provider';
         const paymentPageUrl = safePaymentUrl(result && result.paymentPageUrl);
@@ -693,6 +1230,8 @@
           provider,
           status: 'payment_pending',
           paymentPageUrl,
+          total: result && result.pricing ? result.pricing.total : snapshot.total,
+          promotion: result && result.pricing ? result.pricing : checkoutPromotionPricing,
         };
         if (window.Suvera && window.Suvera.recordOrder) {
           window.Suvera.recordOrder(savedOrder);
@@ -700,6 +1239,8 @@
         localStorage.removeItem(CART_KEY);
         localStorage.removeItem(CHECKOUT_NOTE_KEY);
         localStorage.removeItem(GIFT_WRAP_KEY);
+        clearCheckoutIdempotencyKey();
+        window.SuveraCoupons?.clear();
         if (isIbanPayment) {
           window.location.href = 'tesekkur?order=' + encodeURIComponent(orderCode);
           return;
@@ -715,6 +1256,7 @@
         console.error('Checkout payment initialize failed:', err);
         showCheckoutMessage(getCheckoutErrorMessage(err));
         payButton.disabled = false;
+        payButton.removeAttribute('aria-busy');
         payButton.textContent = 'Siparişi Tamamla';
       }
     });
@@ -722,6 +1264,16 @@
     document.addEventListener('DOMContentLoaded', () => {
       const guestButton = document.getElementById('continueGuestBtn');
       const emailInput = document.getElementById('customerEmail');
+      const invoiceType = document.getElementById('invoiceType');
+      const invoiceSameShipping = document.getElementById('invoiceSameShipping');
+      const syncInvoiceFields = () => {
+        document.querySelectorAll('[data-invoice-company]').forEach((node) => { node.hidden = invoiceType.value !== 'company'; });
+        document.querySelectorAll('[data-invoice-individual]').forEach((node) => { node.hidden = invoiceType.value === 'company'; });
+        document.getElementById('invoiceAddressField').hidden = invoiceSameShipping.checked;
+      };
+      invoiceType.addEventListener('change', syncInvoiceFields);
+      invoiceSameShipping.addEventListener('change', syncInvoiceFields);
+      syncInvoiceFields();
       if (guestButton) {
         guestButton.addEventListener('click', () => {
           localStorage.setItem('suveraCheckoutMode', 'guest');
@@ -751,14 +1303,47 @@
         paymentList.insertAdjacentElement('afterend', trustGrid);
       }
       hydrateCheckoutProfile();
-      populateCities();
-      document.getElementById('city').addEventListener('change', populateDistricts);
+      const savedAddress = readSavedCheckoutAddress();
+      ['firstName', 'lastName', 'address', 'customerPhone'].forEach((field) => {
+        const input = document.getElementById(field);
+        if (input && !input.value.trim() && savedAddress[field]) input.value = savedAddress[field];
+      });
+      populateCities(savedAddress.city || '').then((found) => {
+        if (found && savedAddress.city) return populateDistricts(savedAddress.district || '');
+        return null;
+      });
+      document.getElementById('city').addEventListener('change', () => populateDistricts());
+      void initSavedAddresses();
+      document.getElementById('citySearch').addEventListener('input', async (event) => {
+        const current = document.getElementById('city').value;
+        const filtered = await window.SuveraAddressData.searchCities(event.target.value);
+        const currentCity = checkoutCities.find((city) => titleCaseAddress(city.name) === current);
+        const visibleCities = currentCity && !filtered.some((city) => city.id === currentCity.id)
+          ? [currentCity, ...filtered]
+          : filtered;
+        renderCityOptions(visibleCities, current);
+      });
       loadCheckoutSettings().finally(() => {
         applyCheckoutSettings();
         renderSummary();
+        bindCheckoutCoupon();
+        void refreshCheckoutCoupon();
       });
+      // Re-render once the server cart hydrates the mirror (cart-ui syncs async).
+      window.addEventListener('suvera:cart-updated', renderSummary);
+      // This page does not load cart-ui.js, so hydrate the canonical server cart
+      // here (mirrorServerCart stores id/version and dispatches suvera:cart-updated).
+      (async function hydrateServerCart() {
+        if (!window.SuveraAPI || !window.SuveraAPI.cart || !(window.Suvera && window.Suvera.mirrorServerCart)) return;
+        try {
+          const res = await window.SuveraAPI.cart.get();
+          if (res && res.cart) window.Suvera.mirrorServerCart(res.cart);
+        } catch (_) {}
+        // Gift wrap needs the hydrated cart (id + version) before it can mutate it.
+        await initGiftWrap();
+      })();
     });
   </script>
-  <script src="shared.js"></script>
+  {{> consent}}
 </body>
 </html>

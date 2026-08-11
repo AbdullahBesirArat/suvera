@@ -31,10 +31,79 @@ body { animation: pageFadeIn .45s ease both; }
   transform: translateY(0);
 }
 
-:where(a, button, input, textarea, select, summary, [tabindex]):focus-visible {
-  outline: 3px solid rgba(61, 107, 56, 0.35);
-  outline-offset: 3px;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.95);
+/* A31. The focus ring must survive on top of dark hero imagery and tenant theme colours,
+   so it is a solid, high-contrast pair (dark ring + light halo) rather than a tinted one.
+   :focus-visible only, so pointer users still see nothing. */
+:where(a, button, input, textarea, select, summary, [tabindex], [role="button"], [role="tab"], [role="option"], [role="menuitem"]):focus-visible {
+  outline: 3px solid #1a1a1a;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.95);
+  border-radius: 2px;
+}
+
+/* A31. The one canonical screen-reader-only utility. Never display:none — that would
+   remove the text from the accessibility tree, which is the opposite of the intent. */
+.sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Same hiding, but becomes visible once focused — for skip links and similar. */
+.sr-only-focusable:not(:focus):not(:focus-within) {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* A31 touch targets. Icon-only and compact controls get a real 44x44 hit area without
+   changing their painted size, so layout is unaffected. */
+@media (pointer: coarse) {
+  .hamburger,
+  .mobile-drawer-close,
+  .nav-search-icon,
+  .qty-btn,
+  .cart-remove,
+  .chip-remove,
+  .lightbox-close,
+  .lightbox-nav,
+  .size-guide-close,
+  .drawer-close {
+    position: relative;
+  }
+
+  .hamburger::after,
+  .mobile-drawer-close::after,
+  .nav-search-icon::after,
+  .qty-btn::after,
+  .cart-remove::after,
+  .chip-remove::after,
+  .lightbox-close::after,
+  .lightbox-nav::after,
+  .size-guide-close::after,
+  .drawer-close::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 44px;
+    min-height: 44px;
+  }
 }
 
 /* ── SCROLL REVEAL ── */
@@ -132,8 +201,11 @@ nav.scrolled .nav-logo { color: #1a1a1a; }
   white-space:nowrap;
 }
 nav.scrolled .nav-menu-wrap > li > a { color:#1a1a1a; }
-.nav-menu-wrap > li > a.outlet { color:#ffaaaa; }
-nav.scrolled .nav-menu-wrap > li > a.outlet { color:#c44; }
+/* A31: the unscrolled state was #ffaaaa on a white nav — about 1.7:1, unreadable. Both
+   states now use one red that measures 6.63:1 on white, so "Outlet" still reads as the
+   highlighted item without depending on a colour nobody can see. */
+.nav-menu-wrap > li > a.outlet { color:#a83232; }
+nav.scrolled .nav-menu-wrap > li > a.outlet { color:#a83232; }
 
 /* underline indicator */
 .nav-menu-wrap > li > a::after {
@@ -209,7 +281,7 @@ nav.scrolled .nav-menu-wrap > li:hover > a { color:#3d6b38; }
 }
 .mega-link:hover { color:#3d6b38; padding-left:4px; }
 .mega-link .ml-count {
-  margin-left:auto; font-size:11px; color:#aaa;
+  margin-left:auto; font-size:11px; color:#5f5f5f;
 }
 
 /* Mega featured image card */
@@ -283,8 +355,8 @@ nav.scrolled .nav-search-icon { color:#1a1a1a; }
 nav.scrolled .nav-search-box input {
   border-bottom-color:#3d6b38; color:#1a1a1a;
 }
-.nav-search-box input::placeholder { color:#aaa; }
-nav.scrolled .nav-search-box input::placeholder { color:#aaa; }
+.nav-search-box input::placeholder { color:#5f5f5f; }
+nav.scrolled .nav-search-box input::placeholder { color:#5f5f5f; }
 
 /* ══════════════════════════════════════════════
    HAMBURGER + MOBILE NAV DRAWER
@@ -307,7 +379,17 @@ nav.scrolled .hamburger span { background:#1a1a1a; }
 .mobile-nav {
   position:fixed; inset:0; z-index:250;
   pointer-events:none;
+  /* A31: pointer-events alone still left every drawer link in the tab order while the
+     menu was closed, so keyboard users tabbed into an invisible menu. visibility removes
+     it from both the tab order and the accessibility tree; the delay lets the slide-out
+     transition finish before it disappears. */
+  visibility:hidden;
+  transition:visibility 0s linear .35s;
 }
+/* Open applies visibility with no transition at all, so it is settled the moment the
+   class lands and focus never waits on a delay. Only closing is delayed, to let the
+   drawer slide out before it disappears. */
+.mobile-nav.open { visibility:visible; transition:none; }
 .mobile-overlay {
   position:absolute; inset:0;
   background:rgba(0,0,0,.45); opacity:0;
@@ -343,7 +425,7 @@ nav.scrolled .hamburger span { background:#1a1a1a; }
   cursor:pointer;
 }
 .mobile-nav-item:hover { background:#f9f7f4; color:#3d6b38; }
-.mobile-nav-item.outlet { color:#c44; }
+.mobile-nav-item.outlet { color:#a83232; }
 .mobile-nav-sub {
   background:#f9f7f4; display:none;
   border-bottom:1px solid #f0ede8;
@@ -648,6 +730,43 @@ footer .footer-bottom span {
   color: rgba(255,255,255,.68) !important;
 }
 
+.consent-banner[hidden] { display:none; }
+.consent-banner {
+  position:fixed;
+  z-index:1200;
+  right:20px;
+  bottom:20px;
+  width:min(520px, calc(100vw - 40px));
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  padding:18px 20px;
+  border:1px solid rgba(255,255,255,.16);
+  border-radius:14px;
+  background:#20341f;
+  color:#fff;
+  box-shadow:0 18px 50px rgba(0,0,0,.24);
+}
+.consent-banner strong { display:block; margin-bottom:5px; font-size:14px; }
+.consent-banner p { margin:0; color:rgba(255,255,255,.76); font-size:12px; line-height:1.5; }
+.consent-actions { display:flex; flex:0 0 auto; gap:8px; }
+.consent-actions button {
+  border:1px solid rgba(255,255,255,.3);
+  border-radius:8px;
+  background:transparent;
+  color:#fff;
+  padding:10px 12px;
+  cursor:pointer;
+  font:500 11px/1.2 var(--sans, sans-serif);
+}
+.consent-actions button[data-consent="analytics"] { background:#fff; color:#20341f; }
+
+@media (max-width: 640px) {
+  .consent-banner { align-items:stretch; flex-direction:column; }
+  .consent-actions { display:grid; grid-template-columns:1fr 1fr; }
+}
+
 /* ══════════════════════════════════════════════
    TOAST NOTIFICATION
 ══════════════════════════════════════════════ */
@@ -734,18 +853,21 @@ footer .footer-bottom span {
    FILTER DRAWER (mobile ürün listesi)
 ══════════════════════════════════════════════ */
 .filter-drawer-overlay {
-  position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:299;
+  position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:10090;
   opacity:0; visibility:hidden; pointer-events:none;
   transition:opacity .3s, visibility .3s;
 }
 .filter-drawer-overlay.open { opacity:1; visibility:visible; pointer-events:auto; }
 .filter-drawer {
-  position:fixed; top:0; right:0; bottom:0; z-index:300;
+  position:fixed; top:0; right:0; bottom:0; z-index:10091;
   width:min(320px,90vw); background:#fff;
-  transform:translateX(100%); transition:transform .35s cubic-bezier(.4,0,.2,1);
+  transform:translateX(100%); transition:transform .35s cubic-bezier(.4,0,.2,1), visibility 0s linear .35s;
   overflow-y:auto; display:flex; flex-direction:column;
+  /* A31: off-screen is not hidden. Without this the sort select, every size button and
+     both footer actions stayed in the tab order while the drawer was closed. */
+  visibility:hidden;
 }
-.filter-drawer.open { transform:translateX(0); }
+.filter-drawer.open { transform:translateX(0); visibility:visible; transition:transform .35s cubic-bezier(.4,0,.2,1); }
 .filter-drawer-head {
   padding:18px 20px; border-bottom:1px solid #e8e2d9;
   display:flex; align-items:center; justify-content:space-between;
@@ -791,7 +913,7 @@ a[href]:not([href^="#"]):not([href^="mailto"]):not([href^="tel"]):not([target="_
 ══════════════════════════════════════════════ */
 .section-label {
   font-size:10.5px; letter-spacing:3px; text-transform:uppercase;
-  color:#888; margin-bottom:8px; font-family:'Jost',sans-serif;
+  color:#5f5f5f; margin-bottom:8px; font-family:'Jost',sans-serif;
 }
 .section-title {
   font-family:'Cormorant Garamond',serif; font-size:38px; font-weight:300; line-height:1.2;
@@ -1680,13 +1802,121 @@ img.is-lazy.is-loaded {
   }
 }
 
+/* A31. The widely copied ".01ms" idiom is subtly wrong: transition-property defaults to
+   `all`, so a tiny-but-NON-ZERO duration leaves every property technically transitioning,
+   including inherited discrete ones like visibility. Opening the mobile drawer therefore
+   left .mobile-drawer-head computing `hidden` for one frame, and focusing a
+   visibility:hidden element is a no-op — which is why the close button never received
+   focus under reduced motion while the identical flow worked without it.
+   0s means there is no transition at all, which is what the user asked for. Nothing in the
+   storefront listens for transitionend, so nothing depends on a transition still firing. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
-    animation-duration: .01ms !important;
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
-    transition-duration: .01ms !important;
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
   }
 }
+
+/* Quick-view actions (CSP-safe replacements for former inline hover/toggle handlers) */
+.qv-add-btn:hover { background: #2a4827 !important; }
+.qv-size-btn.qv-size-selected { background: #1a1a1a !important; color: #fff !important; }
+
+/* A22 product reviews + Q&A */
+.reviews-section { max-width: 1180px; margin: 40px auto; padding: 0 24px; }
+.reviews-head { display: flex; align-items: baseline; gap: 24px; flex-wrap: wrap; border-bottom: 1px solid var(--line, #e6e6e0); padding-bottom: 16px; margin-bottom: 20px; }
+.reviews-average { display: flex; align-items: center; gap: 10px; }
+.reviews-average-num { font-size: 30px; font-weight: 600; }
+.review-stars { color: #7d5b07; letter-spacing: 2px; }
+.reviews-count { color: #5f5f5f; font-size: 14px; }
+.reviews-distribution { display: flex; flex-wrap: wrap; gap: 4px 18px; margin-top: 8px; }
+.reviews-dist-row { display: flex; gap: 6px; font-size: 13px; color: #555; }
+.review-write-btn, .review-submit-btn, .qa-submit-btn { background: #1a1a1a; color: #fff; border: 0; padding: 10px 20px; cursor: pointer; border-radius: 2px; font-size: 14px; }
+.review-form, .qa-form { display: grid; gap: 10px; max-width: 560px; margin: 14px 0 24px; }
+.review-rating-input { display: flex; gap: 4px; }
+.review-rating-star { background: none; border: 0; font-size: 26px; color: #ccc; cursor: pointer; padding: 0; }
+.review-rating-star.active { color: #7d5b07; }
+.review-title-input, .review-body-input, .qa-body-input { border: 1px solid var(--line, #d8d8d2); padding: 10px; font: inherit; border-radius: 2px; }
+.review-body-input, .qa-body-input { min-height: 90px; resize: vertical; }
+.review-form-msg, .qa-form-msg { color: #2a4827; font-size: 13px; min-height: 18px; }
+.review-card { border-bottom: 1px solid var(--line, #eee); padding: 16px 0; }
+.review-card-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.review-verified { background: #eef5ec; color: #2a4827; font-size: 12px; padding: 2px 8px; border-radius: 10px; }
+.review-author { color: #5f5f5f; font-size: 13px; margin-left: auto; }
+.review-title { margin: 8px 0 4px; font-size: 16px; }
+.review-body { margin: 0 0 8px; color: #333; white-space: pre-wrap; }
+.review-helpful-btn { background: none; border: 1px solid var(--line, #ddd); padding: 4px 12px; cursor: pointer; font-size: 13px; border-radius: 14px; }
+.qa-section { margin-top: 32px; }
+.qa-item { padding: 12px 0; border-bottom: 1px solid var(--line, #eee); }
+.qa-question { font-weight: 600; margin: 0 0 6px; }
+.qa-answer { margin: 0 0 4px; color: #444; padding-left: 14px; }
+.qa-official { background: #1a1a1a; color: #fff; font-size: 11px; padding: 1px 6px; border-radius: 8px; margin-left: 8px; }
+.reviews-empty, .qa-empty { color: #5f5f5f; }
+
+/* A23 notifications: product-page back-in-stock / price alarm + preference center */
+/* A display class beats the UA [hidden] rule, so scope hidden back for these. */
+.notify-block[hidden], .notify-btn[hidden], .notify-form[hidden], .notify-field[hidden],
+.notify-consent[hidden], .pref-banner[hidden], #prefSignedOut[hidden], #prefCenter[hidden] { display: none !important; }
+.notify-block { margin: 18px 0 8px; padding: 16px 0; border-top: 1px solid var(--line, #e6e6e0); display: grid; gap: 12px; }
+.notify-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.notify-btn { background: #fff; color: #1a1a1a; border: 1px solid #1a1a1a; padding: 9px 16px; cursor: pointer; border-radius: 2px; font-size: 13px; }
+.notify-btn.secondary { border-color: var(--line, #d8d8d2); color: #444; }
+.notify-form { display: grid; gap: 12px; max-width: 480px; border: 1px solid var(--line, #e6e6e0); padding: 16px; border-radius: 4px; }
+.notify-form-title { margin: 0; font-size: 14px; color: #1a1a1a; }
+.notify-field { display: grid; gap: 4px; font-size: 13px; color: #555; }
+.notify-field input { border: 1px solid var(--line, #d8d8d2); padding: 10px; font: inherit; border-radius: 2px; }
+.notify-consent { display: flex; gap: 8px; align-items: flex-start; font-size: 12px; color: #666; line-height: 1.5; }
+.notify-consent input { margin-top: 2px; }
+.notify-status { color: #2a4827; font-size: 13px; min-height: 18px; }
+
+.pref-banner { padding: 12px 16px; border-radius: 4px; font-size: 14px; margin: 0 0 18px; background: #f2f6f1; color: #2a4827; }
+.pref-banner[data-kind="err"] { background: #f9efef; color: #7a2727; }
+.pref-toggles { display: grid; gap: 10px; margin: 12px 0; }
+.pref-toggle { display: flex; gap: 10px; align-items: center; font-size: 14px; color: #333; }
+.pref-subs { display: grid; gap: 8px; }
+.pref-sub { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line, #eee); }
+.pref-sub-type { font-size: 14px; color: #333; }
+.pref-sub-cancel { background: none; border: 1px solid var(--line, #ddd); padding: 4px 12px; cursor: pointer; font-size: 13px; border-radius: 14px; }
+.pref-empty { color: #5f5f5f; }
+
+/* A24.3 size guide modal */
+.size-guide-trigger { margin-top: 10px; background: none; border: 1px solid var(--line, #d8d8d2); padding: 8px 14px; cursor: pointer; border-radius: 2px; font-size: 13px; color: #444; }
+.size-guide-trigger[hidden] { display: none !important; }
+.size-guide-modal { position: fixed; inset: 0; z-index: 1200; display: flex; align-items: center; justify-content: center; background: rgba(20,18,16,.55); padding: 20px; }
+.size-guide-modal[hidden] { display: none !important; }
+.size-guide-dialog { background: #fff; max-width: 720px; width: 100%; max-height: 88vh; overflow: auto; border-radius: 8px; padding: 22px; }
+.size-guide-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid var(--line, #eee); padding-bottom: 12px; margin-bottom: 14px; }
+.size-guide-title { margin: 0; font-size: 22px; font-weight: 500; flex: 1 1 auto; }
+.size-guide-units { display: inline-flex; border: 1px solid var(--line, #d8d8d2); border-radius: 4px; overflow: hidden; }
+.size-unit-btn { background: #fff; border: 0; padding: 6px 14px; cursor: pointer; font-size: 13px; color: #666; }
+.size-unit-btn.active { background: #1a1a1a; color: #fff; }
+.size-guide-close { background: none; border: 0; font-size: 26px; line-height: 1; cursor: pointer; color: #666; padding: 0 4px; }
+.size-guide-desc { margin: 0 0 12px; color: #666; font-size: 14px; }
+.size-guide-desc[hidden] { display: none !important; }
+.size-guide-table-wrap { overflow-x: auto; }
+.size-guide-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.size-guide-caption { text-align: left; color: #5f5f5f; font-size: 12px; padding-bottom: 6px; }
+.size-guide-table th, .size-guide-table td { border: 1px solid var(--line, #eee); padding: 8px 12px; text-align: left; }
+.size-guide-table thead th { background: #faf8f5; font-weight: 600; }
+.size-guide-row-label { background: #faf8f5; font-weight: 600; }
+
+/* A24.4 product comparison */
+.compare-toggle { margin: 8px 0; background: none; border: 1px solid var(--line, #d8d8d2); padding: 8px 16px; cursor: pointer; border-radius: 2px; font-size: 13px; color: #444; }
+.compare-toggle[aria-pressed="true"] { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+.compare-bar { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 1100; display: flex; align-items: center; gap: 16px; background: #1a1a1a; color: #fff; padding: 10px 18px; border-radius: 999px; box-shadow: 0 6px 24px rgba(0,0,0,.25); font-size: 14px; }
+.compare-bar[hidden] { display: none !important; }
+.compare-bar-link { color: #fff; text-decoration: underline; }
+.compare-grid { overflow-x: auto; }
+.compare-table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 480px; }
+.compare-table th, .compare-table td { border: 1px solid var(--line, #eee); padding: 10px 12px; text-align: left; vertical-align: top; }
+.compare-attr { background: #faf8f5; font-weight: 600; white-space: nowrap; }
+.compare-col { min-width: 140px; }
+.compare-prod-link { display: block; font-weight: 600; color: #1a1a1a; }
+.compare-remove { background: none; border: 0; font-size: 18px; cursor: pointer; color: #5f5f5f; padding: 0; }
+.compare-img { width: 100%; max-width: 120px; height: auto; border-radius: 4px; display: block; }
+.compare-noimg { color: #bbb; }

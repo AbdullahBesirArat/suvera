@@ -33,6 +33,10 @@ pnpm-debug.log*
 uploads/
 **/uploads/
 backups/
+*.sql
+
+# Redundant non-canonical Suvera clone (kept locally, not part of canonical repo)
+/suvera/
 
 # IDE and OS files
 .vscode/
@@ -41,3 +45,9 @@ backups/
 *.swo
 .DS_Store
 Thumbs.db
+
+# Full-stack E2E runtime and failure artifacts
+/e2e/.state.json
+/e2e/.tmp/
+/playwright-report/
+/test-results/

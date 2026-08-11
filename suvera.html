@@ -5,8 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <meta http-equiv="refresh" content="0; url=anasayfa"/>
 <title>SUVERA</title>
-<link rel="stylesheet" href="shared.css"/>
-<style>
+  {{> head-defaults}}<style>
 body{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;background:#f8f6f1;color:#1a1a1a;font-family:var(--sans,Arial,sans-serif);padding:24px;}
 .redirect-box{max-width:520px;}
 .redirect-logo{font-family:var(--serif,Georgia,serif);font-size:42px;letter-spacing:6px;margin-bottom:12px;}
@@ -15,8 +14,8 @@ body{min-height:100vh;display:flex;align-items:center;justify-content:center;tex
 </style>
 </head>
 <body>
-  <main class="redirect-box">
-    <div class="redirect-logo">SUVERA</div>
+  <main id="main" tabindex="-1" class="redirect-box">
+    <h1 class="redirect-logo">SUVERA</h1>
     <p>Proje storefront sayfalarina ayrildi. Ana magazaya yonlendiriliyorsunuz.</p>
     <a href="anasayfa">Magazaya Git</a>
   </main>

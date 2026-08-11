@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bildirim Tercihleri | Suvera</title>
+  <meta name="description" content="Suvera stok, fiyat ve favori bildirim tercihlerinizi yonetin." />
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="canonical" href="https://suvera.com.tr/tercihler" />
+    {{> head-defaults}}<link rel="stylesheet" href="css/site-pages.css" />
+</head>
+<body class="site-page-body">
+  {{> announcement}}
+  {{> navigation}}
+
+  <main id="main" tabindex="-1" class="info-page-shell">
+    <div class="page-breadcrumb"><a href="anasayfa">Ana Sayfa</a><span>›</span><span>Bildirim Tercihleri</span></div>
+    <section class="page-hero">
+      <div class="page-hero-card">
+        <div class="hero-kicker">Hesap</div>
+        <h1 class="hero-title">Bildirim Tercihleri</h1>
+        <p class="page-copy">Stok gelince, fiyat düşünce ve favori ürünlerinizle ilgili bildirimleri buradan yönetin.</p>
+      </div>
+      <aside class="page-side-card">
+        <div class="page-checklist">
+          <div class="page-check"><strong>Açık rıza</strong><span>Pazarlama bildirimleri yalnızca onayınızla gönderilir.</span></div>
+          <div class="page-check"><strong>Kolay vazgeçme</strong><span>İstediğiniz an tüm bildirimleri kapatabilirsiniz.</span></div>
+        </div>
+      </aside>
+    </section>
+
+    <div id="prefRoot">
+      <div class="pref-banner" id="prefBanner" role="status" aria-live="polite" hidden></div>
+
+      <section class="page-grid single" id="prefSignedOut" hidden>
+        <article class="page-card">
+          <div class="page-section-head">
+            <h2 class="page-section-title">Giriş yapın</h2>
+            <span class="page-section-subtitle">Tercih merkezi</span>
+          </div>
+          <p class="page-form-note">İletişim tercihlerinizi yönetmek için lütfen hesabınıza giriş yapın. Onay ve abonelik iptali bağlantıları girişsiz de çalışır.</p>
+          <div class="page-form-actions">
+            <a class="page-btn" href="giris">Giriş yap</a>
+            <a class="page-btn-secondary" href="anasayfa">Ana sayfa</a>
+          </div>
+        </article>
+      </section>
+
+      <section class="page-grid" id="prefCenter" hidden>
+        <article class="page-card">
+          <div class="page-section-head">
+            <h2 class="page-section-title">İletişim izinleri</h2>
+            <span class="page-section-subtitle">Pazarlama bildirimleri</span>
+          </div>
+          <p class="page-form-note">İşaretli olmayan hiçbir kanaldan pazarlama bildirimi gönderilmez. İşlemsel e-postalar (sipariş, güvenlik) bu ayardan etkilenmez.</p>
+          <div class="pref-toggles" id="prefConsents"></div>
+          <div class="page-form-actions">
+            <button class="page-btn" type="button" id="prefSave">Tercihleri kaydet</button>
+            <button class="page-btn-secondary" type="button" id="prefOptOut">Tüm pazarlamayı kapat</button>
+          </div>
+          <p class="page-form-note" id="prefSaveMsg" role="status" aria-live="polite"></p>
+        </article>
+        <article class="page-card">
+          <div class="page-section-head">
+            <h2 class="page-section-title">Ürün bildirimlerim</h2>
+            <span class="page-section-subtitle">Stok ve fiyat alarmları</span>
+          </div>
+          <div class="pref-subs" id="prefSubscriptions"></div>
+        </article>
+      </section>
+    </div>
+  </main>
+
+  {{> footer}}
+{{> consent}}
+
+    {{> scripts}}
+  <script src="js/preferences-ui.js"></script>
+  </body>
+</html>

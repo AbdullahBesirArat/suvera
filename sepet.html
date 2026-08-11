@@ -5,33 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="description" content="Suvera sepet sayfasi, siparis ozeti ve odeme oncesi guvenli kontrol adimlarini sunar." />
   <link rel="canonical" href="https://suvera.com.tr/sepet" />
-  <meta property="og:type" content="website" />
-  <meta property="og:title" content="Sepetim | Suvera" />
-  <meta property="og:description" content="Suvera sepet sayfasi, siparis ozeti ve odeme oncesi guvenli kontrol adimlarini sunar." />
-  <meta property="og:url" content="https://suvera.com.tr/sepet" />
-  <meta property="og:image" content="https://suvera.com.tr/og-cover.svg" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Sepetim | Suvera" />
-  <meta name="twitter:description" content="Suvera sepet sayfasi, siparis ozeti ve odeme oncesi guvenli kontrol adimlarini sunar." />
-  <meta name="twitter:image" content="https://suvera.com.tr/og-cover.svg" />
   <meta name="theme-color" content="#2a4827" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="manifest" href="site.webmanifest" />
+  {{> head-defaults}}
   <title>Sepetim – SUVERA</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="shared.css"/>
   <style>
     :root{
       --bg:#f7f5f1;--white:#fff;--black:#1a1a1a;--mid:#5e5a54;--light:#ddd7cd;
-      --lighter:#f1ede6;--accent:#3d6b38;--accent-soft:#6c8a5f;--green-dark:#2a4827;
+      --lighter:#f1ede6;--accent:#3d6b38;--accent-soft:#4a6340;--green-dark:#2a4827;
       --serif:'Cormorant Garamond',serif;--sans:'Jost',sans-serif;
     }
     *,*::before,*::after{box-sizing:border-box}
     html{scroll-behavior:smooth}
     body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--black);overflow-x:hidden;padding-top:102px}
     .page-shell{padding:28px 40px 0}
-    .breadcrumb{font-size:12px;color:#8d877f;letter-spacing:.5px;margin-bottom:18px}
+    .breadcrumb{font-size:12px;color:#635d57;letter-spacing:.5px;margin-bottom:18px}
+    .breadcrumb ol{display:flex;gap:6px;list-style:none;margin:0;padding:0}
+    .breadcrumb li+li::before{content:'›';margin-right:6px;opacity:.55}
     .breadcrumb a{color:inherit;text-decoration:none}
     .breadcrumb span{margin:0 6px;opacity:.55}
     .cart-hero{display:grid;grid-template-columns:minmax(0,1.2fr) 320px;gap:24px;margin-bottom:26px}
@@ -52,17 +41,19 @@
     .cart-main{padding:26px 30px}
     .cart-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;padding-bottom:18px;border-bottom:1px solid var(--light);margin-bottom:10px}
     .page-title{font-family:var(--serif);font-size:36px;font-weight:300;margin:0 0 4px}
-    .page-count{font-size:12px;letter-spacing:1px;color:#8f8981;text-transform:uppercase}
-    .clear-btn{background:none;border:none;padding:0;font:inherit;font-size:11px;letter-spacing:1.7px;text-transform:uppercase;color:#9d958b;cursor:pointer}
+    .page-count{font-size:12px;letter-spacing:1px;color:#635d57;text-transform:uppercase}
+    .clear-btn{background:none;border:none;padding:0;font:inherit;font-size:11px;letter-spacing:1.7px;text-transform:uppercase;color:#635d57;cursor:pointer}
     .clear-btn:hover{color:#c44}
-    .cart-list-head{display:grid;grid-template-columns:minmax(0,1fr) 140px;padding:12px 0 6px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#978f85}
+    .cart-list-head{display:grid;grid-template-columns:minmax(0,1fr) 140px;padding:12px 0 6px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#635d57}
     .cart-item{display:grid;grid-template-columns:120px minmax(0,1fr) 140px;gap:22px;padding:24px 0;border-bottom:1px solid var(--light);align-items:start}
-    .cart-item-img{width:120px;height:152px;background:linear-gradient(150deg,#e9e3d9,#d9cfc0);display:flex;align-items:center;justify-content:center;font-size:48px;overflow:hidden}
+    .cart-item-img{width:120px;height:152px;background:linear-gradient(150deg,#e9e3d9,#d9cfc0);color:inherit;text-decoration:none;display:flex;align-items:center;justify-content:center;font-size:48px;overflow:hidden}
     .cart-item-body{min-width:0}
-    .cart-item-brand{font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:#9d958b;margin:0 0 7px}
+    .cart-item-brand{font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:#635d57;margin:0 0 7px}
     .cart-item-name{font-family:var(--serif);font-size:25px;font-weight:300;line-height:1.05;margin:0 0 8px}
-    .cart-item-variant{font-size:12px;color:#7d7770;margin:0 0 12px;letter-spacing:.4px}
-    .cart-item-unit{font-size:12px;color:#9b9389;margin:0 0 16px}
+    .cart-item-name a{color:inherit;text-decoration:none}
+    .cart-item-name a:hover{text-decoration:underline}
+    .cart-item-variant{font-size:12px;color:#635d57;margin:0 0 12px;letter-spacing:.4px}
+    .cart-item-unit{font-size:12px;color:#635d57;margin:0 0 16px}
     .qty-row{display:flex;align-items:center;gap:10px}
     .qty-btn,.del-btn{width:34px;height:34px;border:1px solid var(--light);background:#fff;color:var(--black);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:.2s}
     .qty-btn:hover,.del-btn:hover{border-color:var(--black)}
@@ -70,10 +61,11 @@
     .qty-num{min-width:24px;text-align:center;font-size:14px;font-weight:500}
     .cart-item-price{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:8px;padding-top:4px}
     .cart-item-price strong{font-size:18px;font-weight:500}
-    .cart-item-price small{font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:#9d958b}
+    .cart-item-price small{font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:#635d57}
     .cart-empty{padding:56px 12px 48px;text-align:center}
     .cart-empty h3{font-family:var(--serif);font-size:36px;font-weight:300;margin-bottom:10px}
-    .cart-empty p{font-size:14px;color:#817a73;margin-bottom:20px}
+    .cart-empty p{font-size:14px;color:#635d57;margin-bottom:20px}
+    .cart-status{min-height:1.4em;margin:6px 0 0;color:#3d6b38;font-size:12px}
     .empty-cta{display:inline-block;padding:14px 22px;background:#1f1f1f;color:#fff;text-decoration:none;font-size:11px;letter-spacing:2px;text-transform:uppercase}
     .section-stack{display:grid;gap:18px;margin-top:18px}
     .section-card{padding:22px 24px}
@@ -81,12 +73,12 @@
     .shipping-progress{display:grid;gap:12px}
     .progress-copy{font-size:13px;line-height:1.7;color:var(--mid)}
     .progress-bar{height:10px;background:#efebe3;border-radius:999px;overflow:hidden}
-    .progress-fill{height:100%;width:0;background:linear-gradient(90deg,#6c8a5f,#2a4827);transition:width .3s ease}
+    .progress-fill{height:100%;width:0;background:linear-gradient(90deg,#4a6340,#2a4827);transition:width .3s ease}
     .service-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
     .service-box{border:1px solid var(--light);padding:14px;background:#faf8f4}
     .service-box strong{display:block;font-size:11px;letter-spacing:1.7px;text-transform:uppercase;margin-bottom:6px}
-    .service-box span{font-size:12px;color:#7d7770;line-height:1.7}
-    .order-note-btn{display:inline-flex;align-items:center;gap:8px;background:none;border:none;padding:0;font:inherit;font-size:11px;letter-spacing:1.8px;text-transform:uppercase;color:#8c857d;cursor:pointer}
+    .service-box span{font-size:12px;color:#635d57;line-height:1.7}
+    .order-note-btn{display:inline-flex;align-items:center;gap:8px;background:none;border:none;padding:0;font:inherit;font-size:11px;letter-spacing:1.8px;text-transform:uppercase;color:#635d57;cursor:pointer}
     .order-note-btn:hover{color:var(--accent)}
     .order-note-wrap{display:none;margin-top:14px}
     .order-note-wrap.open{display:block}
@@ -94,14 +86,14 @@
     .gift-card{display:grid;grid-template-columns:74px minmax(0,1fr) auto;gap:16px;align-items:center;border:1px solid var(--light);background:#faf8f4;padding:16px}
     .gift-visual{height:86px;background:linear-gradient(140deg,#e2d8ca,#d5c6b4);display:flex;align-items:center;justify-content:center;font-size:34px}
     .gift-card h4{font-family:var(--serif);font-size:21px;font-weight:300;margin:0 0 4px}
-    .gift-card p{font-size:12px;color:#7b756d;line-height:1.7;margin:0 0 8px}
+    .gift-card p{font-size:12px;color:#635d57;line-height:1.7;margin:0 0 8px}
     .gift-prices{display:flex;gap:8px;align-items:baseline}
-    .gift-prices del{font-size:12px;color:#aaa}
+    .gift-prices del{font-size:12px;color:#5f5f5f}
     .gift-prices span{font-size:14px;font-weight:500;color:var(--accent)}
     .gift-add-btn{height:42px;padding:0 18px;border:1px solid var(--black);background:#fff;font:inherit;font-size:11px;letter-spacing:1.8px;text-transform:uppercase;cursor:pointer}
     .gift-add-btn:hover{background:#1f1f1f;color:#fff}
     .suggestions-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px}
-    .suggestions-note{font-size:11px;letter-spacing:1.8px;text-transform:uppercase;color:#91897f}
+    .suggestions-note{font-size:11px;letter-spacing:1.8px;text-transform:uppercase;color:#635d57}
     .suggestion-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
     .suggest-card{text-decoration:none;color:inherit}
     .suggest-card-media{aspect-ratio:3/4;background:linear-gradient(150deg,#dfd8cc,#cdc3b5);display:flex;align-items:center;justify-content:center;font-size:46px;overflow:hidden}
@@ -111,24 +103,29 @@
     .suggest-card p{font-family:var(--serif);font-size:18px;font-weight:300;margin:10px 0 4px}
     .suggest-card span{font-size:12px;color:#6d665f}
     .checkout-card{padding:24px;position:sticky;top:100px}
-    .checkout-kicker{font-size:10px;letter-spacing:2.4px;text-transform:uppercase;color:#8e867d;margin-bottom:12px}
+    .checkout-kicker{font-size:10px;letter-spacing:2.4px;text-transform:uppercase;color:#635d57;margin-bottom:12px}
     .summary-title{font-family:var(--serif);font-size:30px;font-weight:300;margin:0 0 20px}
     .summary-panel{padding:18px;background:#faf8f4;border:1px solid var(--light);margin-bottom:18px}
     .summary-row{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;font-size:13px;margin-bottom:12px}
     .summary-row:last-child{margin-bottom:0}
-    .summary-row span{color:#6f6861}
-    .summary-row strong{font-weight:500}
+    .summary-row dt{color:#6f6861}
+    .summary-row dd{font-weight:500;margin:0}
     .summary-divider{border:none;border-top:1px solid var(--light);margin:16px 0}
     .summary-total{display:flex;justify-content:space-between;gap:14px;align-items:flex-end;margin-bottom:18px}
-    .summary-total span{font-size:12px;letter-spacing:1.6px;text-transform:uppercase;color:#8e867d}
-    .summary-total strong{font-size:28px;font-weight:500}
-    .coupon-input-row{margin-bottom:14px;padding:14px 16px;border:1px dashed var(--light);background:#fcfaf6;font-size:12px;line-height:1.7;color:#7b756d}
-    .coupon-input-row strong{display:block;font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#8e867d;margin-bottom:6px}
+    .summary-total dt{font-size:12px;letter-spacing:1.6px;text-transform:uppercase;color:#635d57}
+    .summary-total dd{font-size:28px;font-weight:500;margin:0}
+    .coupon-input-row{margin-bottom:14px;padding:14px 16px;border:1px dashed var(--light);background:#fcfaf6;font-size:12px;line-height:1.7;color:#635d57}
+    .coupon-input-row>strong,.coupon-input-row>label{display:block;font-size:10px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:#635d57;margin-bottom:6px}
+    .coupon-controls{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:10px}
+    .coupon-controls input{min-width:0;border:1px solid var(--light);padding:10px 11px;font:inherit;text-transform:uppercase}
+    .coupon-controls button{border:0;background:#2a4827;color:#fff;padding:10px 13px;font:inherit;cursor:pointer}
+    .coupon-result{margin-top:8px;color:#3d6b38}
+    .coupon-remove{display:none;margin-top:6px;border:0;background:none;padding:0;color:#9a5a50;text-decoration:underline;cursor:pointer;font:inherit}
     .btn-checkout{display:block;width:100%;padding:16px;background:#202020;color:#fff;text-decoration:none;text-align:center;font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px}
     .btn-checkout:hover{background:#2a4827}
     .alt-pay{border:1px solid #d7def5;background:#fbfcff;padding:14px 16px;font-size:12px;line-height:1.7;color:#445}
     .alt-pay strong{display:block;font-size:10px;letter-spacing:1.8px;text-transform:uppercase;margin-bottom:6px;color:#5d6c86}
-    .summary-foot{margin-top:16px;font-size:11px;color:#9a9188;line-height:1.8;text-align:center}
+    .summary-foot{margin-top:16px;font-size:11px;color:#635d57;line-height:1.8;text-align:center}
     footer{background:#2a4827;padding:0 40px 28px;margin-top:56px}
     .footer-divider{border:none;border-top:1px solid rgba(255,255,255,.08);margin-bottom:40px}
     .footer-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr 1fr;gap:42px;margin-bottom:40px}
@@ -160,36 +157,13 @@
   </style>
 </head>
 <body>
-  <div class="announce" id="campaignAnnouncement">&#x2756; SUVERA</div>
+  {{> announcement}}
 
-  <nav id="mainNav">
-    <a class="nav-logo" href="anasayfa">SUVERA</a>
-    <ul class="nav-menu-wrap">
-      <li><a href="urunler">Yeni <span class="nav-chevron">▾</span></a><div class="simple-drop"><a href="urunler">Yeni Gelenler</a><a href="urunler">Çok Satanlar</a><a href="urunler">Editörün Seçimleri</a></div></li>
-      <li><a href="urunler">Giyim <span class="nav-chevron">▾</span></a><div class="simple-drop"><a href="urunler">Elbise</a><a href="urunler">Bluz & Gömlek</a><a href="urunler">Pantolon & Etek</a><a href="urunler">Takım & Kombin</a></div></li>
-      <li><a href="urunler">Dış Giyim <span class="nav-chevron">▾</span></a><div class="simple-drop"><a href="urunler">Kaban & Mont</a><a href="urunler">Trençkot</a><a href="urunler">Ceket & Blazer</a></div></li>
-      <li><a href="urunler">Abaya <span class="nav-chevron">▾</span></a><div class="simple-drop"><a href="urunler">Abaya</a><a href="urunler">Ferace</a><a href="urunler">Kuşaklı Modeller</a></div></li>
-      <li><a href="urunler">Eşarp & Aksesuar</a></li>
-      <li><a href="urunler">Koleksiyonlar</a></li>
-      <li><a href="urunler" class="outlet">Outlet</a></li>
-    </ul>
-    <div class="nav-right">
-      <div class="nav-search-wrap">
-        <button class="nav-search-icon" aria-label="Ara">🔍</button>
-        <div class="nav-search-box" id="navSearchBox">
-          <input type="text" placeholder="Ürün ara..." onkeydown="if(event.key==='Enter')location.href='urunler'"/>
-        </div>
-      </div>
-      <a href="giris" class="nav-icon-btn">HESABIM</a>
-      <a href="sepet" class="nav-icon-btn" style="position:relative">SEPETİM <span class="cart-dot">0</span></a>
-      <button class="hamburger" aria-label="Menü" onclick="openMobileNav()"><span></span><span></span><span></span></button>
-    </div>
-  </nav>
+  {{> navigation}}
 
-  <main class="page-shell">
-    <div class="breadcrumb">
-      <a href="anasayfa">Ana Sayfa</a><span>›</span>
-      <a href="sepet">Sepet</a>
+  <main id="main" tabindex="-1" class="page-shell">
+    <div class="breadcrumb" role="navigation" aria-label="Sayfa yolu">
+      <ol><li><a href="anasayfa">Ana Sayfa</a></li><li aria-current="page">Sepet</li></ol>
     </div>
 
     <section class="cart-hero">
@@ -221,8 +195,9 @@
             <div>
               <h2 class="page-title">Sepetim</h2>
               <div class="page-count">(0 Ürün)</div>
+              <p id="cartStatus" class="cart-status"></p>
             </div>
-            <button class="clear-btn" onclick="clearCart()">Sepeti Temizle</button>
+            <button class="clear-btn" type="button" data-cart-mutation data-action="clear-cart" aria-label="Sepetteki tüm ürünleri temizle">Sepeti Temizle</button>
           </div>
 
           <div class="cart-list-head">
@@ -230,7 +205,7 @@
             <span style="text-align:right">Toplam</span>
           </div>
 
-          <div id="cartItems">
+          <div id="cartItems" aria-busy="true">
             <div class="cart-empty">
               <h3>Sepetiniz boş</h3>
               <p>Yeni sezon seçkisinden birkaç parça ekleyerek devam edebilirsiniz.</p>
@@ -254,7 +229,7 @@
           </div>
 
           <div class="section-card">
-            <button class="order-note-btn" type="button" onclick="toggleOrderNote()">Sipariş Notu Ekle</button>
+            <button class="order-note-btn" type="button" data-action="toggle-order-note">Sipariş Notu Ekle</button>
             <div class="order-note-wrap" id="orderNoteWrap">
               <textarea class="order-note-area" id="orderNoteArea" placeholder="Siparişinizle ilgili notunuzu buraya yazabilirsiniz..."></textarea>
             </div>
@@ -269,7 +244,7 @@
                 <p>Sade dokulu kutu, korumalı iç ambalaj ve zarif kart eşliğiyle hazırlanır.</p>
                 <div class="gift-prices"><del>50,00 TL</del><span>45,00 TL</span></div>
               </div>
-              <button class="gift-add-btn" id="giftAddBtn" type="button" onclick="toggleGift()">Sepete Ekle</button>
+              <button class="gift-add-btn" id="giftAddBtn" type="button" data-action="toggle-gift">Sepete Ekle</button>
             </div>
           </div>
 
@@ -306,20 +281,28 @@
 
       <aside class="checkout-card">
         <div class="checkout-kicker">Ödeme Öncesi</div>
-        <h3 class="summary-title">Sipariş Özeti</h3>
-        <div class="summary-panel">
-          <div class="summary-row"><span>Sepet Toplamı</span><strong id="subtotal">0,00 TL</strong></div>
-          <div class="summary-row"><span>Kargo</span><strong style="color:#4a7c59">Ücretsiz</strong></div>
-          <hr class="summary-divider"/>
-          <div class="summary-total"><span>Genel Toplam</span><strong id="total">0,00 TL</strong></div>
-        </div>
+        <h3 class="summary-title" id="cartSummaryTitle">Sipariş Özeti</h3>
+        <dl class="summary-panel" aria-labelledby="cartSummaryTitle">
+          <div class="summary-row"><dt>Sepet Toplamı</dt><dd id="subtotal">0,00 TL</dd></div>
+          <div class="summary-row" id="cartDiscountRow" hidden><dt>İndirim</dt><dd id="cartDiscount">-0,00 TL</dd></div>
+          <div class="summary-row"><dt>Kargo</dt><dd id="cartShipping" style="color:#4a7c59">Ücretsiz</dd></div>
+          <div class="summary-divider" aria-hidden="true"></div>
+          <div class="summary-total"><dt>Genel Toplam</dt><dd id="total">0,00 TL</dd></div>
+        </dl>
 
         <div class="coupon-input-row">
-          <strong>İndirim Kodları</strong>
-          Kampanyalar şu anda ürün ve sepet toplamına doğrudan yansıtılır. Ayrı kupon girişi bu adımda aktif değildir.
+          <label for="cartCouponCode">Kupon kodu</label>
+          <span id="cartCouponHelp">Kupon checkout sırasında sunucuda yeniden doğrulanır.</span>
+          <div class="coupon-controls">
+            <input id="cartCouponCode" aria-describedby="cartCouponHelp cartCouponResult" aria-invalid="false" autocomplete="off" placeholder="KUPON KODU" />
+            <button id="cartCouponApply" data-cart-mutation type="button">Kuponu uygula</button>
+          </div>
+          <div class="coupon-result" id="cartCouponResult" role="status"></div>
+          <button class="coupon-remove" id="cartCouponRemove" data-cart-mutation type="button">Kuponu kaldır</button>
         </div>
 
-        <a href="siparis" class="btn-checkout">Satın Al →</a>
+        <a id="cartCheckoutLink" aria-describedby="checkoutAvailability" aria-disabled="true" class="btn-checkout">Satın Al →</a>
+        <p id="checkoutAvailability">Sepetiniz boşken ödeme adımına geçilemez.</p>
 
         <div class="alt-pay">
           <strong>Ödeme Bilgisi</strong>
@@ -331,26 +314,11 @@
     </section>
   </main>
 
-  <footer>
-    <hr class="footer-divider"/>
-    <div class="footer-grid">
-      <div class="footer-brand">
-        <a class="nav-logo" href="anasayfa">SUVERA</a>
-        <p>Modern tesettür giyimde rafine, sakin ve güçlü parçalar.</p>
-      </div>
-      <div class="footer-col"><h5>Kategoriler</h5><ul><li><a href="urunler">Elbise</a></li><li><a href="urunler">Abaya</a></li><li><a href="urunler">Takım</a></li><li><a href="urunler">Eşarp</a></li></ul></div>
-      <div class="footer-col"><h5>Bilgiler</h5><ul><li><a href="kvkk">KVKK</a></li><li><a href="kargo">Kargo</a></li><li><a href="iade">İade & Değişim</a></li></ul></div>
-      <div class="footer-col"><h5>SUVERA</h5><ul><li><a href="hakkimizda">Hakkımızda</a></li><li><a href="iletisim#iletisim-kanallari">Mağazalar</a></li></ul></div>
-      <div class="footer-col"><h5>İletişim</h5><ul><li><a href="tel:+908500007872">0850 000 78 72</a></li><li><a href="iletisim#iletisim-kanallari">WhatsApp</a></li></ul></div>
-    </div>
-    <div class="footer-bottom"><span>© 2026 Suvera. Tüm hakları saklıdır.</span><span>SSL Güvenli Alışveriş</span></div>
-  </footer>
-
-  <script src="js/site-seo.js"></script>
-  <script src="js/config.js"></script>
-  <script src="js/api.js"></script>
-<script src="shared.js"></script>
-  <script src="js/cart-ui.js"></script>
+  {{> footer}}
+{{> consent}}
+  {{> scripts}}
+  <script src="js/coupon-ui.js"></script>
+  <script type="module" src="js/cart-ui.js"></script>
   <script>
     const CHECKOUT_NOTE_KEY = 'suveraCheckoutNote';
     const GIFT_WRAP_KEY = 'suveraGiftWrap';

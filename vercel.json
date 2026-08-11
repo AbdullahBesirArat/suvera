@@ -1,5 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "cleanUrls": false,
   "trailingSlash": false,
   "redirects": [
@@ -113,6 +115,14 @@
       "destination": "/arama.html"
     },
     {
+      "source": "/tercihler",
+      "destination": "/tercihler.html"
+    },
+    {
+      "source": "/karsilastir",
+      "destination": "/karsilastir.html"
+    },
+    {
       "source": "/suvera",
       "destination": "/suvera.html"
     }
@@ -120,6 +130,15 @@
   "headers": [
     {
       "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/data/address/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
@@ -165,7 +184,35 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; connect-src 'self' https://panelya-api-production.up.railway.app; img-src 'self' https: data: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'"
+          "value": "default-src 'self'; script-src 'self'; connect-src 'self' https://panelya-api-production.up.railway.app; img-src 'self' https: data: blob:; style-src 'self' https://fonts.googleapis.com; style-src-attr 'none'; font-src 'self' https://fonts.gstatic.com; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "query",
+          "key": "theme_preview",
+          "value": "1"
+        }
+      ],
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, max-age=0"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "no-referrer"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self'; connect-src 'self' https://panelya-api-production.up.railway.app; img-src 'self' https: data: blob:; style-src 'self' https://fonts.googleapis.com; style-src-attr 'none'; font-src 'self' https://fonts.gstatic.com; base-uri 'self'; object-src 'none'; frame-ancestors 'self' https://panelya.com.tr https://www.panelya.com.tr https://panelya-web.vercel.app; form-action 'self'"
         }
       ]
     }

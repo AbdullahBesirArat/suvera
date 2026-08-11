@@ -5,22 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="description" content="Suvera modern tesettur giyim koleksiyonlari, sade ve guclu parcalar ile yeni sezon seckileri." />
   <link rel="canonical" href="https://suvera.com.tr/anasayfa" />
-  <meta property="og:type" content="website" />
-  <meta property="og:title" content="Suvera | Modern Tesettur Giyim" />
-  <meta property="og:description" content="Suvera modern tesettur giyim koleksiyonlari, sade ve guclu parcalar ile yeni sezon seckileri." />
-  <meta property="og:url" content="https://suvera.com.tr/anasayfa" />
-  <meta property="og:image" content="https://suvera.com.tr/og-cover.svg" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Suvera | Modern Tesettur Giyim" />
-  <meta name="twitter:description" content="Suvera modern tesettur giyim koleksiyonlari, sade ve guclu parcalar ile yeni sezon seckileri." />
-  <meta name="twitter:image" content="https://suvera.com.tr/og-cover.svg" />
   <meta name="theme-color" content="#2a4827" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="manifest" href="site.webmanifest" />
+  {{> head-defaults}}
+  <link rel="preload" as="image" href="assets/suvera-istanbul-editorial-1200.avif" imagesrcset="assets/suvera-istanbul-editorial-800.avif 800w, assets/suvera-istanbul-editorial-1200.avif 1200w" imagesizes="100vw" type="image/avif" fetchpriority="high" />
   <title>SUVERA – Modern Tesettür Giyim</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="shared.css"/>
   <style>
     :root {
       --bg: #f7f5f1;
@@ -171,13 +159,13 @@
     .slide:nth-child(1) .slide-bg {
       background-image:
         linear-gradient(90deg, rgba(247,245,241,.92) 0%, rgba(247,245,241,.72) 34%, rgba(247,245,241,.12) 62%),
-        url('assets/suvera-istanbul-editorial.png');
+        url('assets/suvera-istanbul-editorial-1200.webp');
       background-image:
         linear-gradient(90deg, rgba(247,245,241,.92) 0%, rgba(247,245,241,.72) 34%, rgba(247,245,241,.12) 62%),
         image-set(
           url('assets/suvera-istanbul-editorial-1200.avif') type('image/avif') 1x,
           url('assets/suvera-istanbul-editorial-1200.webp') type('image/webp') 1x,
-          url('assets/suvera-istanbul-editorial.png') type('image/png') 1x
+          url('assets/suvera-istanbul-editorial-1200.webp') type('image/webp') 1x
         );
       background-position:center;
     }
@@ -760,128 +748,12 @@
 <body>
 
 <!-- ANNOUNCEMENT -->
-<div class="announce" id="campaignAnnouncement">✦ Suvera seçkileri yükleniyor ✦</div>
+{{> announcement}}
 
 <!-- MEGA MENU NAV -->
-<nav id="mainNav">
-  <a class="nav-logo" href="anasayfa">SUVERA</a>
+{{> navigation}}
 
-  <ul class="nav-menu-wrap">
-    <li>
-      <a href="urunler">Yeni <span class="nav-chevron">▾</span></a>
-      <div class="simple-drop">
-        <a href="urunler">Yeni Gelenler</a>
-        <a href="urunler">Bu Hafta Eklenenler</a>
-        <a href="urunler">Çok Satanlar</a>
-        <a href="urunler">Editörün Seçimleri</a>
-      </div>
-    </li>
-    <li>
-      <a href="urunler">Giyim <span class="nav-chevron">▾</span></a>
-      <div class="mega-drop" style="min-width:600px">
-        <div class="mega-cols four">
-          <div>
-            <div class="mega-col-title">Üst Giyim</div>
-            <a href="urunler" class="mega-link">Elbise</a>
-            <a href="urunler" class="mega-link">Bluz & Gömlek</a>
-            <a href="urunler" class="mega-link">Triko & Kazak</a>
-            <a href="urunler" class="mega-link">Body</a>
-            <a href="urunler" class="mega-link">Sweatshirt</a>
-            <div class="mega-col-title" style="margin-top:14px">Alt Giyim</div>
-            <a href="urunler" class="mega-link">Pantolon</a>
-            <a href="urunler" class="mega-link">Etek</a>
-            <a href="urunler" class="mega-link">Jean</a>
-          </div>
-          <div>
-            <div class="mega-col-title">Koleksiyonlar</div>
-            <a href="urunler" class="mega-link">Yeni Gelenler</a>
-            <a href="urunler" class="mega-link">Günlük Seçki</a>
-            <a href="urunler" class="mega-link">Zamansız Parçalar</a>
-            <a href="urunler" class="mega-link">Özel Seri</a>
-            <a href="urunler" class="mega-link">Suvera Edit</a>
-          </div>
-          <a href="urunler" class="mega-featured">
-            <div class="mega-featured-emoji">TK</div>
-            <div class="mf-tag">✦ Öne Çıkan</div>
-            <div class="mf-title">Palazzo Keten<br/>Takım</div>
-            <div class="mf-cta">Keşfet →</div>
-          </a>
-        </div>
-      </div>
-    </li>
-    <li>
-      <a href="urunler">Dış Giyim <span class="nav-chevron">▾</span></a>
-      <div class="mega-drop" style="min-width:420px">
-        <div class="mega-cols two">
-          <div>
-            <div class="mega-col-title">Kategoriler</div>
-            <a href="urunler" class="mega-link">Kaban & Mont</a>
-            <a href="urunler" class="mega-link">Trençkot</a>
-            <a href="urunler" class="mega-link">Ceket & Blazer</a>
-            <a href="urunler" class="mega-link">Yelek</a>
-            <a href="urunler" class="mega-link">Hırka</a>
-          </div>
-          <a href="urunler" class="mega-featured">
-            <div class="mega-featured-emoji">TR</div>
-            <div class="mf-tag">Sezon Sonu</div>
-            <div class="mf-title">%40'a Varan<br/>İndirim</div>
-            <div class="mf-cta">Hemen Bak →</div>
-          </a>
-        </div>
-      </div>
-    </li>
-    <li>
-      <a href="urunler">Abaya <span class="nav-chevron">▾</span></a>
-      <div class="simple-drop">
-        <a href="urunler">Abaya</a>
-        <a href="urunler">Ferace</a>
-        <a href="urunler">Kuşaklı Modeller</a>
-        <a href="urunler">Nakışlı & Detaylı</a>
-      </div>
-    </li>
-    <li>
-      <a href="urunler">Eşarp & Aksesuar <span class="nav-chevron">▾</span></a>
-      <div class="mega-drop" style="min-width:480px">
-        <div class="mega-cols two">
-          <div>
-            <div class="mega-col-title">Eşarp & Şal</div>
-            <a href="urunler" class="mega-link">İpek Eşarp</a>
-            <a href="urunler" class="mega-link">Modal Eşarp</a>
-            <a href="urunler" class="mega-link">Şal & Fular</a>
-            <a href="urunler" class="mega-link">Bere & Şapka</a>
-            <div class="mega-col-title" style="margin-top:14px">Aksesuar</div>
-            <a href="urunler" class="mega-link">Çanta</a>
-            <a href="urunler" class="mega-link">Takı & Küpe</a>
-          </div>
-          <a href="urunler" class="mega-featured">
-            <div class="mega-featured-emoji">ES</div>
-            <div class="mf-tag">✦ Popüler</div>
-            <div class="mf-title">İpek Modal<br/>Eşarplar</div>
-            <div class="mf-cta">Koleksiyonu Gör →</div>
-          </a>
-        </div>
-      </div>
-    </li>
-    <li><a href="urunler">Koleksiyonlar</a></li>
-    <li><a href="urunler" class="outlet">Outlet</a></li>
-  </ul>
-
-  <div class="nav-right">
-    <div class="nav-search-wrap">
-      <button class="nav-search-icon" aria-label="Ara">🔍</button>
-      <div class="nav-search-box" id="navSearchBox">
-        <input type="text" placeholder="Ürün ara..." onkeydown="if(event.key==='Enter')location.href='urunler'"/>
-      </div>
-    </div>
-    <a href="giris" class="nav-icon-btn">HESABIM</a>
-    <a href="sepet" class="nav-icon-btn" style="position:relative">
-      SEPETİM <span class="cart-dot">0</span>
-    </a>
-    <button class="hamburger" aria-label="Menü" onclick="openMobileNav()">
-      <span></span><span></span><span></span>
-    </button>
-  </div>
-</nav>
+<main id="main" tabindex="-1">
 
 <!-- HERO SLIDER -->
 <div class="hero-slider" id="heroSlider">
@@ -912,12 +784,12 @@
   </div>
 
   <!-- Arrows -->
-  <button class="slider-arrow prev" onclick="changeSlide(-1)" aria-label="Önceki">&#8249;</button>
-  <button class="slider-arrow next" onclick="changeSlide(1)"  aria-label="Sonraki">&#8250;</button>
+  <button class="slider-arrow prev" data-action="slide-prev" aria-label="Önceki">&#8249;</button>
+  <button class="slider-arrow next" data-action="slide-next"  aria-label="Sonraki">&#8250;</button>
 
   <!-- Dots -->
-  <div class="slider-dots" id="heroSliderDots">
-    <button class="slider-dot active" onclick="goSlide(0)"></button>
+  <div class="slider-dots" id="heroSliderDots" role="group" aria-label="Slayt seçimi">
+    <button class="slider-dot active" type="button" data-action="go-slide" data-index="0" aria-label="1. slayta git" aria-current="true"></button>
   </div>
 
   <!-- Progress bar -->
@@ -970,14 +842,14 @@
   </div>
   <div class="prods-grid stagger-children" id="homeProductsGrid">
 
-    <div class="prod-card" onclick="location.href='urun'">
+    <div class="prod-card" data-nav="urun">
       <div class="prod-img">
         <div class="prod-img-bg" style="background:linear-gradient(150deg,#d8d3c8,#c5bfb2)"></div>
         <span style="position:relative;z-index:1">EL</span>
         <div class="prod-badges"><span class="badge badge-sale">İndirim</span></div>
         <div class="prod-hover-actions">
           <button class="quick-add">Hızlı Ekle</button>
-          <button class="quick-fav" onclick="event.stopPropagation();toggleFav(this)">♡</button><button class="quick-view" onclick="event.stopPropagation()" title="Hızlı Bak">Bak</button>
+          <button class="quick-fav" data-action="toggle-fav">♡</button><button class="quick-view" data-stop="1" title="Hızlı Bak">Bak</button>
         </div>
       </div>
       <div class="prod-info">
@@ -995,14 +867,14 @@
       </div>
     </div>
 
-    <div class="prod-card" onclick="location.href='urun'">
+    <div class="prod-card" data-nav="urun">
       <div class="prod-img">
         <div class="prod-img-bg" style="background:linear-gradient(150deg,#7a9b6a,#5a7d52)"></div>
         <span style="position:relative;z-index:1">AB</span>
         <div class="prod-badges"><span class="badge badge-new">Yeni</span></div>
         <div class="prod-hover-actions">
           <button class="quick-add">Hızlı Ekle</button>
-          <button class="quick-fav" onclick="event.stopPropagation();toggleFav(this)">♡</button><button class="quick-view" onclick="event.stopPropagation()" title="Hızlı Bak">Bak</button>
+          <button class="quick-fav" data-action="toggle-fav">♡</button><button class="quick-view" data-stop="1" title="Hızlı Bak">Bak</button>
         </div>
       </div>
       <div class="prod-info">
@@ -1015,14 +887,14 @@
       </div>
     </div>
 
-    <div class="prod-card" onclick="location.href='urun'">
+    <div class="prod-card" data-nav="urun">
       <div class="prod-img">
         <div class="prod-img-bg" style="background:linear-gradient(150deg,#ded8cc,#d0c8b8)"></div>
         <span style="position:relative;z-index:1">TK</span>
         <div class="prod-badges"><span class="badge badge-new">Yeni</span></div>
         <div class="prod-hover-actions">
           <button class="quick-add">Hızlı Ekle</button>
-          <button class="quick-fav" onclick="event.stopPropagation();toggleFav(this)">♡</button><button class="quick-view" onclick="event.stopPropagation()" title="Hızlı Bak">Bak</button>
+          <button class="quick-fav" data-action="toggle-fav">♡</button><button class="quick-view" data-stop="1" title="Hızlı Bak">Bak</button>
         </div>
       </div>
       <div class="prod-info">
@@ -1035,14 +907,14 @@
       </div>
     </div>
 
-    <div class="prod-card" onclick="location.href='urun'">
+    <div class="prod-card" data-nav="urun">
       <div class="prod-img">
         <div class="prod-img-bg" style="background:linear-gradient(150deg,#e4dcd4,#d4c8bc)"></div>
         <span style="position:relative;z-index:1">TR</span>
         <div class="prod-badges"><span class="badge badge-sale">-%30</span></div>
         <div class="prod-hover-actions">
           <button class="quick-add">Hızlı Ekle</button>
-          <button class="quick-fav" onclick="event.stopPropagation();toggleFav(this)">♡</button><button class="quick-view" onclick="event.stopPropagation()" title="Hızlı Bak">Bak</button>
+          <button class="quick-fav" data-action="toggle-fav">♡</button><button class="quick-view" data-stop="1" title="Hızlı Bak">Bak</button>
         </div>
       </div>
       <div class="prod-info">
@@ -1058,13 +930,13 @@
       </div>
     </div>
 
-    <div class="prod-card" onclick="location.href='urun'">
+    <div class="prod-card" data-nav="urun">
       <div class="prod-img">
         <div class="prod-img-bg" style="background:linear-gradient(150deg,#e0d8e0,#ccc4cc)"></div>
         <span style="position:relative;z-index:1">BL</span>
         <div class="prod-hover-actions">
           <button class="quick-add">Hızlı Ekle</button>
-          <button class="quick-fav" onclick="event.stopPropagation();toggleFav(this)">♡</button><button class="quick-view" onclick="event.stopPropagation()" title="Hızlı Bak">Bak</button>
+          <button class="quick-fav" data-action="toggle-fav">♡</button><button class="quick-view" data-stop="1" title="Hızlı Bak">Bak</button>
         </div>
       </div>
       <div class="prod-info">
@@ -1077,14 +949,14 @@
       </div>
     </div>
 
-    <div class="prod-card" onclick="location.href='urun'">
+    <div class="prod-card" data-nav="urun">
       <div class="prod-img">
         <div class="prod-img-bg" style="background:linear-gradient(150deg,#d4dcd8,#c0ccc8)"></div>
         <span style="position:relative;z-index:1">PN</span>
         <div class="prod-badges"><span class="badge badge-new">Yeni</span></div>
         <div class="prod-hover-actions">
           <button class="quick-add">Hızlı Ekle</button>
-          <button class="quick-fav" onclick="event.stopPropagation();toggleFav(this)">♡</button><button class="quick-view" onclick="event.stopPropagation()" title="Hızlı Bak">Bak</button>
+          <button class="quick-fav" data-action="toggle-fav">♡</button><button class="quick-view" data-stop="1" title="Hızlı Bak">Bak</button>
         </div>
       </div>
       <div class="prod-info">
@@ -1097,14 +969,14 @@
       </div>
     </div>
 
-    <div class="prod-card" onclick="location.href='urun'">
+    <div class="prod-card" data-nav="urun">
       <div class="prod-img">
         <div class="prod-img-bg" style="background:linear-gradient(150deg,#e8e0d0,#dcd0bc)"></div>
         <span style="position:relative;z-index:1">ES</span>
         <div class="prod-badges"><span class="badge badge-sale">İndirim</span></div>
         <div class="prod-hover-actions">
           <button class="quick-add">Hızlı Ekle</button>
-          <button class="quick-fav" onclick="event.stopPropagation();toggleFav(this)">♡</button><button class="quick-view" onclick="event.stopPropagation()" title="Hızlı Bak">Bak</button>
+          <button class="quick-fav" data-action="toggle-fav">♡</button><button class="quick-view" data-stop="1" title="Hızlı Bak">Bak</button>
         </div>
       </div>
       <div class="prod-info">
@@ -1122,13 +994,13 @@
       </div>
     </div>
 
-    <div class="prod-card" onclick="location.href='urun'">
+    <div class="prod-card" data-nav="urun">
       <div class="prod-img">
         <div class="prod-img-bg" style="background:linear-gradient(150deg,#d8d0c8,#c8c0b4)"></div>
         <span style="position:relative;z-index:1">MX</span>
         <div class="prod-hover-actions">
           <button class="quick-add">Hızlı Ekle</button>
-          <button class="quick-fav" onclick="event.stopPropagation();toggleFav(this)">♡</button><button class="quick-view" onclick="event.stopPropagation()" title="Hızlı Bak">Bak</button>
+          <button class="quick-fav" data-action="toggle-fav">♡</button><button class="quick-view" data-stop="1" title="Hızlı Bak">Bak</button>
         </div>
       </div>
       <div class="prod-info">
@@ -1185,73 +1057,10 @@
 </div>
 
 <!-- FOOTER -->
-<footer>
-  <hr class="footer-divider"/>
-  <div class="footer-grid">
-    <div class="footer-brand">
-      <a class="nav-logo" href="anasayfa">SUVERA</a>
-      <p>Modern tesettür giyimde zarafet ve sadelik. Her kadın için özenle tasarlanmış koleksiyonlar.</p>
-      <div class="socials">
-        <a href="iletisim#iletisim-kanallari" class="social-btn">INSTAGRAM</a>
-        <span style="color:rgba(255,255,255,.15)">·</span>
-        <a href="iletisim#iletisim-kanallari" class="social-btn">TIKTOK</a>
-        <span style="color:rgba(255,255,255,.15)">·</span>
-        <a href="iletisim#iletisim-kanallari" class="social-btn">PINTEREST</a>
-        <span style="color:rgba(255,255,255,.15)">·</span>
-        <a href="iletisim#iletisim-kanallari" class="social-btn">YOUTUBE</a>
-      </div>
-    </div>
-    <div class="footer-col">
-      <h5>Öne Çıkan Kategoriler</h5>
-      <ul>
-        <li><a href="urunler">Trençkot</a></li>
-        <li><a href="urunler">Ceket & Blazer</a></li>
-        <li><a href="urunler">Kaban & Mont</a></li>
-        <li><a href="urunler">Çanta</a></li>
-        <li><a href="urunler">Etek</a></li>
-        <li><a href="urunler">Elbise</a></li>
-      </ul>
-    </div>
-    <div class="footer-col">
-      <h5>Önemli Bilgiler</h5>
-      <ul>
-        <li><a href="kvkk">KVKK – ETK Aydınlatma</a></li>
-        <li><a href="kargo">Kargo ve Teslimat</a></li>
-        <li><a href="uyelik-sozlesmesi">Üyelik Sözleşmesi</a></li>
-        <li><a href="sozlesme">Satış Sözleşmesi</a></li>
-        <li><a href="iade">İade ve Değişim</a></li>
-      </ul>
-    </div>
-    <div class="footer-col">
-      <h5>SUVERA</h5>
-      <ul>
-        <li><a href="hakkimizda">Hakkımızda</a></li>
-        <li><a href="blog">Blog</a></li>
-        <li><a href="iletisim#iletisim-kanallari">Mağazalar</a></li>
-        <li><a href="iletisim#iletisim-kanallari">Kariyer</a></li>
-        <li><a href="iletisim#iletisim-kanallari">İş Birliği</a></li>
-      </ul>
-    </div>
-    <div class="footer-col">
-      <h5>İletişim</h5>
-      <ul>
-        <li><a href="tel:+908500007872">Bize Ulaşın: 0850 000 78 72</a></li>
-        <li><a href="iletisim#iletisim-kanallari">WhatsApp: Hızlı Destek</a></li>
-        <li><a href="mailto:destek@suvera.com">E-posta: destek@suvera.com</a></li>
-        <li><a href="mailto:isbirligi@suvera.com">İş Birliği: isbirligi@suvera.com</a></li>
-      </ul>
-    </div>
-  </div>
-  <div class="footer-bottom">
-    <span>© 2026 Suvera. Tüm hakları saklıdır.</span>
-    <div class="pay-icons">
-      <span class="pay-pill">VISA</span>
-      <span class="pay-pill">MASTERCARD</span>
-      <span class="pay-pill">İYZİCO</span>
-      <span class="pay-pill">KAPIDA ÖDEME</span>
-    </div>
-  </div>
-</footer>
+</main>
+
+{{> footer}}
+{{> consent}}
 <script>
 
   // Favori toggle (emoji in JS is safe here)
@@ -1374,10 +1183,7 @@
   showSlide(0);
   startTimer();
 </script>
-<script src="js/config.js"></script>
-<script src="js/api.js"></script>
-<script src="js/storefront.js"></script>
-<script src="js/site-seo.js"></script>
-<script src="shared.js"></script>
+  {{> scripts}}
+<script type="module" src="js/storefront.js"></script>
 </body>
 </html>

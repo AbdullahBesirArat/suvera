@@ -1,0 +1,53 @@
+name: Full-stack E2E
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  playwright:
+    name: Playwright / Chromium / disposable PostgreSQL
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout storefront and Panelya
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            panelya/package-lock.json
+
+      - name: Install storefront dependencies
+        run: npm ci
+
+      - name: Install Panelya dependencies
+        run: npm ci --prefix panelya
+
+      - name: Install Chromium and OS dependencies
+        run: npx playwright install --with-deps chromium
+
+      - name: Run full-stack E2E
+        run: npm run test:e2e
+
+      - name: Upload failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-failure-artifacts
+          path: |
+            playwright-report
+            test-results
+            e2e/.tmp/*.log
+          if-no-files-found: ignore
+          retention-days: 7

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ürün Karşılaştırma | Suvera</title>
+  <meta name="description" content="Suvera ürünlerini fiyat, stok ve özelliklerine göre yan yana karşılaştırın." />
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="canonical" href="https://suvera.com.tr/karsilastir" />
+    {{> head-defaults}}<link rel="stylesheet" href="css/site-pages.css" />
+</head>
+<body class="site-page-body">
+  {{> announcement}}
+  {{> navigation}}
+
+  <main id="main" tabindex="-1" class="info-page-shell">
+    <div class="page-breadcrumb"><a href="anasayfa">Ana Sayfa</a><span>›</span><span>Karşılaştırma</span></div>
+    <section class="page-hero">
+      <div class="page-hero-card">
+        <div class="hero-kicker">Katalog</div>
+        <h1 class="hero-title">Ürün Karşılaştırma</h1>
+        <p class="page-copy">Seçtiğiniz ürünleri fiyat, stok ve özellikleriyle yan yana inceleyin. En fazla 4 ürün karşılaştırabilirsiniz.</p>
+      </div>
+      <aside class="page-side-card">
+        <div class="page-checklist">
+          <div class="page-check"><strong>Paylaşılabilir</strong><span>Bağlantı yalnızca ürün numaralarını içerir; kişisel veri taşımaz.</span></div>
+          <div class="page-check"><strong>Kolay yönetim</strong><span>Ürünleri istediğiniz an listeden çıkarabilirsiniz.</span></div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="page-grid single">
+      <article class="page-card">
+        <p class="page-form-note" id="compareEmpty" hidden>Karşılaştırma listeniz boş. Ürün sayfalarındaki “Karşılaştır” düğmesiyle ürün ekleyin.</p>
+        <div class="compare-grid" id="compareGrid"></div>
+      </article>
+    </section>
+  </main>
+
+  {{> footer}}
+{{> consent}}
+
+    {{> scripts}}
+    <script src="js/comparison.js"></script>
+  </body>
+</html>

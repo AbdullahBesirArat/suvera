@@ -3,7 +3,7 @@ const http = require('http');
 const https = require('https');
 const path = require('path');
 
-const rootDir = __dirname;
+const rootDir = fs.existsSync(path.join(__dirname, 'dist')) ? path.join(__dirname, 'dist') : __dirname;
 const upstreamApi = (process.env.UPSTREAM_API || 'https://panelya-api-production.up.railway.app/api').replace(/\/$/, '');
 const publicAccessToken = process.env.SUVERA_PUBLIC_ACCESS_TOKEN || '';
 const siteOrigin = (process.env.SUVERA_SITE_ORIGIN || 'https://suvera.com.tr').replace(/\/$/, '');
@@ -15,12 +15,47 @@ const maxProxyBodyBytes = positiveNumber(process.env.MAX_PROXY_BODY_BYTES, 1024 
 const customerCookie = 'suveraCustomerToken';
 const accessCookie = 'suveraAccessToken';
 const refreshCookie = 'suveraRefreshToken';
+const guestCartCookie = 'suveraGuestCart';
+// Guest cart token forwarded upstream only to cart/checkout endpoints; cart
+// responses buffered so the raw token can move to an HttpOnly cookie.
+const GUEST_TOKEN_UPSTREAM_PATH = /^(cart(?:\/|$)|orders(?:\/|\?|$)|payment(?:\/|$)|reviews(?:\/|$))/;
+const CART_BUFFER_PATH = /^cart(?:\/|$)/;
+// A28 theme preview, mirroring api/[...path].js: the draft stylesheet has to be a GET so a
+// <link rel="stylesheet"> can load it under style-src 'self', so its token is exchanged for
+// an HttpOnly session cookie here and replayed upstream as a header — never in the URL.
+const themePreviewCookie = 'suveraThemePreview';
+const THEME_PREVIEW_BUFFER_PATH = /^storefront-theme\/preview$/;
+const THEME_PREVIEW_UPSTREAM_PATH = /^storefront-theme\/preview\.css(?:\?|$)/;
 // FIX: Mirror production hardening headers during API-connected local testing.
 const securityHeaders = {
   'Referrer-Policy': 'strict-origin-when-cross-origin',
   'X-Content-Type-Options': 'nosniff',
-  'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline'; connect-src 'self' https://panelya-api-production.up.railway.app; img-src 'self' https: data: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'",
+  'Content-Security-Policy': "default-src 'self'; script-src 'self'; connect-src 'self' https://panelya-api-production.up.railway.app; img-src 'self' https: data: blob:; style-src 'self' https://fonts.googleapis.com; style-src-attr 'none'; font-src 'self' https://fonts.gstatic.com; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'",
 };
+
+// A28 theme preview. The admin frames the storefront to preview a draft, which the normal
+// `frame-ancestors 'self'` forbids. Rather than weakening the site-wide policy, the ONE
+// header that has to differ is swapped for the preview response only, and only for origins
+// named in server configuration — never for an origin taken from the request. Everything
+// else in the policy, including `style-src-attr 'none'`, is carried over untouched.
+const THEME_PREVIEW_QUERY = 'theme_preview';
+const themePreviewFrameAncestors = String(process.env.THEME_PREVIEW_FRAME_ANCESTORS || '')
+  .split(/[\s,]+/)
+  .filter((origin) => /^https?:\/\/[^\s'"*;]+$/.test(origin));
+
+function themePreviewHeaders() {
+  const ancestors = ["'self'", ...themePreviewFrameAncestors].join(' ');
+  return {
+    ...securityHeaders,
+    'Content-Security-Policy': securityHeaders['Content-Security-Policy']
+      .replace("frame-ancestors 'self'", `frame-ancestors ${ancestors}`),
+    // A draft must never be cached by a shared cache, indexed, or leak the admin URL it
+    // was opened from.
+    'Cache-Control': 'no-store, max-age=0',
+    'X-Robots-Tag': 'noindex, nofollow, noarchive',
+    'Referrer-Policy': 'no-referrer',
+  };
+}
 
 const contentTypes = {
   '.css': 'text/css; charset=utf-8',
@@ -59,6 +94,8 @@ const cleanPageFiles = new Map([
   ['blog-detay', 'blog-detay.html'],
   ['blog', 'blog.html'],
   ['arama', 'arama.html'],
+  ['tercihler', 'tercihler.html'],
+  ['karsilastir', 'karsilastir.html'],
   ['suvera', 'suvera.html'],
 ]);
 
@@ -156,7 +193,21 @@ function serializeCookie(name, value, options = {}) {
 }
 
 function isCustomerAuthPath(pathname) {
-  return /^\/api\/customer-auth(?:\/|$)/.test(pathname) || /^\/api\/customers\/account(?:\/|\?|$)/.test(pathname);
+  return /^\/api\/customer-auth(?:\/|$)/.test(pathname)
+    || /^\/api\/customers\/account(?:\/|\?|$)/.test(pathname)
+    || /^\/api\/returns\/customer(?:\/|\?|$)/.test(pathname);
+}
+
+// Routes where a signed-in customer's bearer must reach the API so it resolves the
+// customer (not a guest): their account endpoints plus the persistent cart, which
+// includes the guest->customer merge triggered right after login/registration.
+function isCustomerBearerPath(pathname) {
+  return isCustomerAuthPath(pathname)
+    || /^\/api\/cart(?:\/|$)/.test(pathname)
+    // Keep this list in step with api/[...path].js: the A25 address book and guest
+    // order-claim endpoints authenticate the customer through this bearer, and a
+    // missing entry here silently degrades them to guest requests.
+    || /^\/api\/(reviews|questions|notifications|recently-viewed|comparison|customer-addresses|customer-orders)(?:\/|$)/.test(pathname);
 }
 
 function stripSessionTokens(payload) {
@@ -221,11 +272,22 @@ async function proxyApi(req, res, pathname, search) {
   if (token) headers['x-public-access-token'] = token;
   if (req.headers.authorization) {
     headers.Authorization = req.headers.authorization;
-  } else if (isCustomerAuthPath(pathname) && cookies[customerCookie]) {
+  } else if (isCustomerBearerPath(pathname) && cookies[customerCookie]) {
     headers.Authorization = `Bearer ${cookies[customerCookie]}`;
   } else if (cookies[accessCookie]) {
     headers.Authorization = `Bearer ${cookies[accessCookie]}`;
   }
+  if (GUEST_TOKEN_UPSTREAM_PATH.test(upstreamPath) && cookies[guestCartCookie]) {
+    headers['X-Guest-Cart-Token'] = cookies[guestCartCookie];
+  }
+  if (THEME_PREVIEW_UPSTREAM_PATH.test(upstreamPath) && cookies[themePreviewCookie]) {
+    headers['X-Theme-Preview-Token'] = cookies[themePreviewCookie];
+  }
+  // Forward the optimistic-concurrency precondition so cart mutations enforce the
+  // client's expected version server-side (prevents lost updates across tabs).
+  if (req.headers['if-match']) headers['If-Match'] = req.headers['if-match'];
+  // Preserve public catalog/theme conditional GET through the same-origin proxy.
+  if (req.headers['if-none-match']) headers['If-None-Match'] = req.headers['if-none-match'];
   if (req.headers['content-type']) headers['Content-Type'] = req.headers['content-type'];
 
   try {
@@ -270,6 +332,21 @@ async function proxyApi(req, res, pathname, search) {
         responseCookies.push(serializeCookie(accessCookie, payload.accessToken, { maxAge: 60 * 15 }));
         responseBody = Buffer.from(JSON.stringify(stripSessionTokens(payload)));
       }
+      if (CART_BUFFER_PATH.test(upstreamPath) && Object.prototype.hasOwnProperty.call(payload, 'guest_cart_token')) {
+        const guestToken = payload.guest_cart_token;
+        responseCookies.push(typeof guestToken === 'string' && guestToken
+          ? serializeCookie(guestCartCookie, guestToken, { maxAge: 60 * 60 * 24 * 30 })
+          : serializeCookie(guestCartCookie, '', { maxAge: 0 }));
+        const { guest_cart_token: _guestToken, ...rest } = payload;
+        responseBody = Buffer.from(JSON.stringify(rest));
+      }
+      if (THEME_PREVIEW_BUFFER_PATH.test(upstreamPath)) {
+        const previewToken = payload.preview_session_token;
+        // Session cookie (no Max-Age) so the raw token never reaches the persistent jar.
+        responseCookies.push(serializeCookie(themePreviewCookie, typeof previewToken === 'string' ? previewToken : ''));
+        const { preview_session_token: _previewToken, ...rest } = payload;
+        responseBody = Buffer.from(JSON.stringify(rest));
+      }
     }
 
     if (/^customer-auth\/logout$/.test(upstreamPath)) {
@@ -283,6 +360,10 @@ async function proxyApi(req, res, pathname, search) {
 
     send(res, response.status, responseBody, responseHeaders);
   } catch (err) {
+    // The response body only carries err.message, which loses the transport cause
+    // (ECONNRESET / socket hang up / timeout). Log it so an intermittent proxy 502 in
+    // an E2E run can be told apart from an upstream application error.
+    console.error(`[proxy] ${req.method} ${req.url} failed: ${err.code || 'ERR'} ${err.message} reusedSocket=${err.reusedSocket === true}`);
     send(res, err.statusCode || 502, JSON.stringify({
       error: 'Panelya API proxy istegi basarisiz',
       detail: err.message,
@@ -290,10 +371,25 @@ async function proxyApi(req, res, pathname, search) {
   }
 }
 
+// The upstream API runs on Node's default keepAliveTimeout (5s), while this proxy's
+// The upstream API runs on Node's default keepAliveTimeout (5s), while http.globalAgent
+// keeps free sockets indefinitely (Node >=19 defaults keepAlive to true). A socket could
+// therefore sit in the pool that the API had already closed, and the next request
+// written onto it failed with ECONNRESET.
+//
+// The fix removes the cause rather than compensating for it: this dev proxy opens a
+// fresh connection per upstream call (agent: false), so there is never a pooled socket
+// to go stale and no request is ever replayed. Capping free-socket lifetime instead was
+// tried and rejected — it left the race open and applied its timeout to in-flight
+// sockets too. On loopback the extra handshake is irrelevant, and the production proxy
+// (api/[...path].js, undici/fetch on Vercel) is deliberately untouched.
+const UPSTREAM_AGENT = false;
+
 function upstreamRequest(target, options) {
   return new Promise((resolve, reject) => {
     const transport = target.protocol === 'https:' ? https : http;
     const request = transport.request(target, {
+      agent: UPSTREAM_AGENT,
       method: options.method,
       headers: options.headers,
     }, (response) => {
@@ -318,7 +414,10 @@ function upstreamRequest(target, options) {
     request.setTimeout(15000, () => {
       request.destroy(new Error('Upstream API zaman asimina ugradi'));
     });
-    request.on('error', reject);
+    // reusedSocket distinguishes "the upstream rejected us" from "we wrote onto a
+    // pooled keep-alive socket the upstream had already closed", which is the only
+    // case where the request provably never reached the API.
+    request.on('error', (error) => reject(Object.assign(error, { reusedSocket: request.reusedSocket })));
     if (options.body && options.body.length) request.write(options.body);
     request.end();
   });
@@ -371,7 +470,8 @@ async function serveSitemap(res) {
   });
 }
 
-function serveFile(req, res, pathname) {
+function serveFile(req, res, url) {
+  const pathname = url.pathname;
   const requestedPath = pathname === '/' ? '/anasayfa' : pathname;
   let decodedPath;
   try {
@@ -409,8 +509,12 @@ function serveFile(req, res, pathname) {
     }
 
     const type = contentTypes[path.extname(filePath).toLowerCase()] || 'application/octet-stream';
-    const cacheableAsset = /[\\\/](assets|uploads)[\\\/]/.test(filePath);
+    const cacheableAsset = /[\\\/](assets|uploads)[\\\/]/.test(filePath) || /[\\\/]data[\\\/]address[\\\/]/.test(filePath);
+    // Only the HTML document is ever served as a preview response; assets keep the normal
+    // policy so a preview cannot become a way to reach anything else differently.
+    const isPreview = type.startsWith('text/html') && url.searchParams.get(THEME_PREVIEW_QUERY) === '1';
     send(res, 200, body, {
+      ...(isPreview ? themePreviewHeaders() : {}),
       'Content-Type': type,
       ...(cacheableAsset ? { 'Cache-Control': 'public, max-age=31536000, immutable' } : {}),
     });
@@ -433,7 +537,7 @@ function createServer() {
         return;
       }
 
-      serveFile(req, res, url.pathname);
+      serveFile(req, res, url);
     } catch (err) {
       if (!res.headersSent) {
         send(res, 500, 'Internal server error', { 'Content-Type': 'text/plain; charset=utf-8' });

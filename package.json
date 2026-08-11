@@ -3,7 +3,17 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "node dev-server.js",
-    "check": "node --check dev-server.js && node --check \"api/[...path].js\" && node --check api/sitemap.xml.js && node --check js/api.js && node --check js/config.js && node --check js/storefront.js && node --check js/product-detail.js && node --check js/site-pages.js && node --check js/cart-ui.js && node --check shared.js"
+    "build": "node scripts/build-storefront.js",
+    "test:performance": "npm run build && node scripts/check-performance-budget.js",
+    "dev": "npm run build && node dev-server.js",
+    "check": "npm run build && node scripts/check-performance-budget.js && node --check dev-server.js && node --check scripts/build-storefront.js && node --check scripts/check-performance-budget.js && node --check scripts/package-source.js && node --check \"api/[...path].js\" && node --check api/sitemap.xml.js && node --check js/a11y.js && node --check js/api.js && node --check js/coupon-ui.js && node --check js/config.js && node --check js/core/storefront-utils.js && node --check js/storefront.js && node --check js/theme-runtime.js && node --check js/product-detail.js && node --check js/site-pages.js && node --check js/cart-ui.js && node --check js/reviews-ui.js && node --check js/notifications-ui.js && node --check js/preferences-ui.js && node --check js/recently-viewed.js && node --check js/size-guide.js && node --check js/comparison.js && node --check js/address-loader.js && node --check js/analytics.js && node --check js/consent.js && node --check shared.js",
+    "test": "npm run build && node --test js/*.test.js",
+    "package:source": "node scripts/package-source.js",
+    "e2e:install": "playwright install chromium",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
+    "@playwright/test": "^1.62.1"
   }
 }

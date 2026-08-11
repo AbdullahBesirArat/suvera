@@ -84,8 +84,22 @@
           phone: order.phone || '',
           address: order.address || '',
         });
+        // A21: reference the canonical server cart so the order converts it atomically
+        // (server-side); a second order from the same cart is then rejected.
+        const serverCart = window.SuveraCartUI && window.SuveraCartUI.currentCart
+          ? window.SuveraCartUI.currentCart() : null;
+        if (serverCart && serverCart.id) {
+          payload.cart_id = serverCart.id;
+          payload.cart_version = serverCart.version;
+        }
         if (order.total) payload.total = order.total;
-        if (payload.items.length) return await window.SuveraAPI.orders.create(payload);
+        if (payload.items.length) {
+          const result = await window.SuveraAPI.orders.create(payload);
+          // Cart is converted server-side; clear the local mirror and re-sync.
+          if (window.Suvera && window.Suvera.cartMirror) window.Suvera.cartMirror.write([]);
+          if (window.SuveraCartUI && window.SuveraCartUI.sync) void window.SuveraCartUI.sync({ render: false });
+          return result;
+        }
       } catch (err) {
         console.warn('API sipariş kaydı başarısız, localStorage kullanılacak:', err.message);
       }

@@ -5,22 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="description" content="Suvera urun detay sayfasi; gorseller, beden secimleri ve guvenli siparis akisi ile desteklenir." />
   <link rel="canonical" href="https://suvera.com.tr/urun" />
-  <meta property="og:type" content="product" />
-  <meta property="og:title" content="Urun Detayi | Suvera" />
-  <meta property="og:description" content="Suvera urun detay sayfasi; gorseller, beden secimleri ve guvenli siparis akisi ile desteklenir." />
-  <meta property="og:url" content="https://suvera.com.tr/urun" />
-  <meta property="og:image" content="https://suvera.com.tr/og-cover.svg" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Urun Detayi | Suvera" />
-  <meta name="twitter:description" content="Suvera urun detay sayfasi; gorseller, beden secimleri ve guvenli siparis akisi ile desteklenir." />
-  <meta name="twitter:image" content="https://suvera.com.tr/og-cover.svg" />
   <meta name="theme-color" content="#2a4827" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="manifest" href="site.webmanifest" />
+  {{> head-defaults}}
   <title>Ürün Detayı – SUVERA</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="shared.css"/>
   <style>
     :root{--bg:#f6f2eb;--white:#fff;--black:#171717;--mid:#666058;--line:#e4ddd3;--soft:#eee8df;--accent:#3d6b38;--accent-2:#6f8c60;--serif:'Cormorant Garamond',serif;--sans:'Jost',sans-serif;}
     *{box-sizing:border-box}
@@ -29,10 +16,12 @@
     nav{background:#fff;border-bottom:1px solid var(--line);box-shadow:0 2px 20px rgba(0,0,0,.05)}
     nav .nav-logo,nav .nav-menu-wrap>li>a,nav .nav-icon-btn,nav .nav-search-icon{color:var(--black)}
     nav .nav-search-box input{border-bottom-color:var(--line);color:var(--black)}
-    nav .nav-search-box input::placeholder{color:#aaa}
-    .product-breadcrumb{padding:18px 0 14px;font-size:12px;color:#938c83;letter-spacing:.4px}
+    nav .nav-search-box input::placeholder{color:#5f5f5f}
+    .product-breadcrumb{padding:18px 0 14px;font-size:12px;color:#635d55;letter-spacing:.4px}
+    .product-breadcrumb ol{display:flex;gap:7px;list-style:none;margin:0;padding:0}
+    .product-breadcrumb li+li::before{content:'›';margin-right:7px;color:#635d55}
     .product-breadcrumb a{color:inherit;text-decoration:none}
-    .product-breadcrumb span{margin:0 7px;color:#c1b8ac}
+    .product-breadcrumb span{margin:0 7px;color:#635d55}
     .product-main{display:grid;grid-template-columns:minmax(0,1.25fr) 460px;gap:28px;align-items:start}
     .gallery-panel{display:grid;grid-template-columns:88px minmax(0,1fr);gap:14px;position:sticky;top:92px}
     .gallery-thumbs{display:grid;gap:10px;align-content:start}
@@ -44,10 +33,10 @@
     .main-stage{background:#fff;border:1px solid var(--line);padding:14px;border-radius:8px}
     .main-media{aspect-ratio:3/4;overflow:hidden;border-radius:6px;background:#f0ebe3;cursor:zoom-in}
     .main-fallback{width:100%;height:100%;font-size:78px}
-    .gallery-note{display:flex;justify-content:space-between;align-items:center;padding-top:12px;font-size:12px;color:#847d74}
+    .gallery-note{display:flex;justify-content:space-between;align-items:center;padding-top:12px;font-size:12px;color:#635d55}
     .gallery-note strong{font-weight:500;color:var(--black)}
     .info-panel{background:#fff;border:1px solid var(--line);border-radius:8px;padding:28px 28px 24px;position:sticky;top:92px;max-height:calc(100vh - 108px);overflow:auto}
-    .eyebrow{font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:#8f877d;margin-bottom:10px}
+    .eyebrow{font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:#635d55;margin-bottom:10px}
     .title-row{display:flex;gap:14px;align-items:flex-start}
     .product-title{margin:0;font-family:var(--serif);font-size:38px;line-height:1.05;font-weight:400;flex:1}
     .wish-btn{width:42px;height:42px;border:1px solid var(--line);background:#fff;border-radius:6px;cursor:pointer;font-size:18px}
@@ -56,8 +45,8 @@
     .price-row{display:flex;gap:12px;align-items:flex-end;margin-bottom:6px}
     .price-current{font-size:32px;font-weight:500;color:var(--black)}
     .price-sale{color:var(--accent)}
-    .price-old{font-size:16px;color:#a7a096;text-decoration:line-through}
-    .sku-stock{display:flex;justify-content:space-between;gap:12px;padding-bottom:18px;border-bottom:1px solid var(--line);font-size:12px;color:#827a70}
+    .price-old{font-size:16px;color:#635d57;text-decoration:line-through}
+    .sku-stock{display:flex;justify-content:space-between;gap:12px;padding-bottom:18px;border-bottom:1px solid var(--line);font-size:12px;color:#635d55}
     .sku-stock strong{color:var(--black);font-weight:500}
     .section-block{padding:18px 0;border-bottom:1px solid var(--line)}
     .section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
@@ -86,7 +75,7 @@
     .info-accordions{margin-top:26px;border-top:1px solid var(--line)}
     .info-item{border-bottom:1px solid var(--line)}
     .info-trigger{width:100%;background:none;border:none;padding:18px 0;display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-family:var(--sans);font-size:11px;letter-spacing:2px;text-transform:uppercase}
-    .info-trigger::after{content:'+';font-size:19px;color:#8d857b}
+    .info-trigger::after{content:'+';font-size:19px;color:#635d57}
     .info-trigger.open::after{content:'−'}
     .info-body{display:none;padding:0 0 18px;font-size:13px;color:#666057;line-height:1.85}
     .info-body.show{display:block}
@@ -103,7 +92,7 @@
     .measure-row{display:flex;justify-content:space-between;gap:12px;padding-bottom:10px;border-bottom:1px solid #eee7dd;font-size:13px}
     .measure-row strong{font-weight:500}
     .related-head{display:flex;justify-content:space-between;align-items:end;gap:14px;margin-bottom:18px}
-    .related-head p{margin:0;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#877f76}
+    .related-head p{margin:0;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#635d57}
     .related-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
     .related-card{overflow:hidden;cursor:pointer}
     .related-media{aspect-ratio:3/4;background:#f1ece4}
@@ -141,41 +130,20 @@
   </style>
 </head>
 <body>
-<div class="announce" id="campaignAnnouncement">&#x2756; SUVERA</div>
+{{> announcement}}
 
-<nav id="mainNav">
-  <a class="nav-logo" href="anasayfa">SUVERA</a>
-  <ul class="nav-menu-wrap">
-    <li><a href="urunler">Yeni <span class="nav-chevron">▾</span></a><div class="simple-drop"><a href="urunler">Yeni Gelenler</a><a href="urunler">Çok Satanlar</a><a href="urunler">Editörün Seçimleri</a></div></li>
-    <li><a href="urunler">Giyim <span class="nav-chevron">▾</span></a><div class="simple-drop"><a href="urunler">Elbise</a><a href="urunler">Bluz & Gömlek</a><a href="urunler">Takım & Kombin</a></div></li>
-    <li><a href="urunler">Dış Giyim</a></li>
-    <li><a href="urunler">Abaya</a></li>
-    <li><a href="urunler">Eşarp & Aksesuar</a></li>
-    <li><a href="urunler" class="outlet">Outlet</a></li>
-  </ul>
-  <div class="nav-right">
-    <div class="nav-search-wrap">
-      <button class="nav-search-icon" aria-label="Ara">🔍</button>
-      <div class="nav-search-box" id="navSearchBox">
-        <input type="text" placeholder="Ürün ara..." onkeydown="if(event.key==='Enter')location.href='urunler'"/>
-      </div>
-    </div>
-    <a href="giris" class="nav-icon-btn">HESABIM</a>
-    <a href="sepet" class="nav-icon-btn" style="position:relative">SEPETİM <span class="cart-dot">0</span></a>
-    <button class="hamburger" aria-label="Menü" onclick="openMobileNav()"><span></span><span></span><span></span></button>
-  </div>
-</nav>
+{{> navigation}}
 
-<main class="page-shell">
-  <div class="product-breadcrumb" id="productBreadcrumb">
-    <a href="anasayfa">Ana Sayfa</a><span>›</span><a href="urunler">Ürünler</a><span>›</span><span>Ürün Detayı</span>
+<main id="main" tabindex="-1" class="page-shell">
+  <div class="product-breadcrumb" id="productBreadcrumb" role="navigation" aria-label="Sayfa yolu">
+    <ol><li><a href="anasayfa">Ana Sayfa</a></li><li><a href="urunler">Ürünler</a></li><li aria-current="page">Ürün Detayı</li></ol>
   </div>
 
   <section class="product-main">
     <div class="gallery-panel">
-      <div class="gallery-thumbs" id="detailThumbs"></div>
+      <div class="gallery-thumbs" id="detailThumbs" role="group" aria-label="Ürün görselleri"></div>
       <div class="main-stage">
-        <div class="main-media img-zoom-wrap" id="detailMainMedia"></div>
+        <div class="main-media img-zoom-wrap" id="detailMainMedia" role="button" tabindex="0" aria-label="Büyük ürün görselini aç"></div>
         <div class="gallery-note"><span id="galleryCounter">1 / 1</span><strong id="stockBadge">Stokta</strong></div>
       </div>
     </div>
@@ -184,26 +152,27 @@
       <div class="eyebrow" id="detailCategory">Suvera Seçkisi</div>
       <div class="title-row">
         <h1 class="product-title" id="detailProductTitle">Ürün Yükleniyor</h1>
-        <button class="wish-btn" type="button" id="favToggle">♡</button>
+        <button class="wish-btn" type="button" id="favToggle" aria-label="Favorilere ekle" aria-pressed="false">♡</button>
       </div>
       <div class="meta-row" id="detailMeta"></div>
       <div class="price-row">
-        <span class="price-current price-sale" id="detailPriceNew">0,00 TL</span>
-        <span class="price-old" id="detailPriceOld" style="display:none"></span>
+        <span class="price-current price-sale" id="detailPriceNew" aria-label="Güncel fiyat 0,00 TL">0,00 TL</span>
+        <span class="price-old" id="detailPriceOld" aria-label="Eski fiyat" style="display:none"></span>
       </div>
       <div class="sku-stock">
         <span id="detailSku">MV-00000</span>
-        <span id="detailStockText"><strong>Stok durumu</strong> Hazır</span>
+        <span id="detailStockText" role="status"><strong>Stok durumu</strong> Hazır</span>
       </div>
 
       <div class="section-block">
-        <div class="section-head"><h3>Renk</h3><span id="detailColorLabel">Seçili renk</span></div>
-        <div class="swatches" id="detailColors"></div>
+        <div class="section-head"><h3 id="detailColorTitle">Renk</h3><span id="detailColorLabel">Seçili renk</span></div>
+        <div class="swatches" id="detailColors" role="group" aria-labelledby="detailColorTitle"></div>
       </div>
 
       <div class="section-block">
-        <div class="section-head"><h3>Beden</h3><span id="detailSizeLabel">Seçili beden</span></div>
-        <div class="sizes" id="detailSizes"></div>
+        <div class="section-head"><h3 id="detailSizeTitle">Beden</h3><span id="detailSizeLabel">Seçili beden</span></div>
+        <div class="sizes" id="detailSizes" role="group" aria-labelledby="detailSizeTitle"></div>
+        <button class="size-guide-trigger" type="button" id="sizeGuideBtn" hidden aria-haspopup="dialog">Beden Rehberi</button>
       </div>
 
       <div class="section-block">
@@ -216,24 +185,48 @@
       </div>
 
       <div class="cta-row">
-        <button class="buy-btn" id="detailAddCartBtn" type="button" onclick="addToCart()">Sepete Ekle</button>
-        <button class="buy-btn secondary" type="button" onclick="buyNow()">Satın Al</button>
-        <button class="wa-btn" type="button" title="WhatsApp ile Sor">💬</button>
+        <button class="buy-btn" id="detailAddCartBtn" type="button" data-action="add-to-cart" aria-describedby="cartFeedback">Sepete Ekle</button>
+        <button class="buy-btn secondary" type="button" data-action="buy-now" aria-describedby="cartFeedback">Satın Al</button>
+        <button class="wa-btn" type="button" aria-label="WhatsApp ile ürün hakkında sor">💬</button>
       </div>
       <div class="cart-feedback" id="cartFeedback" role="status" aria-live="polite"></div>
+      <button class="compare-toggle" type="button" id="compareToggle" aria-pressed="false">Karşılaştır</button>
       <div class="mini-note" id="detailShortDesc">Ürün detayları hazırlanıyor.</div>
+
+      <div class="notify-block" id="notifySection" hidden>
+        <div class="notify-actions">
+          <button class="notify-btn" type="button" id="notifyStockBtn" hidden>Stok gelince haber ver</button>
+          <button class="notify-btn secondary" type="button" id="notifyPriceBtn">Fiyat alarmı kur</button>
+        </div>
+        <form class="notify-form" id="notifyForm" hidden>
+          <p class="notify-form-title" id="notifyFormTitle"></p>
+          <label class="notify-field" id="notifyEmailField">
+            <span>E-posta adresiniz</span>
+            <input type="email" id="notifyEmail" autocomplete="email" placeholder="ornek@eposta.com" />
+          </label>
+          <label class="notify-consent">
+            <input type="checkbox" id="notifyConsent" />
+            <span>Bu ürünle ilgili bildirim almak için e-posta gönderilmesini onaylıyorum. İstediğim zaman vazgeçebilirim.</span>
+          </label>
+          <div class="notify-actions">
+            <button class="buy-btn" type="submit" id="notifySubmit">Bildirim iste</button>
+            <button class="buy-btn secondary" type="button" id="notifyCancel">Vazgeç</button>
+          </div>
+        </form>
+        <div class="notify-status" id="notifyStatus" role="status" aria-live="polite"></div>
+      </div>
 
       <div class="info-accordions">
         <div class="info-item">
-          <button class="info-trigger" type="button" onclick="toggleDetailAccordion(this)">Ürün Hikayesi</button>
+          <button class="info-trigger" type="button" data-action="detail-accordion">Ürün Hikayesi</button>
           <div class="info-body show" id="detailDescriptionBody"></div>
         </div>
         <div class="info-item">
-          <button class="info-trigger" type="button" onclick="toggleDetailAccordion(this)">Beden ve Ölçü</button>
+          <button class="info-trigger" type="button" data-action="detail-accordion">Beden ve Ölçü</button>
           <div class="info-body" id="detailMeasurementBody"></div>
         </div>
         <div class="info-item">
-          <button class="info-trigger" type="button" onclick="toggleDetailAccordion(this)">Teslimat ve İade</button>
+          <button class="info-trigger" type="button" data-action="detail-accordion">Teslimat ve İade</button>
           <div class="info-body">
             <p>Siparişler 1-3 iş günü içinde hazırlanır. Kargo çıktığında takip numarası hesabınıza ve sipariş ekranına işlenir.</p>
             <p>Kullanılmamış ürünlerde değişim ve iade desteği için bizimle iletişime geçebilirsiniz.</p>
@@ -257,6 +250,31 @@
     </div>
   </section>
 
+  <section class="reviews-section" id="reviewsSection">
+    <div class="reviews-head">
+      <h2>Değerlendirmeler</h2>
+      <div class="reviews-summary" id="reviewsSummary"></div>
+    </div>
+    <button class="review-write-btn" type="button" id="reviewWriteBtn">Değerlendirme yaz</button>
+    <form class="review-form" id="reviewForm" hidden>
+      <div class="review-rating-input" id="reviewRatingInput" role="radiogroup" aria-label="Puan"></div>
+      <input class="review-title-input" id="reviewTitleInput" maxlength="160" placeholder="Başlık (isteğe bağlı)" />
+      <textarea class="review-body-input" id="reviewBodyInput" maxlength="4000" placeholder="Deneyiminizi paylaşın" required></textarea>
+      <div class="review-form-msg" id="reviewFormMsg" role="status"></div>
+      <button class="review-submit-btn" type="submit">Gönder</button>
+    </form>
+    <div class="reviews-list" id="reviewsList"></div>
+    <div class="qa-section">
+      <h3>Soru &amp; Cevap</h3>
+      <form class="qa-form" id="qaForm">
+        <textarea class="qa-body-input" id="qaBodyInput" maxlength="2000" placeholder="Bu ürün hakkında soru sorun" required></textarea>
+        <div class="qa-form-msg" id="qaFormMsg" role="status"></div>
+        <button class="qa-submit-btn" type="submit">Soru gönder</button>
+      </form>
+      <div class="qa-list" id="qaList"></div>
+    </div>
+  </section>
+
   <section class="related-section">
     <div class="related-head">
       <div>
@@ -266,32 +284,59 @@
     </div>
     <div class="related-grid" id="relatedProducts"></div>
   </section>
+
+  <section class="related-section" id="complementarySection" hidden>
+    <div class="related-head">
+      <div>
+        <p>Birlikte iyi gider</p>
+        <h2>Tamamlayıcı Ürünler</h2>
+      </div>
+    </div>
+    <div class="related-grid" id="complementaryProducts"></div>
+  </section>
+
+  <section class="related-section" id="recentlyViewedSection" hidden aria-label="Son görüntülediğiniz ürünler">
+    <div class="related-head">
+      <div>
+        <p>Kaldığınız yerden</p>
+        <h2>Son Görüntüledikleriniz</h2>
+      </div>
+    </div>
+    <div class="related-grid" id="recentlyViewedGrid"></div>
+  </section>
 </main>
 
-<div class="image-lightbox" id="imageLightbox" aria-hidden="true">
-  <button class="image-lightbox-close" type="button" id="imageLightboxClose" aria-label="Görseli kapat">×</button>
-  <button class="image-lightbox-zoom" type="button" id="imageLightboxZoom" aria-label="Görseli yakınlaştır">⌕</button>
+<div class="image-lightbox" id="imageLightbox" aria-hidden="true" aria-label="Ürün görseli">
+  <button class="image-lightbox-close" type="button" id="imageLightboxClose" aria-label="Görseli kapat"><span aria-hidden="true">×</span></button>
+  <button class="image-lightbox-zoom" type="button" id="imageLightboxZoom" aria-label="Görseli yakınlaştır"><span aria-hidden="true">⌕</span></button>
   <div class="image-lightbox-stage" id="imageLightboxStage">
     <img class="image-lightbox-img" id="imageLightboxImg" alt="" />
   </div>
-  <div class="image-lightbox-count" id="imageLightboxCount"></div>
+  <div class="image-lightbox-count" id="imageLightboxCount" role="status" aria-live="polite"></div>
 </div>
 
-<footer>
-  <hr class="footer-divider"/>
-  <div class="footer-grid">
-    <div class="footer-brand">
-      <a class="nav-logo" href="anasayfa">SUVERA</a>
-      <p>Modern tesettür giyimde rafine, sakin ve güçlü parçalar.</p>
-      <div class="socials"><a href="iletisim#iletisim-kanallari" class="social-btn">INSTAGRAM</a><a href="iletisim#iletisim-kanallari" class="social-btn">TIKTOK</a><a href="iletisim#iletisim-kanallari" class="social-btn">PINTEREST</a></div>
+<div class="size-guide-modal" id="sizeGuideModal" role="dialog" aria-modal="true" aria-labelledby="sizeGuideTitle" hidden>
+  <div class="size-guide-dialog">
+    <div class="size-guide-head">
+      <h2 class="size-guide-title" id="sizeGuideTitle">Beden Rehberi</h2>
+      <div class="size-guide-units" role="group" aria-label="Ölçü birimi">
+        <button class="size-unit-btn active" type="button" data-unit="cm" aria-pressed="true">cm</button>
+        <button class="size-unit-btn" type="button" data-unit="inch" aria-pressed="false">inch</button>
+      </div>
+      <button class="size-guide-close" type="button" id="sizeGuideClose" aria-label="Beden rehberini kapat">×</button>
     </div>
-    <div class="footer-col"><h5>Kategoriler</h5><ul><li><a href="urunler">Elbise</a></li><li><a href="urunler">Abaya</a></li><li><a href="urunler">Takım</a></li><li><a href="urunler">Eşarp</a></li></ul></div>
-    <div class="footer-col"><h5>Bilgiler</h5><ul><li><a href="kvkk">KVKK</a></li><li><a href="kargo">Kargo</a></li><li><a href="iade">İade & Değişim</a></li></ul></div>
-    <div class="footer-col"><h5>SUVERA</h5><ul><li><a href="hakkimizda">Hakkımızda</a></li><li><a href="iletisim#iletisim-kanallari">Mağazalar</a></li></ul></div>
-    <div class="footer-col"><h5>İletişim</h5><ul><li><a href="tel:+908500007872">0850 000 78 72</a></li><li><a href="iletisim#iletisim-kanallari">WhatsApp</a></li><li><a href="mailto:destek@suvera.com">destek@suvera.com</a></li></ul></div>
+    <p class="size-guide-desc" id="sizeGuideDesc" hidden></p>
+    <div class="size-guide-table-wrap" id="sizeGuideTableWrap"></div>
   </div>
-  <div class="footer-bottom"><span>© 2026 Suvera. Tüm hakları saklıdır.</span><span>SSL Güvenli Alışveriş</span></div>
-</footer>
+</div>
+
+<div class="compare-bar" id="compareBar" role="region" aria-label="Karşılaştırma" hidden>
+  <span class="compare-bar-text"><strong id="compareBarCount">0</strong> ürün karşılaştırmada</span>
+  <a class="compare-bar-link" id="compareBarLink" href="karsilastir">Karşılaştırmayı aç</a>
+</div>
+
+{{> footer}}
+{{> consent}}
 
 <script>
   function toggleDetailAccordion(trigger) {
@@ -307,10 +352,12 @@
     }
   }
 </script>
-<script src="js/config.js"></script>
-<script src="js/api.js"></script>
-<script src="js/site-seo.js"></script>
-<script src="js/product-detail.js"></script>
-<script src="shared.js"></script>
+  {{> scripts}}
+<script src="js/recently-viewed.js"></script>
+<script src="js/comparison.js"></script>
+<script type="module" src="js/product-detail.js"></script>
+<script src="js/reviews-ui.js"></script>
+<script src="js/notifications-ui.js"></script>
+<script src="js/size-guide.js"></script>
 </body>
 </html>

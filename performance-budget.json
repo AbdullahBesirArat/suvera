@@ -1,0 +1,17 @@
+{
+  "globalScripts": [
+    "js/a11y.js",
+    "js/config.js",
+    "js/api.js",
+    "js/theme-runtime.js",
+    "js/site-seo.js",
+    "js/analytics.js",
+    "js/consent.js",
+    "shared.js"
+  ],
+  "globalJsMaxBytes": 125000,
+  "pageSpecificJsMaxBytes": 76000,
+  "pageTotalJsMaxBytes": 195000,
+  "staticImageMaxBytes": 60000,
+  "heroImageMaxBytes": 50000
+}

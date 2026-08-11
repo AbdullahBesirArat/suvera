@@ -1,10 +1,30 @@
+const { Readable } = require('node:stream');
+const { pipeline } = require('node:stream/promises');
+
 const UPSTREAM_API = process.env.UPSTREAM_API || 'https://panelya-api-production.up.railway.app/api';
 const PUBLIC_ACCESS_TOKEN = process.env.SUVERA_PUBLIC_ACCESS_TOKEN || '';
 // FIX: Keep proxy memory bounded even when env input is missing or invalid.
 const MAX_PROXY_BODY_BYTES = positiveNumber(process.env.MAX_PROXY_BODY_BYTES, 1024 * 1024);
+// Bound how long we wait for the upstream API so the proxy never hangs forever.
+const PROXY_TIMEOUT_MS = positiveNumber(process.env.PROXY_TIMEOUT_MS, 15000);
 const CUSTOMER_COOKIE = 'suveraCustomerToken';
 const ACCESS_COOKIE = 'suveraAccessToken';
 const REFRESH_COOKIE = 'suveraRefreshToken';
+const GUEST_CART_COOKIE = 'suveraGuestCart';
+// Cart responses are buffered so the opaque guest-cart token can be relocated
+// into an HttpOnly cookie and stripped from the body (never exposed to JS).
+const CART_BUFFER_PATH = /^cart(?:\/|$)/;
+// The opaque guest token is forwarded upstream only to cart/checkout endpoints so
+// the API can verify guest-cart ownership during order conversion.
+const GUEST_TOKEN_UPSTREAM_PATH = /^(cart(?:\/|$)|orders(?:\/|\?|$)|payment(?:\/|$)|reviews(?:\/|$))/;
+// A28 theme preview. The draft stylesheet must be loadable by <link rel="stylesheet">
+// (style-src 'self' leaves no other CSP-safe way to apply it), so it has to be a GET —
+// and a GET must not carry the token in its URL. The exchange response is buffered here,
+// the raw token relocated into an HttpOnly session cookie and stripped from the body, and
+// replayed upstream as a header only for the preview stylesheet.
+const THEME_PREVIEW_COOKIE = 'suveraThemePreview';
+const THEME_PREVIEW_BUFFER_PATH = /^storefront-theme\/preview$/;
+const THEME_PREVIEW_UPSTREAM_PATH = /^storefront-theme\/preview\.css(?:\?|$)/;
 
 function positiveNumber(value, fallback) {
   const next = Number(value);
@@ -80,7 +100,18 @@ function setCookies(res, cookies) {
 }
 
 function isCustomerAuthPath(path) {
-  return /^customer-auth(?:\/|$)/.test(path) || /^customers\/account(?:\/|\?|$)/.test(path);
+  return /^customer-auth(?:\/|$)/.test(path)
+    || /^customers\/account(?:\/|\?|$)/.test(path)
+    || /^returns\/customer(?:\/|\?|$)/.test(path);
+}
+
+// Routes where a signed-in customer's bearer must reach the API so it resolves the
+// customer (not a guest): their account endpoints plus the persistent cart, which
+// includes the guest->customer merge triggered right after login/registration.
+function isCustomerBearerPath(path) {
+  return isCustomerAuthPath(path)
+    || /^cart(?:\/|$)/.test(path)
+    || /^(reviews|questions|notifications|recently-viewed|comparison|customer-addresses|customer-orders)(?:\/|$)/.test(path);
 }
 
 function stripSessionTokens(payload) {
@@ -91,26 +122,76 @@ function stripSessionTokens(payload) {
   return next;
 }
 
+// Only these auth responses are buffered so upstream tokens can be moved into
+// HttpOnly cookies and stripped from the body. Everything else is streamed.
+const AUTH_BUFFER_PATHS = /^(customer-auth\/(login|register)|auth\/session\/(login|refresh|switch-organization))$/;
+
+// Never forward hop-by-hop headers or upstream Set-Cookie (we mint our own
+// cookies); content-encoding/length are dropped because undici already decoded
+// the body, so the byte length and encoding no longer match.
+const BLOCKED_RESPONSE_HEADERS = new Set([
+  'content-encoding', 'content-length', 'transfer-encoding', 'connection',
+  'keep-alive', 'set-cookie', 'proxy-authenticate', 'proxy-authorization',
+  'te', 'trailer', 'upgrade',
+]);
+
+function forwardResponseHeaders(res, response) {
+  response.headers.forEach((value, key) => {
+    if (!BLOCKED_RESPONSE_HEADERS.has(key.toLowerCase())) res.setHeader(key, value);
+  });
+}
+
 function shouldAttachRefreshCookie(path) {
   return /^auth\/session\/(refresh|logout)$/.test(path);
 }
 
+function isLocalHostname(hostname) {
+  return /^(localhost|127\.0\.0\.1)$/i.test(String(hostname || ''));
+}
+
+// CSRF defence for state-changing requests: verify the browser-supplied
+// same-origin signals. Returns true only when the request is provably same-site.
 function sameSiteRequest(req) {
-  const unsafe = !['GET', 'HEAD', 'OPTIONS'].includes(String(req.method || 'GET').toUpperCase());
+  const method = String(req.method || 'GET').toUpperCase();
+  const unsafe = !['GET', 'HEAD', 'OPTIONS'].includes(method);
   if (!unsafe) return true;
 
-  const origin = String(req.headers.origin || '').trim();
-  if (!origin) return true;
-
-  const expected = storefrontOrigin(req);
+  let expectedUrl;
   try {
-    const actualUrl = new URL(origin);
-    const expectedUrl = new URL(expected);
-    if (/^(localhost|127\.0\.0\.1)$/i.test(actualUrl.hostname)) return true;
-    return actualUrl.protocol === expectedUrl.protocol && actualUrl.host === expectedUrl.host;
+    expectedUrl = new URL(storefrontOrigin(req));
   } catch (_) {
     return false;
   }
+
+  // null when the header is absent, true/false when present and (mis)matching.
+  const matchesExpected = (value) => {
+    if (!value) return null;
+    try {
+      const url = new URL(value);
+      if (isLocalHostname(url.hostname)) return true;
+      return url.protocol === expectedUrl.protocol && url.host === expectedUrl.host;
+    } catch (_) {
+      return false;
+    }
+  };
+
+  const secFetchSite = String(req.headers['sec-fetch-site'] || '').trim().toLowerCase();
+  if (secFetchSite && !['same-origin', 'same-site', 'none'].includes(secFetchSite)) {
+    return false; // explicit cross-site request
+  }
+
+  const originCheck = matchesExpected(String(req.headers.origin || '').trim());
+  if (originCheck === true) return true;
+  if (originCheck === false) return false;
+
+  const refererCheck = matchesExpected(String(req.headers.referer || req.headers.referrer || '').trim());
+  if (refererCheck === true) return true;
+  if (refererCheck === false) return false;
+
+  // Neither Origin nor Referer usable: accept only an explicit same-origin
+  // Sec-Fetch-Site signal, or local development; otherwise reject.
+  if (secFetchSite === 'same-origin' || secFetchSite === 'same-site') return true;
+  return isLocalHostname(expectedUrl.hostname);
 }
 
 function validProxyPath(path) {
@@ -171,12 +252,27 @@ module.exports = async function handler(req, res) {
   if (publicAccessToken) headers['x-public-access-token'] = publicAccessToken;
 
   if (req.headers['content-type']) headers['Content-Type'] = req.headers['content-type'];
+  // Forward the optimistic-concurrency precondition so cart mutations enforce the
+  // client's expected version server-side (prevents lost updates across tabs).
+  if (req.headers['if-match']) headers['If-Match'] = req.headers['if-match'];
+  // Conditional public reads must reach the API so its tenant-bound ETag can answer 304.
+  if (req.headers['if-none-match']) headers['If-None-Match'] = req.headers['if-none-match'];
   if (req.headers.authorization) {
     headers.Authorization = req.headers.authorization;
-  } else if (isCustomerAuthPath(path) && cookies[CUSTOMER_COOKIE]) {
+  } else if (isCustomerBearerPath(path) && cookies[CUSTOMER_COOKIE]) {
     headers.Authorization = `Bearer ${cookies[CUSTOMER_COOKIE]}`;
   } else if (cookies[ACCESS_COOKIE]) {
     headers.Authorization = `Bearer ${cookies[ACCESS_COOKIE]}`;
+  }
+  // The preview token travels as a header only to the preview stylesheet, so it stays out
+  // of the URL that a <link rel="stylesheet"> would otherwise put in logs and referrers.
+  if (THEME_PREVIEW_UPSTREAM_PATH.test(path) && cookies[THEME_PREVIEW_COOKIE]) {
+    headers['X-Theme-Preview-Token'] = cookies[THEME_PREVIEW_COOKIE];
+  }
+
+  // Guest cart identity travels as an opaque header only to cart/checkout endpoints.
+  if (GUEST_TOKEN_UPSTREAM_PATH.test(path) && cookies[GUEST_CART_COOKIE]) {
+    headers['X-Guest-Cart-Token'] = cookies[GUEST_CART_COOKIE];
   }
 
   const hasBody = !['GET', 'HEAD'].includes(req.method || 'GET');
@@ -191,6 +287,17 @@ module.exports = async function handler(req, res) {
   }
   body = bodyWithRefreshCookie(path, body, cookies, headers);
 
+  // Bound the upstream call with a timeout and abort it if the client hangs up.
+  const controller = new AbortController();
+  let timedOut = false;
+  const timer = setTimeout(() => { timedOut = true; controller.abort(); }, PROXY_TIMEOUT_MS);
+  const onClientClose = () => controller.abort();
+  req.on('close', onClientClose);
+  const cleanup = () => {
+    clearTimeout(timer);
+    req.off('close', onClientClose);
+  };
+
   let response;
   // FIX: Return a controlled proxy error instead of leaking runtime failures.
   try {
@@ -198,16 +305,63 @@ module.exports = async function handler(req, res) {
       method: req.method,
       headers,
       body,
+      signal: controller.signal,
     });
   } catch (err) {
-    res.statusCode = 502;
+    cleanup();
+    res.statusCode = timedOut ? 504 : 502;
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
-    res.end(JSON.stringify({ error: 'Proxy upstream request failed' }));
+    res.end(JSON.stringify({ error: timedOut ? 'Proxy upstream timeout' : 'Proxy upstream request failed' }));
     return;
   }
 
-  const responseBuffer = Buffer.from(await response.arrayBuffer());
   const responseCookies = [];
+  if (/^customer-auth\/logout$/.test(path)) {
+    responseCookies.push(serializeCookie(req, CUSTOMER_COOKIE, '', { maxAge: 0 }));
+  }
+  if (/^auth\/session\/logout$/.test(path)) {
+    responseCookies.push(serializeCookie(req, ACCESS_COOKIE, '', { maxAge: 0 }));
+    responseCookies.push(serializeCookie(req, REFRESH_COOKIE, '', { maxAge: 0 }));
+  }
+
+  forwardResponseHeaders(res, response);
+  res.statusCode = response.status;
+
+  // Non-auth responses stream straight through so large JSON/media never gets
+  // fully buffered in memory. Client disconnect/timeout aborts the upstream body.
+  if (!AUTH_BUFFER_PATHS.test(path) && !CART_BUFFER_PATH.test(path) && !THEME_PREVIEW_BUFFER_PATH.test(path)) {
+    setCookies(res, responseCookies);
+    if (!response.body) {
+      cleanup();
+      res.end();
+      return;
+    }
+    try {
+      await pipeline(Readable.fromWeb(response.body), res);
+    } catch (_) {
+      if (!res.headersSent) res.statusCode = timedOut ? 504 : 502;
+      res.destroy();
+    } finally {
+      cleanup();
+    }
+    return;
+  }
+
+  // Auth flows: buffer the (small) JSON body, relocate tokens into HttpOnly
+  // cookies and strip them from the response echoed to the browser.
+  let responseBuffer;
+  try {
+    responseBuffer = Buffer.from(await response.arrayBuffer());
+  } catch (err) {
+    cleanup();
+    if (!res.headersSent) {
+      res.statusCode = timedOut ? 504 : 502;
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    }
+    res.end(JSON.stringify({ error: timedOut ? 'Proxy upstream timeout' : 'Proxy upstream read failed' }));
+    return;
+  }
+  cleanup();
   const contentType = response.headers.get('content-type') || '';
   let outgoingBuffer = responseBuffer;
 
@@ -222,14 +376,7 @@ module.exports = async function handler(req, res) {
       responseCookies.push(serializeCookie(req, CUSTOMER_COOKIE, payload.accessToken, { maxAge: 60 * 60 * 24 * 30 }));
       outgoingBuffer = Buffer.from(JSON.stringify(stripSessionTokens(payload)));
     }
-    if (/^auth\/session\/login$/.test(path) && payload.accessToken) {
-      responseCookies.push(serializeCookie(req, ACCESS_COOKIE, payload.accessToken, { maxAge: 60 * 15 }));
-      if (payload.refreshToken) {
-        responseCookies.push(serializeCookie(req, REFRESH_COOKIE, payload.refreshToken, { maxAge: 60 * 60 * 24 * 30 }));
-      }
-      outgoingBuffer = Buffer.from(JSON.stringify(stripSessionTokens(payload)));
-    }
-    if (/^auth\/session\/refresh$/.test(path) && payload.accessToken) {
+    if (/^auth\/session\/(login|refresh)$/.test(path) && payload.accessToken) {
       responseCookies.push(serializeCookie(req, ACCESS_COOKIE, payload.accessToken, { maxAge: 60 * 15 }));
       if (payload.refreshToken) {
         responseCookies.push(serializeCookie(req, REFRESH_COOKIE, payload.refreshToken, { maxAge: 60 * 60 * 24 * 30 }));
@@ -240,23 +387,34 @@ module.exports = async function handler(req, res) {
       responseCookies.push(serializeCookie(req, ACCESS_COOKIE, payload.accessToken, { maxAge: 60 * 15 }));
       outgoingBuffer = Buffer.from(JSON.stringify(stripSessionTokens(payload)));
     }
-  }
-
-  if (/^customer-auth\/logout$/.test(path)) {
-    responseCookies.push(serializeCookie(req, CUSTOMER_COOKIE, '', { maxAge: 0 }));
-  }
-  if (/^auth\/session\/logout$/.test(path)) {
-    responseCookies.push(serializeCookie(req, ACCESS_COOKIE, '', { maxAge: 0 }));
-    responseCookies.push(serializeCookie(req, REFRESH_COOKIE, '', { maxAge: 0 }));
-  }
-
-  response.headers.forEach((value, key) => {
-    if (!['content-encoding', 'content-length', 'transfer-encoding'].includes(key.toLowerCase())) {
-      res.setHeader(key, value);
+    if (CART_BUFFER_PATH.test(path) && Object.prototype.hasOwnProperty.call(payload, 'guest_cart_token')) {
+      const token = payload.guest_cart_token;
+      if (typeof token === 'string' && token) {
+        responseCookies.push(serializeCookie(req, GUEST_CART_COOKIE, token, { maxAge: 60 * 60 * 24 * 30 }));
+      } else {
+        responseCookies.push(serializeCookie(req, GUEST_CART_COOKIE, '', { maxAge: 0 }));
+      }
+      const { guest_cart_token: _guestToken, ...rest } = payload;
+      outgoingBuffer = Buffer.from(JSON.stringify(rest));
     }
-  });
-  setCookies(res, responseCookies);
+    if (THEME_PREVIEW_BUFFER_PATH.test(path)) {
+      const token = payload.preview_session_token;
+      // A session cookie on purpose: no Max-Age, so it dies with the browser session and is
+      // never written to the persistent cookie jar. The token is short-lived server-side too.
+      responseCookies.push(serializeCookie(req, THEME_PREVIEW_COOKIE, typeof token === 'string' ? token : ''));
+      const { preview_session_token: _previewToken, ...rest } = payload;
+      outgoingBuffer = Buffer.from(JSON.stringify(rest));
+    }
+  }
 
-  res.statusCode = response.status;
+  setCookies(res, responseCookies);
   res.end(outgoingBuffer);
 };
+
+// Exposed for unit tests; the default export remains the Vercel request handler.
+module.exports.sameSiteRequest = sameSiteRequest;
+module.exports.validProxyPath = validProxyPath;
+module.exports.isCustomerAuthPath = isCustomerAuthPath;
+module.exports.storefrontOrigin = storefrontOrigin;
+module.exports.parseCookies = parseCookies;
+module.exports.stripSessionTokens = stripSessionTokens;

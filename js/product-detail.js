@@ -1,3 +1,5 @@
+import { formatMoney as money, escapeHtml, parseImageEntry, productImageEntries, normalizeColor, colorMeta as sharedColorMeta, resolveAssetUrl as imageUrl } from './core/storefront-utils.js';
+const colorMeta = (value) => sharedColorMeta(value, '#e9dfd0');
 ﻿(function () {
   'use strict';
 
@@ -17,26 +19,7 @@
     status: 'draft',
   };
   let activeImageIndex = 0;
-  let lightboxScrollY = 0;
-
-  function money(value) {
-    return Number(value || 0).toLocaleString('tr-TR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }) + ' TL';
-  }
-
-  function escapeHtml(value) {
-    return String(value || '').replace(/[&<>"']/g, function (char) {
-      return ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#39;',
-      })[char];
-    });
-  }
+  let addingToCart = false;
 
   function plainDescription(html) {
     return String(html || '')
@@ -64,51 +47,6 @@
       .slice(0, 4);
   }
 
-  function imageUrl(path) {
-    return window.SuveraAPI && window.SuveraAPI.assetUrl ? window.SuveraAPI.assetUrl(path) : path;
-  }
-
-  function normalizeColor(value) {
-    return String(value || '').trim().toLocaleLowerCase('tr-TR');
-  }
-
-  function colorMeta(value) {
-    const raw = String(value || '').trim();
-    const parts = raw.split('|').map(function (part) { return part.trim(); }).filter(Boolean);
-    const hexMatch = raw.match(/#(?:[0-9a-f]{3}){1,2}\b/i);
-    const label = parts.length >= 2
-      ? parts[0]
-      : raw.replace(/#(?:[0-9a-f]{3}){1,2}\b/i, '').replace(/[()]/g, '').trim();
-    const css = parts.length >= 2 ? parts[parts.length - 1] : (hexMatch ? hexMatch[0] : raw);
-    return {
-      label: label || css,
-      css: css || '#e9dfd0',
-      value: raw,
-    };
-  }
-
-  function parseImageEntry(value) {
-    const raw = String(value || '').trim();
-    if (!raw) return null;
-    const parts = raw.split('|').map(function (part) { return part.trim(); }).filter(Boolean);
-    if (parts.length >= 2) {
-      return {
-        color: parts[0],
-        url: parts[parts.length - 1],
-      };
-    }
-    return {
-      color: '',
-      url: raw,
-    };
-  }
-
-  function productImageEntries(product) {
-    return (Array.isArray(product.images) ? product.images : [])
-      .map(parseImageEntry)
-      .filter(function (entry) { return entry && entry.url; });
-  }
-
   function imageEntriesForColor(color) {
     const selected = normalizeColor(color);
     const entries = currentProduct.imageEntries || [];
@@ -118,9 +56,16 @@
     return colorEntries.length ? colorEntries : entries;
   }
 
-  function imageMarkup(src, alt, fallbackClass) {
+  function imageMarkup(src, alt, fallbackClass, options) {
+    const settings = options || {};
+    const responsive = src && window.SuveraAPI.responsiveImage
+      ? window.SuveraAPI.responsiveImage(src, settings.purpose || 'detail')
+      : { src: src, srcset: '', sizes: '' };
+    const responsiveAttrs = responsive.srcset
+      ? ' srcset="' + escapeHtml(responsive.srcset) + '" sizes="' + escapeHtml(responsive.sizes) + '"'
+      : '';
     return src
-      ? '<img src="' + escapeHtml(src) + '" alt="' + escapeHtml(alt) + '" loading="lazy" decoding="async"/>'
+      ? '<img src="' + escapeHtml(responsive.src) + '"' + responsiveAttrs + ' alt="' + escapeHtml(alt) + '" loading="' + (settings.priority ? 'eager' : 'lazy') + '"' + (settings.priority ? ' fetchpriority="high"' : '') + ' decoding="async"/>'
       : '<div class="' + fallbackClass + '">' + escapeHtml(currentProduct.emoji) + '</div>';
   }
 
@@ -151,22 +96,25 @@
     img.src = src;
     img.alt = currentProduct.name || 'Suvera ürün görseli';
     lightbox.classList.remove('zoomed');
-    if (zoomButton) zoomButton.textContent = '⌕';
+    if (zoomButton) {
+      (zoomButton.querySelector('[aria-hidden="true"]') || zoomButton).textContent = '⌕';
+      zoomButton.setAttribute('aria-label', 'Görseli yakınlaştır');
+      zoomButton.setAttribute('aria-pressed', 'false');
+    }
     if (count) {
       count.textContent = (index + 1) + ' / ' + Math.max(currentProduct.images.length, 1);
     }
     lightbox.classList.add('open');
-    lightbox.setAttribute('aria-hidden', 'false');
     requestAnimationFrame(function () {
       resetLightboxView(stage);
     });
-    lightboxScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+    // A31: focus trap, Escape, scroll lock and focus restore come from the shared dialog
+    // primitive (js/a11y.js) instead of a second hand-rolled implementation per overlay.
     document.documentElement.style.overflow = 'hidden';
-    document.body.style.position = 'fixed';
-    document.body.style.top = '-' + lightboxScrollY + 'px';
-    document.body.style.left = '0';
-    document.body.style.right = '0';
-    document.body.style.width = '100%';
+    window.SuveraA11y?.openDialog(lightbox, {
+      initialFocus: '#imageLightboxClose',
+      onClose: closeImageLightbox,
+    });
   }
 
   function closeImageLightbox() {
@@ -175,20 +123,18 @@
     const img = document.getElementById('imageLightboxImg');
     if (!lightbox) return;
 
+    // Reached both directly and as the primitive's onClose, so it must be idempotent.
+    if (window.SuveraA11y?.isOpen(lightbox)) {
+      window.SuveraA11y.closeDialog(lightbox);
+      return;
+    }
     lightbox.classList.remove('open');
     lightbox.classList.remove('zoomed');
-    lightbox.setAttribute('aria-hidden', 'true');
     if (stage) {
       resetLightboxView(stage);
     }
     if (img) img.removeAttribute('src');
     document.documentElement.style.overflow = '';
-    document.body.style.position = '';
-    document.body.style.top = '';
-    document.body.style.left = '';
-    document.body.style.right = '';
-    document.body.style.width = '';
-    window.scrollTo(0, lightboxScrollY);
   }
 
   function setActiveThumb(index) {
@@ -196,6 +142,7 @@
     const thumbs = document.querySelectorAll('.thumb-btn');
     thumbs.forEach(function (thumb, i) {
       thumb.classList.toggle('active', i === index);
+      thumb.setAttribute('aria-pressed', i === index ? 'true' : 'false');
     });
 
     const media = currentProduct.images[index] || currentProduct.images[0] || '';
@@ -217,8 +164,14 @@
     const counter = document.getElementById('galleryCounter');
 
     if (mainMedia) {
-      mainMedia.innerHTML = imageMarkup(media, currentProduct.name, 'main-fallback');
+      mainMedia.innerHTML = imageMarkup(media, currentProduct.name, 'main-fallback', { priority: true, purpose: 'detail' });
+      mainMedia.setAttribute('aria-label', currentProduct.name + ' büyük görselini aç');
       mainMedia.onclick = function () {
+        openImageLightbox(activeImageIndex);
+      };
+      mainMedia.onkeydown = function (event) {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        event.preventDefault();
         openImageLightbox(activeImageIndex);
       };
     }
@@ -240,14 +193,14 @@
     if (!thumbs) return;
 
     if (!images.length) {
-      thumbs.innerHTML = '<button class="thumb-btn active" type="button"><div class="thumb-fallback">' + escapeHtml(currentProduct.emoji) + '</div></button>';
+      thumbs.innerHTML = '<button class="thumb-btn active" type="button" aria-label="' + escapeHtml(product.name || 'Ürün') + ' görseli" aria-pressed="true"><div class="thumb-fallback" aria-hidden="true">' + escapeHtml(currentProduct.emoji) + '</div></button>';
       setActiveThumb(0);
       return;
     }
 
     thumbs.innerHTML = images.map(function (src, index) {
-      return '<button class="thumb-btn' + (index === 0 ? ' active' : '') + '" type="button" data-index="' + index + '">' +
-        imageMarkup(src, product.name + ' görsel ' + (index + 1), 'thumb-fallback') +
+      return '<button class="thumb-btn' + (index === 0 ? ' active' : '') + '" type="button" data-index="' + index + '" aria-label="' + escapeHtml(product.name || 'Ürün') + ' görsel ' + (index + 1) + '" aria-pressed="' + (index === 0 ? 'true' : 'false') + '">' +
+        imageMarkup(src, product.name + ' görsel ' + (index + 1), 'thumb-fallback', { purpose: 'thumbnail' }) +
         '</button>';
     }).join('');
 
@@ -262,23 +215,32 @@
 
   function renderSwatches(product) {
     const colors = Array.isArray(product.colors) && product.colors.length ? product.colors : ['#e9dfd0'];
-    currentProduct.selectedColor = colors[0];
+    const variants = Array.isArray(product.variants) ? product.variants : [];
+    const firstAvailableColor = colors.find(function (color) {
+      const matches = variants.filter(function (variant) { return normalizeColor(variant.color) === normalizeColor(color); });
+      return !matches.length || matches.some(optionInStock);
+    });
+    currentProduct.selectedColor = firstAvailableColor || colors[0];
 
     const wrap = document.getElementById('detailColors');
     const label = document.getElementById('detailColorLabel');
     if (!wrap) return;
 
-    wrap.innerHTML = colors.map(function (color, index) {
+    wrap.innerHTML = colors.map(function (color) {
       const meta = colorMeta(color);
-      return '<button class="swatch' + (index === 0 ? ' active' : '') + '" type="button" style="background:' + escapeHtml(meta.css) + '" data-color="' + escapeHtml(color) + '" title="' + escapeHtml(meta.label) + '"></button>';
+      const matches = variants.filter(function (variant) { return normalizeColor(variant.color) === normalizeColor(color); });
+      const disabled = matches.length > 0 && !matches.some(optionInStock);
+      const selected = color === currentProduct.selectedColor;
+      return '<button class="swatch' + (selected ? ' active' : '') + '" type="button" data-css="background:' + escapeHtml(meta.css) + '" data-color="' + escapeHtml(color) + '" aria-label="' + escapeHtml(meta.label) + ' rengi' + (disabled ? ', stokta yok' : '') + '" aria-pressed="' + (selected ? 'true' : 'false') + '"' + (disabled ? ' disabled aria-disabled="true"' : '') + '></button>';
     }).join('');
 
-    if (label) label.textContent = colorMeta(colors[0]).label;
+    if (label) label.textContent = colorMeta(currentProduct.selectedColor).label;
 
     wrap.querySelectorAll('.swatch').forEach(function (button) {
       button.addEventListener('click', function () {
-        wrap.querySelectorAll('.swatch').forEach(function (item) { item.classList.remove('active'); });
+        wrap.querySelectorAll('.swatch').forEach(function (item) { item.classList.remove('active'); item.setAttribute('aria-pressed', 'false'); });
         button.classList.add('active');
+        button.setAttribute('aria-pressed', 'true');
         currentProduct.selectedColor = button.dataset.color || '';
         if (label) label.textContent = colorMeta(currentProduct.selectedColor).label;
         renderGallery(product, currentProduct.selectedColor);
@@ -327,11 +289,22 @@
       stockBadge.textContent = active && stock > 0 ? 'Stokta' : 'Tükendi';
     }
     if (addButton) {
-      addButton.disabled = !(active && stock > 0);
+      addButton.disabled = addingToCart || !(active && stock > 0);
+      addButton.setAttribute('aria-busy', addingToCart ? 'true' : 'false');
     }
     if (buyButton) {
-      buyButton.disabled = !(active && stock > 0);
+      buyButton.disabled = addingToCart || !(active && stock > 0);
+      buyButton.setAttribute('aria-busy', addingToCart ? 'true' : 'false');
     }
+    // A23: broadcast the current variant + availability so the notifications UI can
+    // offer a back-in-stock alert on the exact selection without coupling to internals.
+    window.dispatchEvent(new CustomEvent('suvera:availability', {
+      detail: {
+        productId: currentProduct && currentProduct.id != null ? Number(currentProduct.id) : null,
+        variantId: variant && variant.id != null ? Number(variant.id) : null,
+        inStock: Boolean(active && stock > 0),
+      },
+    }));
   }
 
   function renderSizes(product) {
@@ -354,7 +327,8 @@
     wrap.innerHTML = sizes.map(function (size, index) {
       const variant = variantOptions.find(function (item) { return String(item.size || '').trim() === String(size); });
       const disabled = variantOptions.length && !optionInStock(variant);
-      return '<button class="size-btn' + (size === currentProduct.selectedSize || (!currentProduct.selectedSize && index === 0) ? ' active' : '') + '" type="button" data-size="' + escapeHtml(size) + '"' + (disabled ? ' disabled aria-disabled="true"' : '') + '>' + escapeHtml(size) + '</button>';
+      const selected = size === currentProduct.selectedSize || (!currentProduct.selectedSize && index === 0);
+      return '<button class="size-btn' + (selected ? ' active' : '') + '" type="button" data-size="' + escapeHtml(size) + '" aria-label="' + escapeHtml(size) + ' beden' + (disabled ? ', stokta yok' : '') + '" aria-pressed="' + (selected ? 'true' : 'false') + '"' + (disabled ? ' disabled aria-disabled="true"' : '') + '>' + escapeHtml(size) + '</button>';
     }).join('');
 
     if (label) label.textContent = currentProduct.selectedSize || sizes[0] || '';
@@ -365,8 +339,9 @@
           showCartFeedback('Bu beden bu renk icin stokta yok. Lutfen farkli beden/renk deneyin.', { success: false });
           return;
         }
-        wrap.querySelectorAll('.size-btn').forEach(function (item) { item.classList.remove('active'); });
+        wrap.querySelectorAll('.size-btn').forEach(function (item) { item.classList.remove('active'); item.setAttribute('aria-pressed', 'false'); });
         button.classList.add('active');
+        button.setAttribute('aria-pressed', 'true');
         currentProduct.selectedSize = button.dataset.size || '';
         if (label) label.textContent = currentProduct.selectedSize;
         updateStockDisplay();
@@ -405,12 +380,14 @@
     document.getElementById('detailProductTitle').textContent = currentProduct.name;
     document.getElementById('detailCategory').textContent = product.category_name || 'Suvera Seçkisi';
     document.getElementById('detailPriceNew').textContent = money(finalPrice);
+    document.getElementById('detailPriceNew').setAttribute('aria-label', 'Güncel fiyat ' + money(finalPrice));
     document.getElementById('detailPriceNew').classList.toggle('price-sale', !!product.sale_price);
     document.getElementById('detailSku').textContent = 'SKU: MV-' + String(product.id || 0).padStart(5, '0');
 
     const oldPriceNode = document.getElementById('detailPriceOld');
     oldPriceNode.style.display = oldPrice ? '' : 'none';
     oldPriceNode.textContent = oldPrice ? money(oldPrice) : '';
+    oldPriceNode.setAttribute('aria-label', oldPrice ? 'Eski fiyat ' + money(oldPrice) : '');
 
     updateStockDisplay();
 
@@ -446,8 +423,8 @@
     }
 
     const breadcrumb = document.getElementById('productBreadcrumb');
-    breadcrumb.innerHTML = '<a href="anasayfa">Ana Sayfa</a><span>›</span><a href="urunler">Ürünler</a><span>›</span><a href="urunler">' +
-      escapeHtml(product.category_name || 'Kategori') + '</a><span>›</span><span>' + escapeHtml(currentProduct.name) + '</span>';
+    breadcrumb.innerHTML = '<ol><li><a href="anasayfa">Ana Sayfa</a></li><li><a href="urunler">Ürünler</a></li><li><a href="urunler">' +
+      escapeHtml(product.category_name || 'Kategori') + '</a></li><li aria-current="page">' + escapeHtml(currentProduct.name) + '</li></ol>';
 
     const favButton = document.getElementById('favToggle');
     if (favButton) {
@@ -517,8 +494,13 @@
     if (zoomButton) {
       zoomButton.addEventListener('click', function (event) {
         event.stopPropagation();
-        lightbox.classList.toggle('zoomed');
-        zoomButton.textContent = lightbox.classList.contains('zoomed') ? '−' : '⌕';
+        const zoomed = lightbox.classList.toggle('zoomed');
+        // The glyph lives in an aria-hidden span, so the icon is swapped there and the
+        // accessible name is updated separately rather than being overwritten by it.
+        const glyph = zoomButton.querySelector('[aria-hidden="true"]') || zoomButton;
+        glyph.textContent = zoomed ? '−' : '⌕';
+        zoomButton.setAttribute('aria-label', zoomed ? 'Görseli uzaklaştır' : 'Görseli yakınlaştır');
+        zoomButton.setAttribute('aria-pressed', zoomed ? 'true' : 'false');
         resetLightboxView(stage);
         requestAnimationFrame(function () {
           resetLightboxView(stage);
@@ -528,30 +510,68 @@
     lightbox.addEventListener('click', function (event) {
       if (event.target === lightbox) closeImageLightbox();
     });
-    document.addEventListener('keydown', function (event) {
-      if (event.key === 'Escape') closeImageLightbox();
+    // Escape is handled by the shared dialog primitive. Arrow keys move between images:
+    // the thumbnails are behind the modal and inert while it is open, so without this a
+    // keyboard user could only ever see the one image they opened.
+    lightbox.addEventListener('keydown', function (event) {
+      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+      const images = Array.isArray(currentProduct.images) ? currentProduct.images : [];
+      if (images.length < 2) return;
+      event.preventDefault();
+      const step = event.key === 'ArrowRight' ? 1 : -1;
+      const next = (activeImageIndex + step + images.length) % images.length;
+      setActiveThumb(next);
+      showLightboxImage(next);
     });
+  }
+
+  // Swaps the visible image without reopening the dialog, so focus and the trap survive.
+  function showLightboxImage(index) {
+    const images = Array.isArray(currentProduct.images) ? currentProduct.images : [];
+    const src = images[index];
+    if (!src) return;
+    const lightbox = document.getElementById('imageLightbox');
+    const stage = document.getElementById('imageLightboxStage');
+    const img = document.getElementById('imageLightboxImg');
+    const count = document.getElementById('imageLightboxCount');
+    if (!lightbox || !img) return;
+    img.src = src;
+    img.alt = (currentProduct.name || 'Suvera ürün görseli') + ' — görsel ' + (index + 1);
+    lightbox.classList.remove('zoomed');
+    if (stage) resetLightboxView(stage);
+    if (count) count.textContent = (index + 1) + ' / ' + Math.max(images.length, 1);
+  }
+
+  function relatedCardMarkup(product) {
+    const price = Number(product.sale_price || product.price || 0);
+    const firstImage = productImageEntries(product)[0];
+    const src = firstImage ? imageUrl(firstImage.url) : '';
+    // FIX: Encode product ids before inserting them into inline navigation handlers.
+    return '<article class="related-card" data-nav="urun?id=' + encodeURIComponent(product.id) + '">' +
+      '<div class="related-media">' + imageMarkup(src, product.name, 'related-fallback', { purpose: 'card' }) + '</div>' +
+      '<div class="related-info"><p>' + escapeHtml(product.category_name || 'Seçki') + '</p><h3>' + escapeHtml(product.name) + '</h3><div class="related-price">' + money(price) + '</div></div>' +
+    '</article>';
   }
 
   function renderRelated(products) {
     const wrap = document.getElementById('relatedProducts');
     if (!wrap) return;
-
     if (!products.length) {
       wrap.innerHTML = '<div class="empty-state">Benzer ürünler bu kategoriye ürün eklendikçe burada görünür.</div>';
       return;
     }
+    wrap.innerHTML = products.map(relatedCardMarkup).join('');
+  }
 
-    wrap.innerHTML = products.map(function (product) {
-      const price = Number(product.sale_price || product.price || 0);
-      const firstImage = productImageEntries(product)[0];
-      const src = firstImage ? imageUrl(firstImage.url) : '';
-      // FIX: Encode product ids before inserting them into inline navigation handlers.
-      return '<article class="related-card" onclick="location.href=\'urun?id=' + encodeURIComponent(product.id) + '\'">' +
-        '<div class="related-media">' + imageMarkup(src, product.name, 'related-fallback') + '</div>' +
-        '<div class="related-info"><p>' + escapeHtml(product.category_name || 'Seçki') + '</p><h3>' + escapeHtml(product.name) + '</h3><div class="related-price">' + money(price) + '</div></div>' +
-      '</article>';
-    }).join('');
+  // A24.2 complementary strip: hidden entirely when the API returns no complementary
+  // products (curated by the admin, else a deterministic same-category fallback).
+  function renderComplementary(products) {
+    const wrap = document.getElementById('complementaryProducts');
+    if (!wrap) return;
+    const section = wrap.closest('.related-section');
+    if (!products.length) { if (section) section.hidden = true; return; }
+    if (section) section.hidden = false;
+    wrap.innerHTML = products.map(relatedCardMarkup).join('');
   }
 
   function showCartFeedback(message, options = {}) {
@@ -560,6 +580,8 @@
     if (feedback) {
       feedback.textContent = message;
       feedback.classList.add('show');
+      feedback.setAttribute('role', options.success === false ? 'alert' : 'status');
+      feedback.setAttribute('aria-live', options.success === false ? 'assertive' : 'polite');
       clearTimeout(showCartFeedback.timer);
       showCartFeedback.timer = setTimeout(function () {
         feedback.classList.remove('show');
@@ -575,6 +597,22 @@
         button.textContent = original;
       }, 1800);
     }
+  }
+
+  function validateVariantSelection() {
+    const colorButtons = Array.from(document.querySelectorAll('#detailColors .swatch:not([disabled])'));
+    const sizeButtons = Array.from(document.querySelectorAll('#detailSizes .size-btn:not([disabled])'));
+    if (colorButtons.length && !currentProduct.selectedColor) {
+      showCartFeedback('Sepete eklemeden önce bir renk seçin.', { success: false });
+      colorButtons[0].focus();
+      return false;
+    }
+    if (sizeButtons.length && !currentProduct.selectedSize) {
+      showCartFeedback('Sepete eklemeden önce bir beden seçin.', { success: false });
+      sizeButtons[0].focus();
+      return false;
+    }
+    return true;
   }
 
   function matchingVariant(product) {
@@ -603,43 +641,46 @@
   }
 
   async function addCurrentProductToCart() {
-    if (!window.Suvera || !currentProduct.id) return false;
+    if (!window.Suvera || !currentProduct.id || addingToCart || !validateVariantSelection()) return false;
+    addingToCart = true;
+    updateStockDisplay();
 
-    let availability;
     try {
-      availability = await latestAvailability();
-    } catch (_) {
-      availability = { ok: true, variant: null };
-    }
+      let availability;
+      try {
+        availability = await latestAvailability();
+      } catch (_) {
+        availability = { ok: true, variant: null };
+      }
 
-    if (!availability.ok) {
-      const message = 'Bu secenek icin stok su anda tukendi. Lutfen farkli beden/renk deneyin.';
-      showCartFeedback(message, { success: false });
-      if (window.showToast) window.showToast(message, 'dark');
-      return false;
-    }
+      if (!availability.ok) {
+        const message = 'Bu seçenek için stok şu anda tükendi. Lütfen farklı beden veya renk deneyin.';
+        showCartFeedback(message, { success: false });
+        if (window.showToast) window.showToast(message, 'dark');
+        return false;
+      }
 
-    const variant = availability.variant;
-    window.Suvera.addToCart(currentProduct.name, currentProduct.price, currentProduct.emoji, {
-      id: currentProduct.id,
-      product_id: currentProduct.id,
-      variant_id: variant ? variant.id : null,
-      image: currentProduct.image,
-      color: currentProduct.selectedColor,
-      size: currentProduct.selectedSize,
-      variant: [colorMeta(currentProduct.selectedColor).label, currentProduct.selectedSize].filter(Boolean).join(' / '),
-    });
+      const variant = availability.variant;
+      await window.Suvera.addToCart(currentProduct.name, currentProduct.price, currentProduct.emoji, {
+        id: currentProduct.id,
+        product_id: currentProduct.id,
+        variant_id: variant ? variant.id : null,
+        image: currentProduct.image,
+        color: currentProduct.selectedColor,
+        size: currentProduct.selectedSize,
+        variant: [colorMeta(currentProduct.selectedColor).label, currentProduct.selectedSize].filter(Boolean).join(' / '),
+      });
 
-    showCartFeedback('Ürün sepetinize eklenmiştir. Sepetten devam edebilir ya da Satın Al ile ödeme adımına geçebilirsiniz.');
-    if (window.showToast) {
-      window.showToast('Ürün sepetinize eklenmiştir', 'green');
+      showCartFeedback('Ürün sepetinize eklenmiştir. Sepetten devam edebilir ya da Satın Al ile ödeme adımına geçebilirsiniz.');
+      if (window.showToast) window.showToast('Ürün sepetinize eklenmiştir', 'green');
+      return true;
+    } finally {
+      addingToCart = false;
+      updateStockDisplay();
     }
-    return true;
   }
 
-  async function loadRelated(product) {
-    if (!window.SuveraAPI) return;
-
+  async function loadRelatedLegacy(product) {
     try {
       const params = product.category_id ? '?category_id=' + product.category_id + '&status=active&limit=8' : '?status=active&limit=8';
       const items = await window.SuveraAPI.products.list(params);
@@ -649,6 +690,34 @@
       renderRelated(related);
     } catch (err) {
       renderRelated([]);
+    }
+  }
+
+  async function loadRelated(product) {
+    if (!window.SuveraAPI) return;
+    const hasRelatedApi = Boolean(window.SuveraAPI.catalog && window.SuveraAPI.catalog.related);
+
+    // A24.2: server-backed curated related products (admin manual selection) with a
+    // deterministic same-category/collection fallback in the API. Legacy client-side
+    // category lookup only if the endpoint is unavailable or errors.
+    try {
+      if (hasRelatedApi) {
+        const data = await window.SuveraAPI.catalog.related(product.id, 'related', 8);
+        const items = (data && data.items) || [];
+        if (items.length) renderRelated(items.slice(0, 8));
+        else await loadRelatedLegacy(product);
+      } else {
+        await loadRelatedLegacy(product);
+      }
+    } catch (_) {
+      await loadRelatedLegacy(product);
+    }
+
+    try {
+      const data = hasRelatedApi ? await window.SuveraAPI.catalog.related(product.id, 'complementary', 8) : null;
+      renderComplementary(((data && data.items) || []).slice(0, 8));
+    } catch (_) {
+      renderComplementary([]);
     }
   }
 

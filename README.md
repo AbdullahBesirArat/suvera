@@ -35,7 +35,9 @@ A full-stack commerce portfolio project that combines Panelya, a multi-tenant Sa
 |-- assets/                  # Public storefront assets
 |-- css/                     # Page-specific storefront styles
 |-- js/                      # Storefront API, cart, SEO and page logic
-|-- *.html                   # Static storefront pages
+|-- templates/partials/      # Build-time shared head, nav, footer and consent HTML
+|-- *.html                   # Source page templates (shared sections are partial tokens)
+|-- dist/                    # Generated static storefront output (ignored by git)
 |-- tools/                   # Local project utilities
 |-- OPTIMIZATIONS.md         # Optimization audit notes
 `-- SECURITY.md              # Security review notes
@@ -92,6 +94,9 @@ Run the Suvera storefront with its local API proxy:
 npm run dev
 ```
 
+`npm run dev` first regenerates `dist/`, then serves that production-shaped
+static output. Browser API calls continue to use same-origin `/api`.
+
 Run Panelya API and dashboard in separate terminals:
 
 ```bash
@@ -105,9 +110,17 @@ npm run dev:web
 Suvera:
 
 ```bash
+npm run build
 npm run dev
 npm run check
+npm test
 ```
+
+The build keeps page-specific title, description and canonical values, injects
+shared head/navigation/footer/consent partials, versions local JS/CSS, and moves
+executable inline scripts into page-specific content-hashed files. The checkout
+address source is split into a small 81-city manifest plus lazy, city-specific
+district JSON; the original aggregate source is never copied to `dist/`.
 
 Panelya:
 

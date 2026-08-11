@@ -1,0 +1,41 @@
+# Canonical Suvera storefront deploy scope (Vercel project: suvera-web).
+# Only root-level storefront assets + api/ are served. Everything below is
+# excluded from deployment to avoid shipping duplicate copies, the Panelya
+# submodule, dependency/build artifacts, database backups or secrets.
+
+# Redundant / non-canonical Suvera copies
+suvera/
+panelya/
+
+# Local database backups (production dump lives here, never deploy it)
+backups/
+
+# Dependencies, build and cache artifacts
+node_modules/
+**/node_modules/
+.next/
+dist/
+build/
+out/
+.cache/
+.turbo/
+coverage/
+
+# Secrets and local runtime
+.env
+.env.*
+!.env.example
+.vercel/
+
+# Dev-only server (Vercel uses api/ + static hosting, not dev-server.js)
+dev-server.js
+tools/
+
+# Repo docs / one-off reports (not part of the storefront)
+*.md
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*.log
