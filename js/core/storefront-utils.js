@@ -50,6 +50,78 @@ export function productImageEntries(product) {
     .filter(function (entry) { return entry && entry.url; });
 }
 
+export function productGalleryEntries(product, color) {
+  const entries = productImageEntries(product);
+  const selected = normalizeColor(color);
+  if (!selected) return entries;
+
+  const selectedColorEntries = entries.filter(function (entry) {
+    return normalizeColor(entry.color) === selected;
+  });
+  const generalEntries = entries.filter(function (entry) {
+    return !normalizeColor(entry.color);
+  });
+  const selectedEntries = selectedColorEntries.length || generalEntries.length
+    ? [...selectedColorEntries, ...generalEntries]
+    : entries;
+  const seen = new Set();
+  return selectedEntries.filter(function (entry) {
+    if (seen.has(entry.url)) return false;
+    seen.add(entry.url);
+    return true;
+  });
+}
+
+export function productColorOptions(product) {
+  const colors = Array.isArray(product && product.colors) && product.colors.length
+    ? product.colors
+    : ['#e9dfd0'];
+  const variants = Array.isArray(product && product.variants) ? product.variants : [];
+  return colors.map(function (color) {
+    const selected = normalizeColor(color);
+    const matches = variants.filter(function (variant) {
+      return normalizeColor(variant.color) === selected;
+    });
+    const inStock = !matches.length || matches.some(function (variant) {
+      return Number(variant.stock || 0) > 0 && (variant.status || 'active') === 'active';
+    });
+    return { value: color, inStock, selectable: true };
+  });
+}
+
+export function defaultProductColor(product) {
+  const options = productColorOptions(product);
+  const firstBoundImage = productImageEntries(product).find(function (entry) {
+    return normalizeColor(entry.color);
+  });
+  if (firstBoundImage) {
+    const selected = normalizeColor(firstBoundImage.color);
+    const matchingOption = options.find(function (option) {
+      return normalizeColor(option.value) === selected;
+    });
+    if (matchingOption) return matchingOption.value;
+  }
+  const available = options.find(function (option) { return option.inStock; });
+  return (available || options[0] || {}).value || '';
+}
+
+export function explicitMeasurementLines(product) {
+  const details = product && product.details && typeof product.details === 'object'
+    ? product.details
+    : {};
+  return String(details.measurements || '')
+    .split('\n')
+    .map(function (line) { return line.trim(); })
+    .filter(Boolean);
+}
+
+export function productSizeLabels(product) {
+  const declared = Array.isArray(product && product.sizes) ? product.sizes : [];
+  const variants = Array.isArray(product && product.variants) ? product.variants : [];
+  const source = declared.length ? declared : variants.map(function (variant) { return variant.size; });
+  return [...new Set(source.map(function (size) { return String(size || '').trim(); }).filter(Boolean))];
+}
+
 export function productFinalPrice(product) {
   return Number(product && (product.sale_price || product.price) || 0);
 }

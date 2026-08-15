@@ -1,4 +1,16 @@
-import { formatMoney as money, escapeHtml, parseImageEntry, productImageEntries, normalizeColor, colorMeta as sharedColorMeta, resolveAssetUrl as imageUrl } from './core/storefront-utils.js';
+import {
+  defaultProductColor,
+  escapeHtml,
+  explicitMeasurementLines,
+  formatMoney as money,
+  normalizeColor,
+  productColorOptions,
+  productGalleryEntries,
+  productImageEntries,
+  productSizeLabels,
+  colorMeta as sharedColorMeta,
+  resolveAssetUrl as imageUrl,
+} from './core/storefront-utils.js';
 const colorMeta = (value) => sharedColorMeta(value, '#e9dfd0');
 ﻿(function () {
   'use strict';
@@ -32,28 +44,12 @@ const colorMeta = (value) => sharedColorMeta(value, '#e9dfd0');
       .trim();
   }
 
-  function measurementLines(text) {
-    return text
-      .split('\n')
-      .map(function (line) { return line.trim(); })
-      .filter(function (line) { return /\bbeden\b|cm|göğüs|gogus|bel|omuz|kol|uzunluk/i.test(line); });
-  }
-
   function articleLines(text) {
     return text
       .split('\n')
       .map(function (line) { return line.trim(); })
       .filter(Boolean)
       .slice(0, 4);
-  }
-
-  function imageEntriesForColor(color) {
-    const selected = normalizeColor(color);
-    const entries = currentProduct.imageEntries || [];
-    const colorEntries = selected
-      ? entries.filter(function (entry) { return normalizeColor(entry.color) === selected; })
-      : [];
-    return colorEntries.length ? colorEntries : entries;
   }
 
   function imageMarkup(src, alt, fallbackClass, options) {
@@ -182,7 +178,7 @@ const colorMeta = (value) => sharedColorMeta(value, '#e9dfd0');
 
   function renderGallery(product, color) {
     currentProduct.imageEntries = productImageEntries(product);
-    const images = imageEntriesForColor(color).map(function (entry) {
+    const images = productGalleryEntries(product, color).map(function (entry) {
       return imageUrl(entry.url);
     });
 
@@ -214,24 +210,18 @@ const colorMeta = (value) => sharedColorMeta(value, '#e9dfd0');
   }
 
   function renderSwatches(product) {
-    const colors = Array.isArray(product.colors) && product.colors.length ? product.colors : ['#e9dfd0'];
-    const variants = Array.isArray(product.variants) ? product.variants : [];
-    const firstAvailableColor = colors.find(function (color) {
-      const matches = variants.filter(function (variant) { return normalizeColor(variant.color) === normalizeColor(color); });
-      return !matches.length || matches.some(optionInStock);
-    });
-    currentProduct.selectedColor = firstAvailableColor || colors[0];
+    const colorOptions = productColorOptions(product);
+    currentProduct.selectedColor = defaultProductColor(product);
 
     const wrap = document.getElementById('detailColors');
     const label = document.getElementById('detailColorLabel');
     if (!wrap) return;
 
-    wrap.innerHTML = colors.map(function (color) {
+    wrap.innerHTML = colorOptions.map(function (option) {
+      const color = option.value;
       const meta = colorMeta(color);
-      const matches = variants.filter(function (variant) { return normalizeColor(variant.color) === normalizeColor(color); });
-      const disabled = matches.length > 0 && !matches.some(optionInStock);
       const selected = color === currentProduct.selectedColor;
-      return '<button class="swatch' + (selected ? ' active' : '') + '" type="button" data-css="background:' + escapeHtml(meta.css) + '" data-color="' + escapeHtml(color) + '" aria-label="' + escapeHtml(meta.label) + ' rengi' + (disabled ? ', stokta yok' : '') + '" aria-pressed="' + (selected ? 'true' : 'false') + '"' + (disabled ? ' disabled aria-disabled="true"' : '') + '></button>';
+      return '<button class="swatch' + (selected ? ' active' : '') + '" type="button" data-css="background:' + escapeHtml(meta.css) + '" data-color="' + escapeHtml(color) + '" aria-label="' + escapeHtml(meta.label) + ' rengi' + (option.inStock ? '' : ', stokta yok') + '" aria-pressed="' + (selected ? 'true' : 'false') + '"></button>';
     }).join('');
 
     if (label) label.textContent = colorMeta(currentProduct.selectedColor).label;
@@ -354,17 +344,15 @@ const colorMeta = (value) => sharedColorMeta(value, '#e9dfd0');
     const finalPrice = Number(product.sale_price || product.price || 0);
     const oldPrice = product.sale_price ? Number(product.price || 0) : 0;
     const text = plainDescription(product.description);
-    const measure = measurementLines(text);
     const story = articleLines(text);
     const details = product.details && typeof product.details === 'object' ? product.details : {};
     const storyText = (product.product_story && product.product_story.trim())
       || details.story || story.join(' ') || 'Bu ürün, sade çizgiyi yumuşak kumaş hissiyle bir araya getirir.';
     const shortText = details.short_description || story[0] || 'Rahat kalıp, dengeli duruş ve sezon boyunca sık kullanılacak bir parça.';
     const deliveryText = details.delivery_note || 'Siparişler 1-3 iş günü içinde hazırlanır. Kargo çıktığında takip numarası hesabınıza ve sipariş ekranına işlenir.\nKullanılmamış ürünlerde değişim ve iade desteği için bizimle iletişime geçebilirsiniz.';
-    const customMeasurements = details.measurements
-      ? details.measurements.split('\n').map(function (line) { return line.trim(); }).filter(Boolean)
-      : [];
-    const measurementData = customMeasurements.length ? customMeasurements : measure;
+    const measurementData = explicitMeasurementLines(product);
+    const sizeLabels = productSizeLabels(product);
+    const sizeSummary = sizeLabels.length ? 'Mevcut bedenler: ' + sizeLabels.join(', ') + '.' : 'Ölçü bilgisi paylaşılmadı.';
     const stock = Number(product.stock || 0);
 
     currentProduct.id = product.id;
@@ -406,14 +394,14 @@ const colorMeta = (value) => sharedColorMeta(value, '#e9dfd0');
 
     document.getElementById('detailMeasurementBody').innerHTML = measurementData.length
       ? '<table>' + measurementData.map(function (line) { return '<tr><td>' + escapeHtml(line) + '</td></tr>'; }).join('') + '</table>'
-      : '<p>Ölçü bilgisi hazırlanıyor.</p>';
+      : '<p>' + escapeHtml(sizeSummary) + '</p>';
 
     document.getElementById('detailStoryCopy').textContent = storyText;
 
     const measureList = document.getElementById('detailMeasureList');
     measureList.innerHTML = measurementData.slice(0, 5).map(function (line, index) {
       return '<div class="measure-row"><span>Detay ' + (index + 1) + '</span><strong>' + escapeHtml(line) + '</strong></div>';
-    }).join('') || '<div class="measure-row"><span>Bilgi</span><strong>Ölçü tablosu eklenecek</strong></div>';
+    }).join('') || '<div class="measure-row"><span>Bedenler</span><strong>' + escapeHtml(sizeLabels.join(', ') || 'Ölçü bilgisi paylaşılmadı') + '</strong></div>';
 
     const deliveryBodies = document.querySelectorAll('.info-body');
     if (deliveryBodies[2]) {
