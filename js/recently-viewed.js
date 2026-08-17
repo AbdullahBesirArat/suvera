@@ -77,10 +77,16 @@
   function card(product, formatter) {
     const link = el('a', 'related-card');
     link.href = `urun?id=${encodeURIComponent(product.id)}`;
+    // Entries may be plain urls, colour-aware "Colour | url" strings, or {url} objects.
+    // assetUrl normalizes each shape; take the first one that actually resolves so a single
+    // unusable entry does not leave the card image-less.
     const images = Array.isArray(product.images) ? product.images : [];
-    const entry = images[0];
-    const url = typeof entry === 'string' ? entry : (entry && entry.url) || '';
-    const src = url && window.SuveraAPI.assetUrl ? window.SuveraAPI.assetUrl(url) : url;
+    let src = '';
+    for (const entry of images) {
+      const url = typeof entry === 'string' ? entry : (entry && entry.url) || '';
+      const resolved = url && window.SuveraAPI.assetUrl ? window.SuveraAPI.assetUrl(url) : url;
+      if (resolved) { src = resolved; break; }
+    }
     if (src) {
       const img = el('img', 'related-card-img');
       img.loading = 'lazy';

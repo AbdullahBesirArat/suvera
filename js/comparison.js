@@ -119,10 +119,14 @@
   }
 
   function imageCell(product) {
+    // Same colour-aware entry shapes as the product cards; assetUrl normalizes each one.
     const images = Array.isArray(product.images) ? product.images : [];
-    const entry = images[0];
-    const url = typeof entry === 'string' ? entry : (entry && entry.url) || '';
-    const src = url && window.SuveraAPI.assetUrl ? window.SuveraAPI.assetUrl(url) : url;
+    let src = '';
+    for (const entry of images) {
+      const url = typeof entry === 'string' ? entry : (entry && entry.url) || '';
+      const resolved = url && window.SuveraAPI.assetUrl ? window.SuveraAPI.assetUrl(url) : url;
+      if (resolved) { src = resolved; break; }
+    }
     if (!src) return el('span', 'compare-noimg', '—');
     const img = el('img', 'compare-img');
     img.loading = 'lazy';

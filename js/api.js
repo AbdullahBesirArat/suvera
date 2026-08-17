@@ -181,8 +181,21 @@
   }
 
   function assetUrl(url) {
-    const value = String(url || '').trim();
+    let value = String(url || '').trim();
     if (!value) return '';
+    // products.images entries may be colour-aware ("Lacivert #243f8f | /api/media/<id>/detail"),
+    // the same contract parseImageEntry implements for the module renderers. Classic-script
+    // callers hand the raw entry straight to this resolver, so strip the colour prefix here
+    // too — otherwise the bare colour name fell through to the trailing "/uploads/" branch and
+    // produced "/uploads/Lacivert", which then poisoned srcset with an unparseable candidate.
+    if (value.includes('|')) {
+      const parts = value.split('|').map((part) => part.trim()).filter(Boolean);
+      value = parts.length ? parts[parts.length - 1] : '';
+      // Whatever follows the separator must look like a path or absolute url. A malformed
+      // entry such as "Lacivert |" leaves only the colour behind, and resolving that would
+      // recreate the very "/uploads/<colour>" request this strip exists to prevent.
+      if (!value || !(value.startsWith('/') || /^[a-z][a-z0-9+.-]*:/i.test(value))) return '';
+    }
     if (/^https?:\/\//i.test(value) || /^blob:/i.test(value)) return value;
     // FIX: Block data/javascript/file asset URLs before API content reaches DOM attributes.
     if (/^[a-z][a-z0-9+.-]*:/i.test(value)) return '';
