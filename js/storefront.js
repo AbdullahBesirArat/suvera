@@ -14,12 +14,13 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
   }
 
   function themeLinkHref(target) {
-    if (!target || typeof target !== 'object') return 'urunler';
+    if (!target || typeof target !== 'object' || target.type === 'none') return '';
+    if (target.type === 'products') return 'urunler';
     if (target.type === 'category') return 'urunler?category_id=' + encodeURIComponent(target.id);
     if (target.type === 'collection') return 'urunler?collection=' + encodeURIComponent(target.id);
     if (target.type === 'product') return 'urun?id=' + encodeURIComponent(target.id);
     if (target.type === 'page' && /^[a-z0-9-]+$/.test(String(target.page || ''))) return String(target.page);
-    return 'urunler';
+    return '';
   }
 
   function colorDots(colors, product) {
@@ -176,6 +177,93 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
       </div>`;
   }
 
+  function appendHeroCta(parent, label, target, className) {
+    const href = themeLinkHref(target);
+    const text = String(label || '').trim();
+    if (!href || !text) return;
+    const link = document.createElement('a');
+    link.className = className;
+    link.href = href;
+    link.textContent = text;
+    parent.appendChild(link);
+  }
+
+  function renderThemedHero(slider, settings, theme) {
+    const desktopRaw = settings.mediaId && theme && theme.media ? theme.media[settings.mediaId] : '';
+    const mobileRaw = settings.mobileMediaId && theme && theme.media ? theme.media[settings.mobileMediaId] : '';
+    const desktopImage = desktopRaw ? window.SuveraAPI.assetUrl(desktopRaw) : '';
+    const mobileImage = mobileRaw ? window.SuveraAPI.assetUrl(mobileRaw) : '';
+    const fallbackImage = desktopImage || mobileImage;
+    const slide = document.createElement('div');
+    slide.className = 'slide active theme-hero';
+    const background = document.createElement('div');
+    background.className = 'slide-bg';
+
+    if (fallbackImage) {
+      const picture = document.createElement('picture');
+      picture.className = 'theme-hero-picture';
+      if (mobileImage) {
+        const source = document.createElement('source');
+        source.media = '(max-width: 767px)';
+        source.srcset = mobileImage;
+        picture.appendChild(source);
+      }
+      const image = document.createElement('img');
+      image.className = 'slide-bg-image';
+      image.src = fallbackImage;
+      image.alt = '';
+      image.loading = 'eager';
+      image.decoding = 'async';
+      image.fetchPriority = 'high';
+      image.width = desktopImage ? 1600 : 1122;
+      image.height = desktopImage ? 800 : 1402;
+      picture.appendChild(image);
+      background.appendChild(picture);
+    }
+    slide.appendChild(background);
+    const overlay = document.createElement('div');
+    overlay.className = 'slide-overlay';
+    slide.appendChild(overlay);
+    const content = document.createElement('div');
+    content.className = 'slide-content';
+
+    if (settings.eyebrow) {
+      const eyebrow = document.createElement('span');
+      eyebrow.className = 'slide-tag';
+      eyebrow.textContent = String(settings.eyebrow);
+      content.appendChild(eyebrow);
+    }
+    if (settings.title || settings.accentText) {
+      const heading = document.createElement('h1');
+      heading.className = 'slide-title';
+      if (settings.title) {
+        const title = document.createElement('span');
+        title.textContent = String(settings.title);
+        heading.appendChild(title);
+      }
+      if (settings.title && settings.accentText) heading.appendChild(document.createElement('br'));
+      if (settings.accentText) {
+        const accent = document.createElement('em');
+        accent.textContent = String(settings.accentText);
+        heading.appendChild(accent);
+      }
+      content.appendChild(heading);
+    }
+    if (settings.subtitle) {
+      const description = document.createElement('p');
+      description.className = 'slide-desc';
+      description.textContent = String(settings.subtitle);
+      content.appendChild(description);
+    }
+    const actions = document.createElement('div');
+    actions.className = 'slide-ctas';
+    appendHeroCta(actions, settings.ctaLabel, settings.ctaTarget, 'btn-slide-primary');
+    appendHeroCta(actions, settings.secondaryCtaLabel, settings.secondaryCtaTarget, 'btn-slide-outline');
+    if (actions.childNodes.length) content.appendChild(actions);
+    slide.appendChild(content);
+    slider.prepend(slide);
+  }
+
   function renderHeroDots(target, count) {
     if (!target) return;
     target.innerHTML = Array.from({ length: Math.max(count, 1) }).map(function (_, index) {
@@ -197,26 +285,29 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
       var themed = window.SuveraTheme ? window.SuveraTheme.sectionSettings('hero') : null;
       var theme = window.SuveraTheme ? window.SuveraTheme.theme : null;
       var themedImage = themed && themed.mediaId && theme && theme.media ? theme.media[themed.mediaId] : '';
+      var themedMobileImage = themed && themed.mobileMediaId && theme && theme.media ? theme.media[themed.mobileMediaId] : '';
       var items;
-      if (themed && (themed.title || themedImage)) {
-        items = [{
-          title: themed.title,
-          sub: themed.subtitle,
-          btn: themed.ctaLabel,
-          href: themeLinkHref(themed.ctaTarget),
-          image_url: themedImage,
-        }];
+      if (themed && (themed.title || themed.accentText || themedImage || themedMobileImage)) {
+        items = null;
       } else {
         const slides = await window.SuveraAPI.slider.list();
         items = Array.isArray(slides) ? slides : [];
       }
-      if (!items.length) { slider.hidden = true; return; }
+      if (items && !items.length) { slider.hidden = true; return; }
 
       slider.querySelectorAll(':scope > .slide').forEach(function (node) {
         node.remove();
       });
-      slider.insertAdjacentHTML('afterbegin', items.map(slideMarkup).join(''));
-      renderHeroDots(document.getElementById('heroSliderDots'), items.length);
+      if (items) {
+        slider.insertAdjacentHTML('afterbegin', items.map(slideMarkup).join(''));
+        renderHeroDots(document.getElementById('heroSliderDots'), items.length);
+      } else {
+        renderThemedHero(slider, themed, theme);
+        renderHeroDots(document.getElementById('heroSliderDots'), 1);
+      }
+      slider.querySelectorAll('.slider-arrow, .slider-dots, .slider-progress').forEach(function (control) {
+        control.hidden = items ? items.length < 2 : true;
+      });
 
       if (typeof window.rebuildHeroSlider === 'function') {
         window.rebuildHeroSlider();
