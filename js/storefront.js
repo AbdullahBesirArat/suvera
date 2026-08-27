@@ -13,8 +13,17 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
     return entry ? window.SuveraAPI.assetUrl(entry.url) : '';
   }
 
+  function themeLinkHref(target) {
+    if (!target || typeof target !== 'object') return 'urunler';
+    if (target.type === 'category') return 'urunler?category_id=' + encodeURIComponent(target.id);
+    if (target.type === 'collection') return 'urunler?collection=' + encodeURIComponent(target.id);
+    if (target.type === 'product') return 'urun?id=' + encodeURIComponent(target.id);
+    if (target.type === 'page' && /^[a-z0-9-]+$/.test(String(target.page || ''))) return String(target.page);
+    return 'urunler';
+  }
+
   function colorDots(colors, product) {
-    const list = Array.isArray(colors) && colors.length ? colors : ['#d8d3c8'];
+    const list = Array.isArray(colors) ? colors : [];
     return list.slice(0, 4).map(function (color, index) {
       const meta = colorMeta(color);
       const image = imageForColor(product, color);
@@ -29,10 +38,12 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
   }
 
   function stockLabel(product) {
-    const stock = Number(product.stock ?? product.stock_quantity ?? product.quantity ?? 0);
+    const rawStock = product.stock ?? product.stock_quantity ?? product.quantity;
+    const stock = Number(rawStock);
     if (Number.isFinite(stock) && stock > 0 && stock <= 3) return 'Son ' + stock + ' urun';
     if (product.in_stock === false || product.is_active === false) return 'Stokta yok';
-    return 'Stokta';
+    if (product.in_stock === true || (Number.isFinite(stock) && stock > 0)) return 'Stokta';
+    return '';
   }
 
   function skeletonCards(count) {
@@ -51,7 +62,7 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
   function productCard(product) {
     const price = Number(product.sale_price || product.price || 0);
     const oldPrice = product.sale_price ? Number(product.price || 0) : null;
-    const emoji = product.emoji || 'SU';
+    const emoji = product.emoji || String(product.name || '').trim().slice(0, 2).toUpperCase();
     const image = imageForColor(product, '');
     const responsive = image && window.SuveraAPI.responsiveImage ? window.SuveraAPI.responsiveImage(image, 'card') : { src: image, srcset: '', sizes: '' };
     const responsiveAttrs = responsive.srcset ? ` srcset="${escapeHtml(responsive.srcset)}" sizes="${escapeHtml(responsive.sizes)}"` : '';
@@ -84,7 +95,7 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
             <span class="p-new">${money(price)}</span>
             ${oldPrice ? '<span class="p-old">' + money(oldPrice) + '</span>' : ''}
           </div>
-          <span class="prod-stock-chip">${escapeHtml(stockLabel(product))}</span>
+          ${stockLabel(product) ? `<span class="prod-stock-chip">${escapeHtml(stockLabel(product))}</span>` : ''}
         </div>
       </div>`;
   }
@@ -92,7 +103,7 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
   function featuredStripCard(product) {
     const price = Number(product.sale_price || product.price || 0);
     const oldPrice = product.sale_price ? Number(product.price || 0) : null;
-    const emoji = product.emoji || 'SU';
+    const emoji = product.emoji || String(product.name || '').trim().slice(0, 2).toUpperCase();
     const image = imageForColor(product, '');
     const responsive = image && window.SuveraAPI.responsiveImage ? window.SuveraAPI.responsiveImage(image, 'card') : { src: image, srcset: '', sizes: '' };
     const responsiveAttrs = responsive.srcset ? ` srcset="${escapeHtml(responsive.srcset)}" sizes="${escapeHtml(responsive.sizes)}"` : '';
@@ -114,14 +125,9 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
     return String(value || '').trim().toUpperCase();
   }
 
-  function pickCategoryVisual(index) {
-    const visuals = ['EL', 'AB', 'TK', 'TR', 'ES', 'KL'];
-    return visuals[index % visuals.length];
-  }
-
-  function categoryCard(category, index) {
+  function categoryCard(category) {
     const categoryId = encodeURIComponent(category.id);
-    const visual = pickCategoryVisual(index);
+    const visual = String(category.name || '').trim().slice(0, 2).toUpperCase();
     const image = category.image_url ? window.SuveraAPI.assetUrl(category.image_url) : '';
     const imageStyle = image
       ? 'background-image:linear-gradient(to top, rgba(12,24,12,.58), rgba(12,24,12,.10) 55%),url(' + escapeHtml(image) + ');background-size:cover;background-position:center;'
@@ -130,8 +136,8 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
       <div class="cat-card" data-nav="urunler?category_id=${categoryId}">
         <div class="cat-inner${image ? ' has-image' : ''}" data-css="${imageStyle}">${image ? '' : escapeHtml(visual)}</div>
         <div class="cat-overlay">
-          <h3>${escapeHtml(category.name || 'Kategori')}</h3>
-          <p>${escapeHtml(category.slug || 'Suvera Seçkisi')}</p>
+          <h3>${escapeHtml(category.name || '')}</h3>
+          ${category.slug ? '<p>' + escapeHtml(category.slug) + '</p>' : ''}
         </div>
       </div>`;
   }
@@ -145,50 +151,26 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
     target.textContent = image ? '' : fallbackText;
   }
 
-  function pickSlideVisual(index) {
-    const visuals = [
-      ['SU', 'VE'],
-      ['EL', 'BI'],
-      ['AB', 'YA'],
-      ['ES', 'RP'],
-      ['KO', 'LK'],
-    ];
-    return visuals[index % visuals.length];
-  }
-
   function slideMarkup(slide, index) {
-    const title = String(slide.title || 'Suvera Koleksiyonu');
+    const title = String(slide.title || '').trim();
+    if (!title && !slide.image_url) return '';
     const pieces = title.split(/\s+/).filter(Boolean);
     const titleTop = pieces.slice(0, Math.max(1, Math.ceil(pieces.length / 2))).join(' ');
-    const titleBottom = pieces.slice(Math.max(1, Math.ceil(pieces.length / 2))).join(' ') || 'Keşfet';
-    const visuals = pickSlideVisual(index);
+    const titleBottom = pieces.slice(Math.max(1, Math.ceil(pieces.length / 2))).join(' ');
     const image = slide.image_url ? window.SuveraAPI.assetUrl(slide.image_url) : '';
-    const background = image
-      ? 'background-image:linear-gradient(rgba(26,26,26,.16), rgba(26,26,26,.34)),url(' + escapeHtml(image) + ');background-size:cover;background-position:center;'
-      : '';
     return `
       <div class="slide${index === 0 ? ' active' : ''}">
-        <div class="slide-bg" data-css="${background}"></div>
+        <div class="slide-bg">${image ? '<img class="slide-bg-image" src="' + escapeHtml(image) + '" alt="" ' + (index === 0 ? 'fetchpriority="high" loading="eager"' : 'loading="lazy"') + ' decoding="async">' : ''}</div>
         <div class="slide-overlay"></div>
-        <div class="slide-models">
-          <div class="model-left">${escapeHtml(visuals[0])}</div>
-          <div class="model-right">${escapeHtml(visuals[1])}</div>
-        </div>
         <div class="slide-content">
-          <span class="slide-tag">${escapeHtml(slide.tag || "İstanbul'dan yeni sezon")}</span>
+          ${slide.tag ? '<span class="slide-tag">' + escapeHtml(slide.tag) + '</span>' : ''}
           <h1 class="slide-title">
             ${escapeHtml(titleTop)}<br/>
-            <em>${escapeHtml(titleBottom)}</em>
+            ${titleBottom ? '<em>' + escapeHtml(titleBottom) + '</em>' : ''}
           </h1>
-          <p class="slide-desc">${escapeHtml(slide.sub || "İstanbul ışığından ve Türkiye'nin şehirli ritminden ilham alan modern tesettür seçkileri.")}</p>
-          <div class="hero-market-proof" aria-label="Suvera hizmet avantajları">
-            <span>Türkiye geneli hızlı kargo</span>
-            <span>İyzico ile güvenli ödeme</span>
-            <span>30 gün kolay iade</span>
-          </div>
+          ${slide.sub ? '<p class="slide-desc">' + escapeHtml(slide.sub) + '</p>' : ''}
           <div class="slide-ctas">
-            <a href="urunler" class="btn-slide-primary">${escapeHtml(slide.btn || 'Keşfet')}</a>
-            <a href="urunler" class="btn-slide-outline">Tüm Ürünler</a>
+            ${slide.btn ? '<a href="' + escapeHtml(safeHref(slide.href, 'urunler')) + '" class="btn-slide-primary">' + escapeHtml(slide.btn) + '</a>' : ''}
           </div>
         </div>
       </div>`;
@@ -212,9 +194,23 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
     if (!window.SuveraAPI || !slider) return;
 
     try {
-      const slides = await window.SuveraAPI.slider.list();
-      const items = Array.isArray(slides) && slides.length ? slides : [];
-      if (!items.length) return;
+      var themed = window.SuveraTheme ? window.SuveraTheme.sectionSettings('hero') : null;
+      var theme = window.SuveraTheme ? window.SuveraTheme.theme : null;
+      var themedImage = themed && themed.mediaId && theme && theme.media ? theme.media[themed.mediaId] : '';
+      var items;
+      if (themed && (themed.title || themedImage)) {
+        items = [{
+          title: themed.title,
+          sub: themed.subtitle,
+          btn: themed.ctaLabel,
+          href: themeLinkHref(themed.ctaTarget),
+          image_url: themedImage,
+        }];
+      } else {
+        const slides = await window.SuveraAPI.slider.list();
+        items = Array.isArray(slides) ? slides : [];
+      }
+      if (!items.length) { slider.hidden = true; return; }
 
       slider.querySelectorAll(':scope > .slide').forEach(function (node) {
         node.remove();
@@ -226,6 +222,7 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
         window.rebuildHeroSlider();
       }
     } catch (err) {
+      slider.hidden = true;
       console.warn('Suvera hero slider yüklenemedi:', err.message);
     }
   }
@@ -295,34 +292,46 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
     }
   }
 
-  async function renderCategories(target, limit) {
+  async function renderCategories(target, limit, selectedIds) {
     if (!window.SuveraAPI || !target) return;
 
     try {
       const categories = await window.SuveraAPI.categories.list();
-      const items = Array.isArray(categories) ? categories.slice(0, limit || categories.length) : [];
-      if (!items.length) return;
+      var all = Array.isArray(categories) ? categories : [];
+      var ids = Array.isArray(selectedIds) ? selectedIds.map(String) : [];
+      if (ids.length) all = ids.map(function (id) { return all.find(function (item) { return String(item.id) === id; }); }).filter(Boolean);
+      const items = all.slice(0, limit || all.length);
+      if (!items.length) { target.closest('.home-builder-section')?.setAttribute('hidden', ''); return; }
       target.innerHTML = items.map(categoryCard).join('');
     } catch (err) {
+      target.closest('.home-builder-section')?.setAttribute('hidden', '');
       console.warn('Suvera kategorileri yüklenemedi:', err.message);
     }
   }
 
-  async function renderProducts(target, limit) {
+  async function loadSectionProducts(settings, limit) {
+    var source = settings && settings.source ? settings.source : { type: 'products' };
+    if (source.type === 'category' || source.type === 'collection') {
+      var query = new URLSearchParams({ page: '1', pageSize: String(limit), sort: settings.sort || 'newest' });
+      query.set(source.type === 'category' ? 'category' : 'collection', String(source.id));
+      var catalog = await window.SuveraAPI.catalog.search(query);
+      return Array.isArray(catalog && catalog.items) ? catalog.items : [];
+    }
+    return window.SuveraAPI.products.list('?status=active&limit=' + limit);
+  }
+
+  async function renderProducts(target, limit, settings) {
     if (!window.SuveraAPI || !target) return;
 
     target.innerHTML = skeletonCards(limit || 6);
 
     try {
-      const products = await window.SuveraAPI.products.list('?status=active&limit=' + limit);
+      const products = await loadSectionProducts(settings || {}, limit);
       const items = products || [];
       const count = document.getElementById('productResultCount');
       if (count) count.textContent = items.length ? String(items.length) : '0';
 
-      if (!items.length) {
-        target.innerHTML = '<div class="empty-state">Suvera urunleri hazirlaniyor. Cok yakinda burada olacak.</div>';
-        return [];
-      }
+      if (!items.length) { target.closest('.home-builder-section')?.setAttribute('hidden', ''); return []; }
 
       target.innerHTML = items.map(productCard).join('');
       if (window.Suvera && window.Suvera.refreshWishlistButtons) {
@@ -330,11 +339,34 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
       }
       return items;
     } catch (err) {
-      target.innerHTML = '<div class="empty-state">Suvera ürünleri şu anda yüklenemiyor. Lütfen kısa süre sonra tekrar deneyin.</div>';
+      target.innerHTML = '';
+      target.closest('.home-builder-section')?.setAttribute('hidden', '');
       const count = document.getElementById('productResultCount');
       if (count) count.textContent = '0';
       console.warn('Suvera API urunleri alinamadi:', err.message);
       return [];
+    }
+  }
+
+  function collectionCard(collection) {
+    var image = collection.image_url ? window.SuveraAPI.assetUrl(collection.image_url) : '';
+    return '<a class="home-collection-card" href="' + escapeHtml(collectionHref(collection)) + '">' +
+      (image ? '<img src="' + escapeHtml(image) + '" alt="' + escapeHtml(collection.title || '') + '" loading="lazy" decoding="async">' : '') +
+      '<span>' + escapeHtml(collection.title || '') + '</span></a>';
+  }
+
+  async function renderCollections(target, settings) {
+    if (!window.SuveraAPI || !target) return;
+    try {
+      var collections = await window.SuveraAPI.collections.list();
+      var all = Array.isArray(collections) ? collections : [];
+      var ids = Array.isArray(settings.collectionIds) ? settings.collectionIds.map(String) : [];
+      if (ids.length) all = ids.map(function (id) { return all.find(function (item) { return String(item.id) === id; }); }).filter(Boolean);
+      var items = all.slice(0, settings.limit || 4);
+      if (!items.length) { target.closest('.home-builder-section')?.setAttribute('hidden', ''); return; }
+      target.innerHTML = items.map(collectionCard).join('');
+    } catch (err) {
+      target.closest('.home-builder-section')?.setAttribute('hidden', '');
     }
   }
 
@@ -882,15 +914,32 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
   }
 
   document.addEventListener('DOMContentLoaded', function () {
-    renderHeroSlider();
     renderCampaignAnnouncement();
-    bindNewsletterForm();
-    renderCategories(document.getElementById('homeCategoryGrid'), 6);
     var homeProductsPromise = whenThemeSettled().then(function () {
-      return renderProducts(document.getElementById('homeProductsGrid'), homeProductLimit());
+      if (!document.getElementById('homepageSections')) return [];
+      renderHeroSlider();
+      bindNewsletterForm();
+      var jobs = [];
+      document.querySelectorAll('[data-home-section-id]').forEach(function (wrapper) {
+        var section = window.SuveraTheme && window.SuveraTheme.section
+          ? window.SuveraTheme.section(wrapper.dataset.homeSectionId)
+          : null;
+        if (!section) return;
+        var settings = section.settings || {};
+        if (section.type === 'category-slider') {
+          jobs.push(renderCategories(wrapper.querySelector('.home-category-rail'), settings.limit || 8, settings.categoryIds));
+        } else if (section.type === 'collection-showcase') {
+          jobs.push(renderCollections(wrapper.querySelector('.home-collection-rail'), settings));
+        } else if (section.type === 'product-grid' || section.type === 'product-carousel') {
+          jobs.push(renderProducts(wrapper.querySelector('.prods-grid, .home-product-rail'), settings.limit || 8, settings));
+        }
+      });
+      return Promise.all(jobs).then(function (results) {
+        return results.find(Array.isArray) || [];
+      });
     });
     renderCollectionPage();
-    if (!document.getElementById('collectionTitle')) {
+    if (!document.getElementById('collectionTitle') && !document.getElementById('homepageSections')) {
       var productGrid = document.getElementById('prodsGrid');
       var featuredTarget = document.getElementById('featuredProductsStrip') || document.querySelector('.featured-strip');
       if (!productGrid) {

@@ -70,8 +70,8 @@ function checkPerformanceBudget() {
   const hero = fileSize('assets/suvera-istanbul-editorial-1200.avif');
   invariant(hero <= budget.heroImageMaxBytes, `LCP hero ${hero} > ${budget.heroImageMaxBytes}`);
 
-  const index = fs.readFileSync(path.join(dist, 'index.html'), 'utf8');
-  invariant(/rel="preload"[^>]+suvera-istanbul-editorial-1200\.avif[^>]+fetchpriority="high"/i.test(index), 'homepage LCP preload/fetchpriority eksik');
+  const storefront = fs.readFileSync(path.join(dist, 'js', 'storefront.js'), 'utf8');
+  invariant(/fetchpriority="high" loading="eager"/.test(storefront), 'yönetilen homepage LCP görseli öncelikli değil');
   const productDetail = fs.readFileSync(path.join(dist, 'js', 'product-detail.js'), 'utf8');
   invariant(/priority: true, purpose: 'detail'/.test(productDetail), 'ürün LCP görseli öncelikli değil');
   invariant(/loading="' \+ \(settings\.priority \? 'eager' : 'lazy'\)/.test(productDetail), 'ürün görsel lazy/eager ayrımı eksik');

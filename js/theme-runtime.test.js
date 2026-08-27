@@ -77,18 +77,30 @@ test('every theme string reaches the DOM through textContent only', () => {
 
 test('section types are the server allowlist, so a theme cannot name an arbitrary selector', () => {
   const selectors = code.slice(code.indexOf('var SECTION_SELECTORS'), code.indexOf('var TRUST_ICON_GLYPHS'));
-  for (const type of ['hero', 'product-grid', 'collection-blocks', 'trust-features', 'newsletter']) {
+  for (const type of [
+    'hero', 'product-grid', 'product-carousel', 'collection-blocks', 'collection-showcase',
+    'category-slider', 'editorial', 'promo-banner', 'trust-features', 'newsletter',
+  ]) {
     assert.ok(selectors.includes(`'${type}'`) || selectors.includes(`${type}:`), `${type} must map to an existing wrapper`);
   }
 });
 
-test('the product grid takes no query, filter or sort string from the theme', () => {
-  // The grid's row count is a bounded integer; the catalog request itself stays entirely
-  // server-side, so a theme can never influence which products are selected.
-  const applier = code.slice(code.indexOf('function applyProductGrid'), code.indexOf('function applyCollectionBlocks'));
-  for (const forbidden of ['settings.source', 'settings.sort', 'settings.columns']) {
-    assert.equal(applier.includes(forbidden), false, `the grid must not read ${forbidden} into a request`);
+test('homepage builder creates managed sections without parsing tenant HTML', () => {
+  for (const type of ['product-carousel', 'collection-showcase', 'category-slider', 'editorial', 'promo-banner']) {
+    assert.ok(source.includes(`'${type}'`) || source.includes(`=== '${type}'`), `${type} must have a builder path`);
   }
+  assert.match(source, /homepageSections/);
+  assert.equal(code.includes('insertAdjacentHTML'), false);
+});
+
+test('the data-section builder performs no request or free-form query construction', () => {
+  // The runtime only builds a known wrapper. A carousel CTA may reuse its validated
+  // internal entity source, while requests and sort handling stay in storefront.js.
+  const builder = code.slice(code.indexOf('function buildDataSection'), code.indexOf('function buildEditorial'));
+  for (const forbidden of ['fetch(', 'requestJson(', 'settings.sort', 'URLSearchParams']) {
+    assert.equal(builder.includes(forbidden), false, `the DOM builder must not request through ${forbidden}`);
+  }
+  assert.match(builder, /appendCta\(wrapper, settings\.ctaLabel, settings\.source/);
   const storefront = fs.readFileSync(path.join(root, 'js', 'storefront.js'), 'utf8');
   assert.match(storefront, /Number\.isInteger\(settings\.limit\)/);
   assert.equal(storefront.includes('sectionSettings(\'product-grid\').source'), false);

@@ -7,7 +7,6 @@
   <link rel="canonical" href="https://suvera.com.tr/anasayfa" />
   <meta name="theme-color" content="#2a4827" />
   {{> head-defaults}}
-  <link rel="preload" as="image" href="assets/suvera-istanbul-editorial-1200.avif" imagesrcset="assets/suvera-istanbul-editorial-800.avif 800w, assets/suvera-istanbul-editorial-1200.avif 1200w" imagesizes="100vw" type="image/avif" fetchpriority="high" />
   <title>SUVERA – Modern Tesettür Giyim</title>
   <style>
     :root {
@@ -744,6 +743,7 @@
       }
     }
   </style>
+  <link rel="stylesheet" href="css/home.css" />
 </head>
 <body>
 
@@ -754,307 +754,8 @@
 {{> navigation}}
 
 <main id="main" tabindex="-1">
-
-<!-- HERO SLIDER -->
-<div class="hero-slider" id="heroSlider">
-  <div class="slide active">
-    <div class="slide-bg"></div>
-    <div class="slide-overlay"></div>
-    <div class="slide-models">
-      <div class="model-left">SU</div>
-      <div class="model-right">VE</div>
-    </div>
-    <div class="slide-content">
-      <span class="slide-tag">İstanbul'dan yeni sezon</span>
-      <h1 class="slide-title">
-        Günlük zarafeti<br/>
-        <em>yerel bir dokuyla</em>
-      </h1>
-      <p class="slide-desc">İstanbul ışığından, Kapadokya tonlarından ve Türkiye'nin şehirli ritminden ilham alan modern tesettür seçkileri.</p>
-      <div class="hero-market-proof" aria-label="Suvera hizmet avantajları">
-        <span>Türkiye geneli hızlı kargo</span>
-        <span>İyzico ile güvenli ödeme</span>
-        <span>30 gün kolay iade</span>
-      </div>
-      <div class="slide-ctas">
-        <a href="urunler" class="btn-slide-primary">Yeni Sezonu Keşfet</a>
-        <a href="urunler" class="btn-slide-outline">Koleksiyona Bak</a>
-      </div>
-    </div>
-  </div>
-
-  <!-- Arrows -->
-  <button class="slider-arrow prev" data-action="slide-prev" aria-label="Önceki">&#8249;</button>
-  <button class="slider-arrow next" data-action="slide-next"  aria-label="Sonraki">&#8250;</button>
-
-  <!-- Dots -->
-  <div class="slider-dots" id="heroSliderDots" role="group" aria-label="Slayt seçimi">
-    <button class="slider-dot active" type="button" data-action="go-slide" data-index="0" aria-label="1. slayta git" aria-current="true"></button>
-  </div>
-
-  <!-- Progress bar -->
-  <div class="slider-progress" id="sliderProgress"></div>
-</div>
-
-<!-- MARQUEE -->
-<div class="marquee-wrap">
-  <div class="marquee-track">
-    <span>SUVERA</span><span class="dot">✦</span>
-    <span>Modern Tesettür</span><span class="dot">✦</span>
-    <span>2026 Koleksiyonu</span><span class="dot">✦</span>
-    <span>Ücretsiz Kargo</span><span class="dot">✦</span>
-    <span>30 Gün İade</span><span class="dot">✦</span>
-    <span>Yeni Sezon</span><span class="dot">✦</span>
-    <span>SUVERA</span><span class="dot">✦</span>
-    <span>Modern Tesettür</span><span class="dot">✦</span>
-    <span>2026 Koleksiyonu</span><span class="dot">✦</span>
-    <span>Ücretsiz Kargo</span><span class="dot">✦</span>
-    <span>30 Gün İade</span><span class="dot">✦</span>
-    <span>Yeni Sezon</span><span class="dot">✦</span>
-  </div>
-</div>
-
-<!-- CATS -->
-<section class="cats-bg reveal">
-  <div class="sec-head">
-    <div>
-      <p class="sec-sub">Kategoriler</p>
-      <h2 class="sec-title">Ne arıyorsun <em>bugün?</em></h2>
-    </div>
-    <a href="urunler" class="link-arrow">Tümünü Gör →</a>
-  </div>
-  <div class="cats-grid stagger-children" id="homeCategoryGrid">
-    <div class="cat-card">
-      <div class="cat-inner">SU</div>
-      <div class="cat-overlay"><h3>Kategoriler</h3><p>Yükleniyor</p></div>
-    </div>
-  </div>
-</section>
-
-<!-- PRODUCTS -->
-<section style="background:var(--bg)" class="reveal">
-  <div class="sec-head">
-    <div>
-      <p class="sec-sub">Öne Çıkanlar</p>
-      <h2 class="sec-title">Haftanın <em>seçkileri</em></h2>
-    </div>
-    <a href="urunler" class="link-arrow">Tümünü Gör →</a>
-  </div>
-  <div class="prods-grid stagger-children" id="homeProductsGrid">
-
-    <div class="prod-card" data-nav="urun">
-      <div class="prod-img">
-        <div class="prod-img-bg" style="background:linear-gradient(150deg,#d8d3c8,#c5bfb2)"></div>
-        <span style="position:relative;z-index:1">EL</span>
-        <div class="prod-badges"><span class="badge badge-sale">İndirim</span></div>
-        <div class="prod-hover-actions">
-          <button class="quick-add">Hızlı Ekle</button>
-          <button class="quick-fav" data-action="toggle-fav">♡</button><button class="quick-view" data-stop="1" title="Hızlı Bak">Bak</button>
-        </div>
-      </div>
-      <div class="prod-info">
-        <h4>Oversize Uzun Rahat Elbise</h4>
-        <div class="prod-colors">
-          <div class="color-dot active" style="background:#6b5044"></div>
-          <div class="color-dot" style="background:#8b9b6c"></div>
-          <div class="color-dot" style="background:#7c7c7c"></div>
-        </div>
-        <div class="prod-price">
-          <span class="p-new">749,90 TL</span>
-          <span class="p-old">999,90 TL</span>
-          <span class="p-pct">-%25</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="prod-card" data-nav="urun">
-      <div class="prod-img">
-        <div class="prod-img-bg" style="background:linear-gradient(150deg,#7a9b6a,#5a7d52)"></div>
-        <span style="position:relative;z-index:1">AB</span>
-        <div class="prod-badges"><span class="badge badge-new">Yeni</span></div>
-        <div class="prod-hover-actions">
-          <button class="quick-add">Hızlı Ekle</button>
-          <button class="quick-fav" data-action="toggle-fav">♡</button><button class="quick-view" data-stop="1" title="Hızlı Bak">Bak</button>
-        </div>
-      </div>
-      <div class="prod-info">
-        <h4>Krep Dokulu Abaya</h4>
-        <div class="prod-colors">
-          <div class="color-dot active" style="background:#111"></div>
-          <div class="color-dot" style="background:#1a2a4c"></div>
-        </div>
-        <div class="prod-price"><span class="p-new">1.249,90 TL</span></div>
-      </div>
-    </div>
-
-    <div class="prod-card" data-nav="urun">
-      <div class="prod-img">
-        <div class="prod-img-bg" style="background:linear-gradient(150deg,#ded8cc,#d0c8b8)"></div>
-        <span style="position:relative;z-index:1">TK</span>
-        <div class="prod-badges"><span class="badge badge-new">Yeni</span></div>
-        <div class="prod-hover-actions">
-          <button class="quick-add">Hızlı Ekle</button>
-          <button class="quick-fav" data-action="toggle-fav">♡</button><button class="quick-view" data-stop="1" title="Hızlı Bak">Bak</button>
-        </div>
-      </div>
-      <div class="prod-info">
-        <h4>Palazzo Keten Takım</h4>
-        <div class="prod-colors">
-          <div class="color-dot active" style="background:#c8b898"></div>
-          <div class="color-dot" style="background:#7a8070"></div>
-        </div>
-        <div class="prod-price"><span class="p-new">1.099,90 TL</span></div>
-      </div>
-    </div>
-
-    <div class="prod-card" data-nav="urun">
-      <div class="prod-img">
-        <div class="prod-img-bg" style="background:linear-gradient(150deg,#e4dcd4,#d4c8bc)"></div>
-        <span style="position:relative;z-index:1">TR</span>
-        <div class="prod-badges"><span class="badge badge-sale">-%30</span></div>
-        <div class="prod-hover-actions">
-          <button class="quick-add">Hızlı Ekle</button>
-          <button class="quick-fav" data-action="toggle-fav">♡</button><button class="quick-view" data-stop="1" title="Hızlı Bak">Bak</button>
-        </div>
-      </div>
-      <div class="prod-info">
-        <h4>Uzun Trençkot</h4>
-        <div class="prod-colors">
-          <div class="color-dot active" style="background:#c0a882"></div>
-          <div class="color-dot" style="background:#6b6060"></div>
-        </div>
-        <div class="prod-price">
-          <span class="p-new">1.399,90 TL</span>
-          <span class="p-old">1.999,90 TL</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="prod-card" data-nav="urun">
-      <div class="prod-img">
-        <div class="prod-img-bg" style="background:linear-gradient(150deg,#e0d8e0,#ccc4cc)"></div>
-        <span style="position:relative;z-index:1">BL</span>
-        <div class="prod-hover-actions">
-          <button class="quick-add">Hızlı Ekle</button>
-          <button class="quick-fav" data-action="toggle-fav">♡</button><button class="quick-view" data-stop="1" title="Hızlı Bak">Bak</button>
-        </div>
-      </div>
-      <div class="prod-info">
-        <h4>Viskon Şifon Bluz</h4>
-        <div class="prod-colors">
-          <div class="color-dot active" style="background:#c4a8b8"></div>
-          <div class="color-dot" style="background:#e8e0d4"></div>
-        </div>
-        <div class="prod-price"><span class="p-new">699,90 TL</span></div>
-      </div>
-    </div>
-
-    <div class="prod-card" data-nav="urun">
-      <div class="prod-img">
-        <div class="prod-img-bg" style="background:linear-gradient(150deg,#d4dcd8,#c0ccc8)"></div>
-        <span style="position:relative;z-index:1">PN</span>
-        <div class="prod-badges"><span class="badge badge-new">Yeni</span></div>
-        <div class="prod-hover-actions">
-          <button class="quick-add">Hızlı Ekle</button>
-          <button class="quick-fav" data-action="toggle-fav">♡</button><button class="quick-view" data-stop="1" title="Hızlı Bak">Bak</button>
-        </div>
-      </div>
-      <div class="prod-info">
-        <h4>Etek Formlu Geniş Pantolon</h4>
-        <div class="prod-colors">
-          <div class="color-dot active" style="background:#607060"></div>
-          <div class="color-dot" style="background:#2c3040"></div>
-        </div>
-        <div class="prod-price"><span class="p-new">899,90 TL</span></div>
-      </div>
-    </div>
-
-    <div class="prod-card" data-nav="urun">
-      <div class="prod-img">
-        <div class="prod-img-bg" style="background:linear-gradient(150deg,#e8e0d0,#dcd0bc)"></div>
-        <span style="position:relative;z-index:1">ES</span>
-        <div class="prod-badges"><span class="badge badge-sale">İndirim</span></div>
-        <div class="prod-hover-actions">
-          <button class="quick-add">Hızlı Ekle</button>
-          <button class="quick-fav" data-action="toggle-fav">♡</button><button class="quick-view" data-stop="1" title="Hızlı Bak">Bak</button>
-        </div>
-      </div>
-      <div class="prod-info">
-        <h4>İpek Modal Eşarp</h4>
-        <div class="prod-colors">
-          <div class="color-dot active" style="background:#e0d4c4"></div>
-          <div class="color-dot" style="background:#b8a8a0"></div>
-          <div class="color-dot" style="background:#8ca898"></div>
-        </div>
-        <div class="prod-price">
-          <span class="p-new">349,90 TL</span>
-          <span class="p-old">449,90 TL</span>
-          <span class="p-pct">-%22</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="prod-card" data-nav="urun">
-      <div class="prod-img">
-        <div class="prod-img-bg" style="background:linear-gradient(150deg,#d8d0c8,#c8c0b4)"></div>
-        <span style="position:relative;z-index:1">MX</span>
-        <div class="prod-hover-actions">
-          <button class="quick-add">Hızlı Ekle</button>
-          <button class="quick-fav" data-action="toggle-fav">♡</button><button class="quick-view" data-stop="1" title="Hızlı Bak">Bak</button>
-        </div>
-      </div>
-      <div class="prod-info">
-        <h4>Kuşaklı Maxi Abaya</h4>
-        <div class="prod-colors">
-          <div class="color-dot active" style="background:#c0a870"></div>
-          <div class="color-dot" style="background:#111"></div>
-        </div>
-        <div class="prod-price"><span class="p-new">1.549,90 TL</span></div>
-      </div>
-    </div>
-
-  </div>
-</section>
-
-<!-- EDITORIAL -->
-<div class="editorial reveal">
-  <div class="ed-text">
-    <p>✦ Editöryal</p>
-    <h2 class="ed-title">SUVERA<br/><em>Koleksiyonu</em></h2>
-    <p class="ed-body">Sakinliği ve zarafeti bir arada yaşayan kadın için tasarlandı. Geniş kesimler, yumuşak renkler ve özenli detaylar; ofisten akşam davetine kadar günün her anına eşlik eder.</p>
-    <a href="urunler" class="btn-dark" style="background:#fff;color:var(--green-dark);border:none;">Koleksiyonu Gör</a>
-  </div>
-  <div class="ed-img">
-    <div class="ed-img-caption">
-      <strong>SUVERA</strong>
-      <small>2026 / İstanbul Seçkisi</small>
-    </div>
-  </div>
-</div>
-
-<!-- FEATURES -->
-<div class="features-bar reveal">
-  <div class="feat"><div class="feat-icon">🚚</div><h4>Ücretsiz Kargo</h4><p>600 TL üzeri tüm siparişlerde</p></div>
-  <div class="feat"><div class="feat-icon">↩️</div><h4>Kolay İade</h4><p>30 gün içinde ücretsiz iade</p></div>
-  <div class="feat"><div class="feat-icon">🔒</div><h4>Güvenli Ödeme</h4><p>SSL şifreli, tüm kartlar</p></div>
-  <div class="feat"><div class="feat-icon">💬</div><h4>WhatsApp Destek</h4><p>Hafta içi 09:00 – 18:00</p></div>
-</div>
-
-<!-- NEWSLETTER -->
-<div class="newsletter reveal">
-  <p>✦ Bültenimize Katıl</p>
-  <h2>Yenilikleri <em>ilk sen</em> öğren</h2>
-  <span>Kampanya ve yeni koleksiyonlardan haberdar olmak için e-bültenimize abone ol.</span>
-  <form class="nl-form" id="newsletterForm" novalidate>
-    <input id="newsletterEmail" type="email" placeholder="E-posta adresinizi giriniz" required/>
-    <button type="submit">Kayıt Ol</button>
-  </form>
-  <div class="kvkk-check">
-    <input type="checkbox" id="kvkk"/>
-    <label for="kvkk"><a href="kvkk">KVKK Sözleşmesi</a>'ni okudum, kabul ediyorum.</label>
-  </div>
-  <div id="newsletterStatus" style="margin-top:10px;font-size:13px;color:rgba(255,255,255,.7);"></div>
-</div>
+<h1 class="sr-only">Suvera</h1>
+<div id="homepageSections" class="homepage-sections" aria-live="polite"></div>
 
 <!-- FOOTER -->
 </main>
@@ -1086,15 +787,18 @@
 
   // ── SLIDER ──
   // Scope everything to the slider container to avoid class conflicts
-  const SLIDER   = document.getElementById('heroSlider');
-  const PROGRESS = document.getElementById('sliderProgress');
   const INTERVAL = 5000; // 5 saniye
 
   let cur = 0;
   let timer = null;
+  let sliderBound = false;
+
+  function sliderNode() { return document.getElementById('heroSlider'); }
+  function progressNode() { return document.getElementById('sliderProgress'); }
 
   function getSlides() {
-    return Array.from(SLIDER.querySelectorAll(':scope > .slide'));
+    const slider = sliderNode();
+    return slider ? Array.from(slider.querySelectorAll(':scope > .slide')) : [];
   }
 
   function getDots() {
@@ -1119,6 +823,7 @@
   }
 
   function startProgress() {
+    const PROGRESS = progressNode();
     if(!PROGRESS) return;
     PROGRESS.style.transition = 'none';
     PROGRESS.style.width = '0%';
@@ -1152,36 +857,32 @@
     if(timer) { clearInterval(timer); timer = null; }
   }
 
-  // pause on hover
-  SLIDER.addEventListener('mouseenter', () => {
-    stopTimer();
-    if(PROGRESS){ PROGRESS.style.transition='none'; }
-  });
-  SLIDER.addEventListener('mouseleave', () => {
-    startProgress();
-    startTimer();
-  });
-
-  // touch swipe
-  let touchX = 0;
-  SLIDER.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, {passive:true});
-  SLIDER.addEventListener('touchend',   e => {
-    const dx = e.changedTouches[0].clientX - touchX;
-    if(Math.abs(dx) > 40) window.changeSlide(dx < 0 ? 1 : -1);
-  }, {passive:true});
-
   // scroll reveal handled by shared.js
 
   window.rebuildHeroSlider = function() {
+    const slider = sliderNode();
+    if (!slider) return;
+    if (!sliderBound) {
+      slider.addEventListener('mouseenter', () => {
+        stopTimer();
+        const progress = progressNode();
+        if(progress) progress.style.transition='none';
+      });
+      slider.addEventListener('mouseleave', () => { startProgress(); startTimer(); });
+      let touchX = 0;
+      slider.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, {passive:true});
+      slider.addEventListener('touchend', e => {
+        const dx = e.changedTouches[0].clientX - touchX;
+        if(Math.abs(dx) > 40) window.changeSlide(dx < 0 ? 1 : -1);
+      }, {passive:true});
+      sliderBound = true;
+    }
     cur = 0;
     stopTimer();
     showSlide(0);
     startTimer();
   };
 
-  // ── START ──
-  showSlide(0);
-  startTimer();
 </script>
   {{> scripts}}
 <script type="module" src="js/storefront.js"></script>

@@ -8,9 +8,8 @@
 //     not even through the site's own data-css hydration, which exists for developer
 //     authored markup and must not be fed tenant data.
 //
-//  2. SECTIONS are applied to the markup the pages already ship: this module reorders,
-//     hides and re-labels existing wrappers. It never builds a parallel page, and it
-//     never uses innerHTML — every string coming from a theme lands in textContent.
+//  2. SECTIONS are rendered into the homepage's single builder host with DOM APIs. It never
+//     uses innerHTML — every tenant string reaches textContent or a validated internal href.
 //
 // Everything here is fail-safe: if the theme cannot be fetched, is empty, or is malformed,
 // the storefront keeps the appearance it has without a theme.
@@ -25,7 +24,12 @@
   var SECTION_SELECTORS = {
     hero: '#heroSlider, .hero-slider',
     'collection-blocks': '.cats-bg',
+    'collection-showcase': '.home-collection-showcase',
+    'category-slider': '.home-category-slider',
     'product-grid': '#homeProductsGrid',
+    'product-carousel': '.home-product-carousel',
+    editorial: '.home-editorial',
+    'promo-banner': '.home-promo-banner',
     'trust-features': '.features-bar',
     newsletter: '.newsletter',
   };
@@ -40,17 +44,8 @@
     theme: null,
     preview: false,
     sections: {},
+    sectionsById: {},
   };
-
-  function sectionWrapper(type) {
-    var selector = SECTION_SELECTORS[type];
-    if (!selector) return null;
-    var node = document.querySelector(selector);
-    if (!node) return null;
-    // The product grid is an inner container; the block that can be hidden or reordered is
-    // the <section> around it.
-    return node.closest('section') || node;
-  }
 
   // --- token stylesheet ---------------------------------------------------------------
 
@@ -145,58 +140,163 @@
     node.textContent = text;
   }
 
-  function applyHero(wrapper, settings) {
-    setText(wrapper.querySelector('.slide-title, .hero-title, h1'), settings.title);
-    setText(wrapper.querySelector('.slide-sub, .hero-sub, .slide-text'), settings.subtitle);
-    var cta = wrapper.querySelector('.slide-cta, .hero-cta, .btn-primary');
-    setText(cta, settings.ctaLabel);
+  function element(tag, className, textValue) {
+    var node = document.createElement(tag);
+    if (className) node.className = className;
+    if (textValue) node.textContent = String(textValue);
+    return node;
   }
 
-  function applyProductGrid(wrapper, settings) {
-    setText(wrapper.querySelector('.sec-title'), settings.title);
+  function internalHref(target) {
+    var link = target && typeof target === 'object' ? target : { type: 'none' };
+    if (link.type === 'products') return 'urunler';
+    if (link.type === 'category') return 'urunler?category_id=' + encodeURIComponent(link.id);
+    if (link.type === 'collection') return 'urunler?collection=' + encodeURIComponent(link.id);
+    if (link.type === 'product') return 'urun?id=' + encodeURIComponent(link.id);
+    if (link.type === 'page' && /^[a-z0-9-]+$/.test(String(link.page || ''))) return String(link.page);
+    return '';
   }
 
-  function applyCollectionBlocks(wrapper, settings) {
-    setText(wrapper.querySelector('.sec-title'), settings.title);
+  function mediaUrl(theme, mediaId) {
+    var raw = mediaId && theme.media ? theme.media[mediaId] : '';
+    return raw && window.SuveraAPI ? window.SuveraAPI.assetUrl(raw) : '';
   }
 
-  function applyTrustFeatures(wrapper, settings) {
-    var items = Array.isArray(settings.items) ? settings.items : [];
-    if (!items.length) return;
-    // Rebuilt with createElement/textContent so no theme string is ever parsed as HTML.
-    var next = document.createDocumentFragment();
-    items.forEach(function (item) {
-      var feat = document.createElement('div');
-      feat.className = 'feat';
-      var icon = document.createElement('div');
-      icon.className = 'feat-icon';
-      icon.textContent = TRUST_ICON_GLYPHS[item.icon] || TRUST_ICON_GLYPHS.shield;
-      var title = document.createElement('h4');
-      title.textContent = String(item.title || '');
-      var text = document.createElement('p');
-      text.textContent = String(item.text || '');
-      feat.appendChild(icon);
-      feat.appendChild(title);
-      feat.appendChild(text);
-      next.appendChild(feat);
+  function appendHeading(wrapper, settings, defaultEyebrow) {
+    var title = String(settings.title || '').trim();
+    var description = String(settings.description || '').trim();
+    if (!title && !description) return;
+    var head = element('header', 'home-section-head');
+    if (defaultEyebrow) head.appendChild(element('p', 'home-section-eyebrow', defaultEyebrow));
+    if (title) head.appendChild(element('h2', 'home-section-title', title));
+    if (description) head.appendChild(element('p', 'home-section-description', description));
+    wrapper.appendChild(head);
+  }
+
+  function appendCta(wrapper, label, target, className) {
+    var href = internalHref(target);
+    if (!href || !String(label || '').trim()) return;
+    var link = element('a', className || 'home-cta', label);
+    link.href = href;
+    wrapper.appendChild(link);
+  }
+
+  function buildHero(section) {
+    var wrapper = element('div', 'hero-slider home-builder-section');
+    wrapper.id = 'heroSlider';
+    wrapper.setAttribute('aria-label', 'Ana vitrin');
+    var prev = element('button', 'slider-arrow prev', '‹');
+    prev.type = 'button'; prev.dataset.action = 'slide-prev'; prev.setAttribute('aria-label', 'Önceki');
+    var next = element('button', 'slider-arrow next', '›');
+    next.type = 'button'; next.dataset.action = 'slide-next'; next.setAttribute('aria-label', 'Sonraki');
+    var dots = element('div', 'slider-dots'); dots.id = 'heroSliderDots';
+    var progress = element('div', 'slider-progress'); progress.id = 'sliderProgress';
+    wrapper.appendChild(prev); wrapper.appendChild(next); wrapper.appendChild(dots); wrapper.appendChild(progress);
+    return wrapper;
+  }
+
+  function buildDataSection(section) {
+    var settings = section.settings || {};
+    var wrapper = element('section', 'home-builder-section');
+    var rail = element('div', 'home-scroll-rail');
+    if (section.type === 'product-grid') {
+      wrapper.className += ' home-product-grid';
+      rail.className = 'prods-grid'; rail.id = 'homeProductsGrid';
+      appendHeading(wrapper, settings, 'Ürünler');
+    } else if (section.type === 'product-carousel') {
+      wrapper.className += ' home-product-carousel';
+      rail.className += ' home-product-rail';
+      appendHeading(wrapper, settings, 'Ürünler');
+    } else if (section.type === 'category-slider') {
+      wrapper.className += ' home-category-slider cats-bg';
+      rail.className += ' home-category-rail'; rail.id = 'homeCategoryGrid';
+      appendHeading(wrapper, settings, 'Kategoriler');
+    } else {
+      wrapper.className += ' home-collection-showcase';
+      rail.className += ' home-collection-rail';
+      appendHeading(wrapper, settings, 'Koleksiyonlar');
+    }
+    wrapper.appendChild(rail);
+    if (section.type === 'product-carousel') {
+      appendCta(wrapper, settings.ctaLabel, settings.source, 'home-section-link');
+    }
+    return wrapper;
+  }
+
+  function buildEditorial(section, theme) {
+    var settings = section.settings || {};
+    var wrapper = element('section', 'home-builder-section ' + (section.type === 'editorial' ? 'home-editorial' : 'home-promo-banner'));
+    var copy = element('div', 'home-story-copy');
+    if (settings.eyebrow) copy.appendChild(element('p', 'home-section-eyebrow', settings.eyebrow));
+    if (settings.title) copy.appendChild(element('h2', 'home-story-title', settings.title));
+    if (settings.description) copy.appendChild(element('p', 'home-story-description', settings.description));
+    appendCta(copy, settings.ctaLabel, settings.ctaTarget, 'home-cta');
+    wrapper.appendChild(copy);
+    var url = mediaUrl(theme, settings.mediaId);
+    if (url) {
+      var image = element('img', 'home-story-image');
+      image.src = url; image.alt = String(settings.title || ''); image.loading = 'lazy'; image.decoding = 'async';
+      wrapper.appendChild(image);
+    }
+    return wrapper;
+  }
+
+  function buildTrust(section) {
+    var wrapper = element('aside', 'features-bar home-builder-section');
+    wrapper.setAttribute('aria-label', String(section.settings.title || 'Mağaza bilgileri'));
+    (section.settings.items || []).forEach(function (item) {
+      var feat = element('div', 'feat');
+      feat.appendChild(element('span', 'feat-icon', TRUST_ICON_GLYPHS[item.icon] || TRUST_ICON_GLYPHS.shield));
+      feat.appendChild(element('strong', '', item.title));
+      if (item.text) feat.appendChild(element('small', '', item.text));
+      wrapper.appendChild(feat);
     });
-    while (wrapper.firstChild) wrapper.removeChild(wrapper.firstChild);
-    wrapper.appendChild(next);
+    return wrapper;
   }
 
-  function applyNewsletter(wrapper, settings) {
-    setText(wrapper.querySelector('h2'), settings.title);
-    setText(wrapper.querySelector('span'), settings.text);
-    setText(wrapper.querySelector('button[type="submit"]'), settings.buttonLabel);
+  function buildNewsletter(section) {
+    var settings = section.settings || {};
+    var wrapper = element('section', 'newsletter home-builder-section');
+    if (settings.title) wrapper.appendChild(element('h2', '', settings.title));
+    if (settings.text) wrapper.appendChild(element('span', '', settings.text));
+    var form = element('form', 'nl-form'); form.id = 'newsletterForm'; form.noValidate = true;
+    var input = element('input', ''); input.id = 'newsletterEmail'; input.type = 'email'; input.required = true;
+    input.placeholder = 'E-posta adresiniz';
+    var button = element('button', '', settings.buttonLabel || 'Kayıt ol'); button.type = 'submit';
+    form.appendChild(input); form.appendChild(button); wrapper.appendChild(form);
+    var consent = element('label', 'kvkk-check');
+    var checkbox = element('input', ''); checkbox.type = 'checkbox'; checkbox.id = 'kvkk';
+    consent.appendChild(checkbox); consent.appendChild(document.createTextNode(' KVKK metnini okudum ve kabul ediyorum.'));
+    wrapper.appendChild(consent);
+    var status = element('div', 'newsletter-status'); status.id = 'newsletterStatus'; wrapper.appendChild(status);
+    return wrapper;
   }
 
-  var SECTION_APPLIERS = {
-    hero: applyHero,
-    'product-grid': applyProductGrid,
-    'collection-blocks': applyCollectionBlocks,
-    'trust-features': applyTrustFeatures,
-    newsletter: applyNewsletter,
-  };
+  function buildLegacyCollectionBlocks(section, theme) {
+    var wrapper = element('section', 'cats-bg home-builder-section');
+    appendHeading(wrapper, section.settings || {}, 'Koleksiyonlar');
+    var rail = element('div', 'home-scroll-rail home-collection-rail');
+    (section.settings.blocks || []).forEach(function (block) {
+      var href = internalHref(block.target);
+      if (!href) return;
+      var card = element('a', 'home-collection-card', block.title); card.href = href;
+      var url = mediaUrl(theme, block.mediaId);
+      if (url) { var image = element('img', '', ''); image.src = url; image.alt = String(block.title || ''); image.loading = 'lazy'; card.prepend(image); }
+      rail.appendChild(card);
+    });
+    wrapper.appendChild(rail);
+    return wrapper;
+  }
+
+  function buildSection(section, theme) {
+    if (section.type === 'hero') return buildHero(section);
+    if (['product-grid', 'product-carousel', 'category-slider', 'collection-showcase'].includes(section.type)) return buildDataSection(section);
+    if (section.type === 'editorial' || section.type === 'promo-banner') return buildEditorial(section, theme);
+    if (section.type === 'trust-features') return buildTrust(section);
+    if (section.type === 'newsletter') return buildNewsletter(section);
+    if (section.type === 'collection-blocks') return buildLegacyCollectionBlocks(section, theme);
+    return null;
+  }
 
   function applyAnnouncement(announcement) {
     var node = document.getElementById('campaignAnnouncement');
@@ -208,53 +308,25 @@
     setText(node, announcement.text);
   }
 
-  // Reorders the wrappers to match the theme. Only elements that already share a parent are
-  // moved, so a page with a different layout is left untouched instead of scrambled.
-  function applyOrder(sections) {
-    var entries = sections
-      .map(function (section) { return { section: section, node: sectionWrapper(section.type) }; })
-      .filter(function (entry) { return entry.node; });
-    if (entries.length < 2) return;
-    var parent = entries[0].node.parentNode;
-    if (!parent) return;
-    if (!entries.every(function (entry) { return entry.node.parentNode === parent; })) return;
-    var anchor = entries.reduce(function (earliest, entry) {
-      if (!earliest) return entry.node;
-      return earliest.compareDocumentPosition(entry.node) & Node.DOCUMENT_POSITION_PRECEDING
-        ? entry.node
-        : earliest;
-    }, null);
-    var cursor = anchor;
-    entries.forEach(function (entry) {
-      parent.insertBefore(entry.node, cursor);
-      cursor = entry.node.nextSibling;
-    });
-  }
-
   function applySections(theme) {
     var sections = Array.isArray(theme.sections) ? theme.sections.slice() : [];
     sections.sort(function (a, b) { return Number(a.order) - Number(b.order); });
-
-    // Anything the theme does not list is a section the tenant turned off.
-    var listed = {};
-    sections.forEach(function (section) { listed[section.type] = true; });
-    Object.keys(SECTION_SELECTORS).forEach(function (type) {
-      var wrapper = sectionWrapper(type);
-      if (wrapper) wrapper.hidden = !listed[type];
-    });
-
+    var host = document.getElementById('homepageSections');
+    if (!host) return;
+    while (host.firstChild) host.removeChild(host.firstChild);
+    state.sections = {};
+    state.sectionsById = {};
     sections.forEach(function (section) {
       state.sections[section.type] = section.settings || {};
-      var wrapper = sectionWrapper(section.type);
-      if (!wrapper) return;
-      var apply = SECTION_APPLIERS[section.type];
-      if (!apply) return;
+      state.sectionsById[section.id] = section;
       try {
-        apply(wrapper, section.settings || {});
+        var wrapper = buildSection(section, theme);
+        if (!wrapper) return;
+        wrapper.dataset.homeSectionId = section.id;
+        wrapper.dataset.homeSectionType = section.type;
+        host.appendChild(wrapper);
       } catch (_) { /* a bad section must not break the rest of the page */ }
     });
-
-    applyOrder(sections);
   }
 
   function applyTheme(theme, preview) {
@@ -262,7 +334,7 @@
     state.preview = !!preview;
     attachStylesheet(!!preview, preview ? String(theme.version_id || '') : theme.hash || '');
     applyAnnouncement(theme.announcement);
-    if (document.getElementById('homeProductsGrid') || document.querySelector('.hero-slider')) {
+    if (document.getElementById('homepageSections')) {
       applySections(theme);
     }
   }
@@ -296,5 +368,6 @@
     get isPreview() { return state.preview; },
     // Read by storefront.js so grid size follows the theme instead of a hardcoded number.
     sectionSettings: function (type) { return state.sections[type] || null; },
+    section: function (id) { return state.sectionsById[id] || null; },
   };
 }());
