@@ -21,10 +21,10 @@ const GUEST_TOKEN_UPSTREAM_PATH = /^(cart(?:\/|$)|orders(?:\/|\?|$)|payment(?:\/
 // (style-src 'self' leaves no other CSP-safe way to apply it), so it has to be a GET —
 // and a GET must not carry the token in its URL. The exchange response is buffered here,
 // the raw token relocated into an HttpOnly session cookie and stripped from the body, and
-// replayed upstream as a header only for the preview stylesheet.
+// replayed upstream as a header only for preview-scoped read endpoints.
 const THEME_PREVIEW_COOKIE = 'suveraThemePreview';
 const THEME_PREVIEW_BUFFER_PATH = /^storefront-theme\/preview$/;
-const THEME_PREVIEW_UPSTREAM_PATH = /^storefront-theme\/preview\.css(?:\?|$)/;
+const THEME_PREVIEW_UPSTREAM_PATH = /^(?:storefront-theme\/preview\.css|collections\/preview)(?:\?|$)/;
 
 function positiveNumber(value, fallback) {
   const next = Number(value);
@@ -264,8 +264,8 @@ module.exports = async function handler(req, res) {
   } else if (cookies[ACCESS_COOKIE]) {
     headers.Authorization = `Bearer ${cookies[ACCESS_COOKIE]}`;
   }
-  // The preview token travels as a header only to the preview stylesheet, so it stays out
-  // of the URL that a <link rel="stylesheet"> would otherwise put in logs and referrers.
+  // The preview token travels as a header only to allowlisted preview reads, so it stays
+  // out of URLs, logs and referrers and can never authorize the normal public endpoints.
   if (THEME_PREVIEW_UPSTREAM_PATH.test(path) && cookies[THEME_PREVIEW_COOKIE]) {
     headers['X-Theme-Preview-Token'] = cookies[THEME_PREVIEW_COOKIE];
   }

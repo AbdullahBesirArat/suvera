@@ -519,7 +519,11 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
   async function renderCollections(target, settings) {
     if (!window.SuveraAPI || !target) return;
     try {
-      var collections = await window.SuveraAPI.collections.list();
+      var preview = Boolean(window.SuveraTheme && window.SuveraTheme.isPreview);
+      var loader = preview && window.SuveraAPI.collections.previewList
+        ? window.SuveraAPI.collections.previewList
+        : window.SuveraAPI.collections.list;
+      var collections = await loader();
       var all = Array.isArray(collections) ? collections : [];
       var ids = Array.isArray(settings.collectionIds) ? settings.collectionIds.map(String) : [];
       if (ids.length) all = ids.map(function (id) { return all.find(function (item) { return String(item.id) === id; }); }).filter(Boolean);

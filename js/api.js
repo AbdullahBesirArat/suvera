@@ -460,6 +460,7 @@
     },
     collections: {
       list: () => request(withOrganizationSlug('/collections')),
+      previewList: () => request(withOrganizationSlug('/collections/preview'), { cache: 'no-store' }),
       adminList: () => request('/collections/admin/all'),
       create: (collection) => request('/collections', { method: 'POST', body: JSON.stringify(collection) }),
       update: (id, collection) => request(`/collections/${id}`, { method: 'PUT', body: JSON.stringify(collection) }),

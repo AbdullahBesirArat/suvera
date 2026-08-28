@@ -400,7 +400,7 @@ test('the preview token is moved into an HttpOnly session cookie and stripped fr
   assert.doesNotMatch(cookie, /Max-Age/, 'a session cookie, so the token never lands in the persistent jar');
 });
 
-test('the preview cookie is replayed only to the preview stylesheet, never to other routes', async () => {
+test('the preview cookie is replayed only to preview-scoped reads, never to public routes', async () => {
   async function forwarded(path) {
     let header;
     await withFetch(
@@ -416,8 +416,12 @@ test('the preview cookie is replayed only to the preview stylesheet, never to ot
   }
   assert.equal(await forwarded('storefront-theme/preview.css'), 'PREVIEWTOKEN');
   assert.equal(await forwarded('storefront-theme/preview.css?organizationSlug=suvera'), 'PREVIEWTOKEN');
+  assert.equal(await forwarded('collections/preview'), 'PREVIEWTOKEN');
+  assert.equal(await forwarded('collections/preview?organizationSlug=suvera'), 'PREVIEWTOKEN');
   assert.equal(await forwarded('storefront-theme/theme.css'), undefined, 'the published sheet is never a preview');
   assert.equal(await forwarded('storefront-theme'), undefined);
+  assert.equal(await forwarded('collections'), undefined, 'normal collections stay active-only');
+  assert.equal(await forwarded('collections?includeInactive=true'), undefined, 'a query flag grants no preview credential');
   assert.equal(await forwarded('products'), undefined);
   assert.equal(await forwarded('orders'), undefined);
 });

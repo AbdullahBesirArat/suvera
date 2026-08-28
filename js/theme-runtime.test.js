@@ -178,6 +178,29 @@ test('homepage navigation is populated from real categories, collections, and pa
   }
 });
 
+test('inactive collections are previewable only in the homepage collection section', () => {
+  const api = fs.readFileSync(path.join(root, 'js', 'api.js'), 'utf8');
+  const storefront = fs.readFileSync(path.join(root, 'js', 'storefront.js'), 'utf8');
+  const navigation = storefront.slice(
+    storefront.indexOf('async function renderRealNavigation'),
+    storefront.indexOf('async function renderProducts')
+  );
+  const homepageCollections = storefront.slice(
+    storefront.indexOf('async function renderCollections'),
+    storefront.indexOf('function renderFeaturedStrip')
+  );
+  const catalog = storefront.slice(
+    storefront.indexOf('async function renderCollectionPage'),
+    storefront.indexOf('window.SuveraCatalog')
+  );
+  assert.match(api, /previewList:\s*\(\) => request\(withOrganizationSlug\('\/collections\/preview'\), \{ cache: 'no-store' \}\)/);
+  assert.match(homepageCollections, /SuveraTheme\.isPreview/);
+  assert.match(homepageCollections, /collections\.previewList/);
+  assert.match(homepageCollections, /collections\.list/);
+  assert.doesNotMatch(navigation, /previewList/);
+  assert.doesNotMatch(catalog, /previewList/);
+});
+
 // --- wiring -----------------------------------------------------------------------------------
 
 test('the theme runtime is loaded on every storefront page', () => {
