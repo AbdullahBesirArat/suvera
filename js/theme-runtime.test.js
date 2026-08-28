@@ -183,6 +183,7 @@ test('category cards prefer owner media then deterministically fall back to acti
   const loader = storefront.slice(storefront.indexOf('async function renderCategories'), storefront.indexOf('async function loadSectionProducts'));
   assert.match(card, /category\.image_url \|\| category\.fallback_image_url/);
   assert.match(loader, /!category\.image_url/);
+  assert.match(loader, /target\.innerHTML = items\.map\(categoryCard\)\.join\(''\);[\s\S]+await Promise\.all/, 'category navigation renders before fallback requests finish');
   assert.match(loader, /status: 'active'/);
   assert.match(loader, /category: String\(category\.id\)/);
   assert.match(loader, /sort: 'recommended'/);

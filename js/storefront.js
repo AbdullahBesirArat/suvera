@@ -353,6 +353,10 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
       if (ids.length) all = ids.map(function (id) { return all.find(function (item) { return String(item.id) === id; }); }).filter(Boolean);
       const items = all.slice(0, limit || all.length);
       if (!items.length) { target.closest('.home-builder-section')?.setAttribute('hidden', ''); return; }
+      // Keep category navigation available while real product-media fallbacks resolve.
+      // Owner/category media still wins, and the cards are refreshed below with only
+      // canonical catalog media (never a random or fabricated image).
+      target.innerHTML = items.map(categoryCard).join('');
       const missing = items.filter(function (category) { return !category.image_url; });
       let cursor = 0;
       async function hydrateNextCategory() {
