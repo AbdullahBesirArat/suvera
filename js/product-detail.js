@@ -19,7 +19,7 @@ const colorMeta = (value) => sharedColorMeta(value, '#e9dfd0');
     id: null,
     name: 'Ürün',
     price: 0,
-    emoji: '👗',
+    emoji: '',
     image: '',
     selectedColor: '',
     selectedSize: '',
@@ -62,7 +62,7 @@ const colorMeta = (value) => sharedColorMeta(value, '#e9dfd0');
       : '';
     return src
       ? '<img src="' + escapeHtml(responsive.src) + '"' + responsiveAttrs + ' alt="' + escapeHtml(alt) + '" loading="' + (settings.priority ? 'eager' : 'lazy') + '"' + (settings.priority ? ' fetchpriority="high"' : '') + ' decoding="async"/>'
-      : '<div class="' + fallbackClass + '">' + escapeHtml(currentProduct.emoji) + '</div>';
+      : '<div class="' + fallbackClass + '"><span class="product-media-placeholder" aria-hidden="true"></span></div>';
   }
 
   function resetLightboxView(stage) {
@@ -189,7 +189,7 @@ const colorMeta = (value) => sharedColorMeta(value, '#e9dfd0');
     if (!thumbs) return;
 
     if (!images.length) {
-      thumbs.innerHTML = '<button class="thumb-btn active" type="button" aria-label="' + escapeHtml(product.name || 'Ürün') + ' görseli" aria-pressed="true"><div class="thumb-fallback" aria-hidden="true">' + escapeHtml(currentProduct.emoji) + '</div></button>';
+      thumbs.innerHTML = '<button class="thumb-btn active" type="button" aria-label="' + escapeHtml(product.name || 'Ürün') + ' görseli" aria-pressed="true"><div class="thumb-fallback" aria-hidden="true"><span class="product-media-placeholder"></span></div></button>';
       setActiveThumb(0);
       return;
     }
@@ -358,7 +358,7 @@ const colorMeta = (value) => sharedColorMeta(value, '#e9dfd0');
     currentProduct.id = product.id;
     currentProduct.name = product.name || 'Ürün';
     currentProduct.price = finalPrice;
-    currentProduct.emoji = product.emoji || '👗';
+    currentProduct.emoji = '';
     currentProduct.categoryId = product.category_id || null;
     currentProduct.variants = Array.isArray(product.variants) ? product.variants : [];
     currentProduct.stock = stock;

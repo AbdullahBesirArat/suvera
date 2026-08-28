@@ -106,7 +106,7 @@ import { formatMoney as money, escapeHtml } from './core/storefront-utils.js';
       const responsiveAttrs = responsive.srcset ? ` srcset="${escapeHtml(responsive.srcset)}" sizes="80px"` : '';
       return `<img src="${escapeHtml(responsive.src)}"${responsiveAttrs} alt="${escapeHtml(item.name)}" loading="lazy" decoding="async" data-css="width:100%;height:100%;object-fit:cover;"/>`;
     }
-    return escapeHtml(item.emoji || '👗');
+    return '<span class="product-media-placeholder" aria-hidden="true"></span>';
   }
 
   function renderCartPage() {

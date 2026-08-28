@@ -63,10 +63,12 @@
     .breadcrumb span{margin:0 6px;}
 
     /* PAGE LAYOUT */
-    .page-wrap{display:grid;grid-template-columns:230px 1fr;gap:0;min-height:80vh;}
+    .page-wrap{position:relative;display:block;min-height:0;}
+    .sidebar-column{position:absolute;inset:0 auto 0 0;width:230px;}
 
     /* SIDEBAR FILTER */
-    .sidebar{background:var(--white);border-right:1px solid var(--light);padding:32px 28px;position:sticky;top:102px;height:calc(100vh - 102px);overflow-y:auto;}
+    .sidebar{background:var(--white);border-right:1px solid var(--light);padding:32px 28px;position:sticky;top:64px;height:min(100%,calc(100vh - 64px));overflow-y:auto;}
+    .announcement-visible .sidebar{top:102px;height:min(100%,calc(100vh - 102px));}
     .sidebar::-webkit-scrollbar{width:3px;}
     .sidebar::-webkit-scrollbar-thumb{background:var(--light);}
     .filter-section{margin-bottom:32px;}
@@ -95,7 +97,7 @@
     .sub-cat-arrow{color:#635d55;font-size:11px;flex-shrink:0;}
 
     /* CONTENT AREA */
-    .content{padding:8px 40px 28px;}
+    .content{padding:8px 40px 28px;margin-left:230px;min-width:0;}
     .content-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:14px;}
     .content-title{font-family:var(--serif);font-size:36px;font-weight:300;}
     .content-meta{display:flex;align-items:center;gap:20px;}
@@ -129,7 +131,7 @@
     .prod-img{aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;font-size:64px;position:relative;overflow:hidden;}
     .prod-img-bg{width:100%;height:100%;position:absolute;inset:0;transition:transform .6s ease;}
     .prod-card:hover .prod-img-bg{transform:scale(1.05);}
-    .prod-emoji{position:relative;z-index:1;}
+    .product-media-placeholder{position:absolute;inset:0;display:block;background:linear-gradient(145deg,#eee9e1,#ddd6cc);}
     .prod-badges{position:absolute;top:12px;left:12px;display:flex;flex-direction:column;gap:5px;z-index:2;}
     .badge{font-size:9.5px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;font-family:var(--sans);}
     .badge-sale{background:var(--accent);color:#fff;}
@@ -152,7 +154,8 @@
     .p-pct{font-size:11px;color:var(--accent);font-weight:500;}
 
     /* PAGINATION */
-    .pagination{display:flex;justify-content:center;align-items:center;gap:6px;margin:56px 0 20px;}
+    .pagination{display:flex;justify-content:center;align-items:center;gap:6px;margin:32px 0 20px;}
+    .pagination:empty{display:none;margin:0;}
     .page-btn{min-width:40px;height:40px;border:1px solid var(--light);background:#fff;font-family:var(--sans);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;}
     .page-btn:hover,.page-btn.act{background:var(--black);color:#fff;border-color:var(--black);}
 
@@ -178,7 +181,7 @@
     .footer-col ul li a:hover{color:var(--accent2);}
     .footer-bottom{border-top:1px solid rgba(255,255,255,.07);padding-top:22px;display:flex;justify-content:space-between;font-size:11.5px;color:rgba(255,255,255,.3);}
 
-    @media(max-width:1024px){.collection-editorial{grid-template-columns:1fr;}.editorial-grid{grid-template-columns:1fr 1fr;}.page-wrap{grid-template-columns:1fr;}.sidebar{display:none;}.prods-grid{grid-template-columns:repeat(3,1fr);}.footer-grid{grid-template-columns:1fr 1fr;}}
+    @media(max-width:1024px){.collection-editorial{grid-template-columns:1fr;}.editorial-grid{grid-template-columns:1fr 1fr;}.sidebar-column{display:none;}.content{margin-left:0;}.prods-grid{grid-template-columns:repeat(3,1fr);}.footer-grid{grid-template-columns:1fr 1fr;}}
     @media(max-width:640px){body{padding-top:92px;}nav{padding:0 20px;}.breadcrumb{padding:14px 18px 10px;font-size:11.5px;white-space:nowrap;overflow-x:auto;}.collection-editorial{padding:0 18px 18px;gap:14px;}.editorial-panel{padding:22px 18px;}.editorial-kicker{font-size:10px;letter-spacing:2.4px;margin-bottom:16px;}.editorial-grid{grid-template-columns:1fr;gap:18px;}.editorial-link{padding:8px 0;font-size:13.5px;}.editorial-feature{padding:18px;}.editorial-visual{min-height:160px;font-size:54px;margin-bottom:16px;}.editorial-feature h2{font-size:32px;line-height:1.06;}.editorial-feature p{font-size:12.5px;line-height:1.7;}.content{padding:0 18px 24px;}.content-header{align-items:flex-start;margin-bottom:20px;}.content-title{font-size:32px;}.content-meta{width:100%;justify-content:space-between;gap:12px;}.sort-select{max-width:170px;padding:8px 10px;}.prods-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}.featured-strip{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}.prod-card:hover{transform:none;box-shadow:none;}.prod-img{font-size:48px;}.prod-badges{top:8px;left:8px;}.badge{font-size:8.5px;padding:4px 7px;letter-spacing:1px;}.prod-fav{opacity:1;top:8px;right:8px;width:34px;height:34px;}.prod-hover-actions{position:static;transform:none;padding:0 10px 12px;background:#fff;}.quick-add{min-height:38px;font-size:9.5px;letter-spacing:1.4px;}.prod-info{padding:12px 10px 10px;}.prod-info h4{font-size:15px;}.prod-price{gap:6px;flex-wrap:wrap;}.filter-mobile-btn{width:100%;justify-content:center;min-height:40px;}footer{padding:0 20px 24px;}.footer-bottom{flex-direction:column;gap:12px;}}
   </style>
 </head>
@@ -197,39 +200,35 @@
   <span id="collectionBreadcrumbCurrent">Seçki</span>
 </div>
 
-<section class="collection-editorial">
+<section class="collection-editorial" id="collectionEditorial" hidden>
   <div class="editorial-panel">
-    <div class="editorial-kicker" id="collectionKicker">Suvera Seçkisi</div>
+    <div class="editorial-kicker" id="collectionKicker"></div>
     <div class="editorial-grid">
       <div class="editorial-col">
         <h3 id="editorialCategoryHeading">Kategoriler</h3>
-        <div id="editorialCategoryLinks">
-          <a class="editorial-link" href="urunler">Seçki hazırlanıyor <span>SUVERA</span></a>
-        </div>
+        <div id="editorialCategoryLinks"></div>
       </div>
       <div class="editorial-col">
         <h3>Koleksiyonlar</h3>
-        <div id="editorialCollectionLinks">
-          <a class="editorial-link" href="urunler">Koleksiyonlar yükleniyor <span>SUVERA</span></a>
-        </div>
+        <div id="editorialCollectionLinks"></div>
       </div>
       <div class="editorial-feature">
-        <div class="editorial-visual" id="editorialFeatureVisual">🥻</div>
+        <div class="editorial-visual" id="editorialFeatureVisual" hidden></div>
         <div>
-          <small id="editorialFeatureTag">Öne Çıkan</small>
-          <h2 id="editorialFeatureTitle">SUVERA<br/>Yeni<br/>Seçki</h2>
-          <p id="editorialFeatureDescription">Panelya panelinden yayına alınan ürünler burada öne çıkar.</p>
+          <small id="editorialFeatureTag"></small>
+          <h2 id="editorialFeatureTitle"></h2>
+          <p id="editorialFeatureDescription"></p>
           <a class="editorial-cta" href="urunler" id="editorialFeatureLink">Keşfet →</a>
         </div>
       </div>
     </div>
   </div>
   <div class="editorial-feature">
-    <div class="editorial-visual" id="collectionFeatureVisual">🧕</div>
+    <div class="editorial-visual" id="collectionFeatureVisual" hidden></div>
     <div>
-      <small id="collectionFeatureTag">Yaz Koleksiyonu</small>
-      <h2 id="collectionFeatureTitle">SUVERA<br/>seçkisine<br/>yakından bak</h2>
-      <p id="collectionFeatureDescription">Yayındaki ürünler Panelya panelinden gelir; kategori ve stok bilgileri canlı veriye göre güncellenir.</p>
+      <small id="collectionFeatureTag"></small>
+      <h2 id="collectionFeatureTitle"></h2>
+      <p id="collectionFeatureDescription"></p>
       <a class="editorial-cta" href="#prodsGrid">Ürünlere in →</a>
     </div>
   </div>
@@ -238,26 +237,21 @@
 <div class="page-wrap">
 
   <!-- SIDEBAR -->
+  <div class="sidebar-column">
   <aside class="sidebar">
     <div class="filter-section">
       <h4 id="collectionCategoryHeading">Kategori</h4>
-      <div class="filter-opts" id="collectionCategoryFilters">
-        <label class="filter-check"><input type="radio" name="collectionCategory" value="" checked/> Tüm Ürünler</label>
-      </div>
+      <div class="filter-opts" id="collectionCategoryFilters"></div>
     </div>
 
     <div class="filter-section">
       <h4>Renk</h4>
-      <div class="color-filter-opts" id="collectionColorFilters">
-        <div class="cf-dot" style="background:#111" title="Renk yükleniyor"></div>
-      </div>
+      <div class="color-filter-opts" id="collectionColorFilters"></div>
     </div>
 
     <div class="filter-section">
       <h4>Beden</h4>
-      <div class="size-filter" id="collectionSizeFilters">
-        <button class="size-btn">Standart</button>
-      </div>
+      <div class="size-filter" id="collectionSizeFilters"></div>
     </div>
 
     <div class="filter-section">
@@ -271,6 +265,7 @@
 
     <button class="filter-reset" id="collectionFilterReset" type="button">Filtreleri Temizle</button>
   </aside>
+  </div>
 
   <!-- CONTENT -->
   <div class="content">
@@ -298,185 +293,13 @@
     </div>
 
     <!-- FEATURED STRIP -->
-    <p class="featured-label">✦ Kategorinin Öne Çıkanları</p>
-    <div class="featured-strip" id="featuredProductsStrip">
-      <div class="empty-state">Öne çıkan ürünler yükleniyor.</div>
-    </div>
+    <p class="featured-label" id="featuredProductsLabel" hidden>Öne Çıkanlar</p>
+    <div class="featured-strip" id="featuredProductsStrip" hidden></div>
 
     <!-- MAIN GRID -->
-    <div class="prods-grid stagger-children" id="prodsGrid">
-
-      <div class="prod-card" data-nav="urun">
-        <div class="prod-img">
-          <div class="prod-img-bg" style="background:linear-gradient(150deg,#ddd5c8,#c8bdb0)"></div>
-          <span class="prod-emoji">🧕</span>
-          <div class="prod-badges"><span class="badge badge-sale">İndirim</span></div>
-          <button class="prod-wish" data-action="toggle-fav">🤍</button>
-          <div class="prod-hover-actions">
-            <button class="quick-add" data-stop="1">Sepete Ekle</button>
-          </div>
-        </div>
-        <div class="prod-info">
-          <h4>Oversize Uzun Rahat Elbise Açık Kahve</h4>
-          <div class="prod-colors">
-            <div class="color-dot active" style="background:#6b5044"></div>
-            <div class="color-dot" style="background:#8b9b6c"></div>
-            <div class="color-dot" style="background:#7c7c7c"></div>
-          </div>
-          <div class="prod-price"><span class="p-new">749,90 TL</span><span class="p-old">999,90 TL</span></div>
-        </div>
-      </div>
-
-      <div class="prod-card" data-nav="urun">
-        <div class="prod-img">
-          <div class="prod-img-bg" style="background:linear-gradient(150deg,#8b9b6c,#607050)"></div>
-          <span class="prod-emoji">🧕</span>
-          <div class="prod-badges"><span class="badge badge-sale">İndirim</span></div>
-          <button class="prod-wish" data-action="toggle-fav">🤍</button>
-          <div class="prod-hover-actions">
-            <button class="quick-add" data-stop="1">Sepete Ekle</button>
-          </div>
-        </div>
-        <div class="prod-info">
-          <h4>Oversize Uzun Rahat Elbise Sarı Yeşil</h4>
-          <div class="prod-colors">
-            <div class="color-dot active" style="background:#8b9b6c"></div>
-            <div class="color-dot" style="background:#6b5044"></div>
-          </div>
-          <div class="prod-price"><span class="p-new">749,90 TL</span><span class="p-old">999,90 TL</span></div>
-        </div>
-      </div>
-
-      <div class="prod-card" data-nav="urun">
-        <div class="prod-img">
-          <div class="prod-img-bg" style="background:linear-gradient(150deg,#7c7c7c,#505050)"></div>
-          <span class="prod-emoji">🧕</span>
-          <div class="prod-badges"><span class="badge badge-sale">İndirim</span></div>
-          <button class="prod-wish" data-action="toggle-fav">🤍</button>
-          <div class="prod-hover-actions">
-            <button class="quick-add" data-stop="1">Sepete Ekle</button>
-          </div>
-        </div>
-        <div class="prod-info">
-          <h4>Oversize Uzun Rahat Elbise Antrasit</h4>
-          <div class="prod-colors">
-            <div class="color-dot active" style="background:#7c7c7c"></div>
-          </div>
-          <div class="prod-price"><span class="p-new">749,90 TL</span><span class="p-old">999,90 TL</span></div>
-        </div>
-      </div>
-
-      <div class="prod-card" data-nav="urun">
-        <div class="prod-img">
-          <div class="prod-img-bg" style="background:linear-gradient(150deg,#e8e4d8,#d8d0c4)"></div>
-          <span class="prod-emoji">🧕</span>
-          <div class="prod-badges"><span class="badge badge-sale">İndirim</span></div>
-          <button class="prod-wish" data-action="toggle-fav">🤍</button>
-          <div class="prod-hover-actions">
-            <button class="quick-add" data-stop="1">Sepete Ekle</button>
-          </div>
-        </div>
-        <div class="prod-info">
-          <h4>Geniş Etekli Uzun Elbise Çağla</h4>
-          <div class="prod-colors">
-            <div class="color-dot active" style="background:#e8e4d8"></div>
-            <div class="color-dot" style="background:#6c8070"></div>
-          </div>
-          <div class="prod-price"><span class="p-new">999,90 TL</span><span class="p-old">1.499,90 TL</span></div>
-        </div>
-      </div>
-
-      <div class="prod-card" data-nav="urun">
-        <div class="prod-img">
-          <div class="prod-img-bg" style="background:linear-gradient(150deg,#c8bdb0,#b8a898)"></div>
-          <span class="prod-emoji">🧕</span>
-          <div class="prod-badges"><span class="badge badge-sale">İndirim</span></div>
-          <button class="prod-wish" data-action="toggle-fav">🤍</button>
-          <div class="prod-hover-actions">
-            <button class="quick-add" data-stop="1">Sepete Ekle</button>
-          </div>
-        </div>
-        <div class="prod-info">
-          <h4>Oversize Uzun Rahat Elbise Vizon</h4>
-          <div class="prod-colors">
-            <div class="color-dot active" style="background:#c8bdb0"></div>
-          </div>
-          <div class="prod-price"><span class="p-new">749,90 TL</span><span class="p-old">999,90 TL</span></div>
-        </div>
-      </div>
-
-      <div class="prod-card" data-nav="urun">
-        <div class="prod-img">
-          <div class="prod-img-bg" style="background:linear-gradient(150deg,#dde4d8,#c4ccc0)"></div>
-          <span class="prod-emoji">🧕</span>
-          <div class="prod-badges"><span class="badge badge-new">Yeni</span></div>
-          <button class="prod-wish" data-action="toggle-fav">🤍</button>
-          <div class="prod-hover-actions">
-            <button class="quick-add" data-stop="1">Sepete Ekle</button>
-          </div>
-        </div>
-        <div class="prod-info">
-          <h4>Bağlamalı Kemer Detaylı Elbise</h4>
-          <div class="prod-colors">
-            <div class="color-dot active" style="background:#8b9b6c"></div>
-            <div class="color-dot" style="background:#111"></div>
-          </div>
-          <div class="prod-price"><span class="p-new">1.099,90 TL</span></div>
-        </div>
-      </div>
-
-      <div class="prod-card" data-nav="urun">
-        <div class="prod-img">
-          <div class="prod-img-bg" style="background:linear-gradient(150deg,#e4dcd4,#d4c8bc)"></div>
-          <span class="prod-emoji">🧕</span>
-          <div class="prod-badges"><span class="badge badge-new">Yeni</span></div>
-          <button class="prod-wish" data-action="toggle-fav">🤍</button>
-          <div class="prod-hover-actions">
-            <button class="quick-add" data-stop="1">Sepete Ekle</button>
-          </div>
-        </div>
-        <div class="prod-info">
-          <h4>Viskon Maxi Elbise Krem</h4>
-          <div class="prod-colors">
-            <div class="color-dot active" style="background:#e8e0d4"></div>
-            <div class="color-dot" style="background:#d4a8a0"></div>
-          </div>
-          <div class="prod-price"><span class="p-new">899,90 TL</span></div>
-        </div>
-      </div>
-
-      <div class="prod-card" data-nav="urun">
-        <div class="prod-img">
-          <div class="prod-img-bg" style="background:linear-gradient(150deg,#e0d8e0,#ccc4cc)"></div>
-          <span class="prod-emoji">🧕</span>
-          <div class="prod-badges"><span class="badge badge-soon">Yakında!</span></div>
-          <button class="prod-wish" data-action="toggle-fav">🤍</button>
-          <div class="prod-hover-actions">
-            <button class="quick-add" data-stop="1">Stok Bildir</button>
-          </div>
-        </div>
-        <div class="prod-info">
-          <h4>Krep Kuşaklı Uzun Elbise</h4>
-          <div class="prod-colors">
-            <div class="color-dot active" style="background:#c4a8b8"></div>
-          </div>
-          <div class="prod-price"><span class="p-new">1.199,90 TL</span></div>
-        </div>
-      </div>
-
-    </div>
-
+    <div class="prods-grid stagger-children" id="prodsGrid" aria-busy="true"></div>
     <!-- PAGINATION -->
-    <div class="pagination" id="collectionPagination">
-      <button class="page-btn act">1</button>
-    </div>
-
-    <!-- SEO TEXT -->
-    <div class="seo-text">
-      <h2>Elbise</h2>
-      <p>Giyimin en önemli parçalarından biri olan elbise, her kadının dolabında mutlaka yer alması gereken zamansız bir seçenektir. Hem günlük yaşamda hem de özel davetlerde tercih edilebilecek geniş bir model yelpazesine sahiptir...</p>
-      <span class="read-more" data-action="expand-clamp">Devamını Oku</span>
-    </div>
+    <div class="pagination" id="collectionPagination"></div>
   </div>
 </div>
 
@@ -573,7 +396,7 @@ function addToCartFromCard(btn) {
   var card = btn.closest('.prod-card');
   var nameEl = card ? card.querySelector('h4') : null;
   var name = nameEl ? nameEl.textContent.trim() : 'Ürün';
-  if (window.Suvera) Suvera.addToCart(name, 0, '🧕');
+  if (window.Suvera) Suvera.addToCart(name, 0, '');
 }
 function updateDrawerSz(btn) {
   btn.style.background = btn.classList.contains('active') ? '#1a1a1a' : '#fff';

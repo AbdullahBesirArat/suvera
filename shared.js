@@ -50,10 +50,8 @@ import { escapeHtml } from './js/core/storefront-utils.js';
   const PROFILE_KEY = 'suveraCustomerProfile';
   const defaultSettings = {
     siteName: 'SUVERA – Modern Tesettür Giyim',
-    announcementText: '✦ Yeni sezon geldi — tüm siparişlerde ücretsiz kargo 600 TL ve üzeri ✦',
     freeShippingLimit: 600,
     features: {
-      announcement: true,
       newBadge: true,
       favorites: true,
       whatsapp: true,
@@ -385,7 +383,7 @@ import { escapeHtml } from './js/core/storefront-utils.js';
         name: it.product_name, price: Number(it.unit_price), qty: Number(it.quantity),
         color: it.color, size: it.size,
         variant: [it.color, it.size].filter(Boolean).join(' / ') || 'Standart',
-        image: images[it.variant_id] || '', emoji: '👗',
+        image: images[it.variant_id] || '', emoji: '',
       };
     });
     const written = writeCartMirror(items);
@@ -410,7 +408,7 @@ import { escapeHtml } from './js/core/storefront-utils.js';
       return variantId ? String(i.variant_id) === String(variantId) : i.name === name;
     });
     if (existing) existing.qty = Math.min(Number(existing.qty || 1) + 1, 99);
-    else items.push({ name, price, emoji: emoji || '🧕', qty: 1, ...meta });
+    else items.push({ name, price, emoji: emoji || '', qty: 1, ...meta });
     writeCartMirror(items);
     if (variantId) cacheCartImage(variantId, meta.image);
 
@@ -453,26 +451,11 @@ import { escapeHtml } from './js/core/storefront-utils.js';
   }
 
   function initNavScroll() {
-    const ann = document.querySelector('.announce');
     const nav = document.getElementById('mainNav') || document.querySelector('nav');
     if (!nav) return;
-    const ANN_H = ann ? ann.offsetHeight : 0;
 
     function update() {
-      const isMobile = window.matchMedia('(max-width: 768px)').matches;
-      if (isMobile) {
-        nav.classList.add('scrolled');
-        if (ann) ann.classList.toggle('hidden', window.scrollY < 96);
-        document.documentElement.classList.toggle('mobile-announcement-visible', !!ann && window.scrollY >= 96);
-        return;
-      }
-      if (window.scrollY >= ANN_H) {
-        nav.classList.add('scrolled');
-        if (ann) ann.classList.add('hidden');
-      } else {
-        nav.classList.remove('scrolled');
-        if (ann) ann.classList.remove('hidden');
-      }
+      nav.classList.toggle('scrolled', window.scrollY > 0);
     }
     window.addEventListener('scroll', update, { passive: true });
     window.addEventListener('resize', update, { passive: true });
@@ -648,7 +631,7 @@ import { escapeHtml } from './js/core/storefront-utils.js';
       const productId = card?.dataset.productId || '';
       const name  = card?.dataset.productName || card?.querySelector('h4')?.textContent || 'Ürün';
       const price = card?.dataset.productPriceLabel || card?.querySelector('.p-new')?.textContent || '';
-      const emoji = card?.dataset.productEmoji || card?.querySelector('.prod-emoji, [style*="z-index:1"]')?.textContent || '🧕';
+      const emoji = card?.dataset.productEmoji || '';
       const image = card?.dataset.productImage || '';
 
       let modal = document.getElementById('quickViewModal');
@@ -741,13 +724,6 @@ import { escapeHtml } from './js/core/storefront-utils.js';
 
   function applySiteSettings() {
     document.title = siteSettings.siteName || defaultSettings.siteName;
-
-    const announce = document.querySelector('.announce');
-    const announcementEnabled = !(siteSettings.features && siteSettings.features.announcement === false);
-    if (announce && !announcementEnabled) {
-      announce.style.display = 'none';
-      document.documentElement.style.setProperty('--announcement-offset', '0px');
-    }
 
     if (siteSettings.features && siteSettings.features.maintenance) {
       let banner = document.getElementById('maintenanceBanner');
@@ -1116,82 +1092,6 @@ import { escapeHtml } from './js/core/storefront-utils.js';
     });
   }
 
-  // ── CAMPAIGN BANNER SLIDER ──────────────────────
-  async function initCampaignBanner() {
-    const announce = document.querySelector('.announce');
-    if (!announce) return;
-
-    const announcementEnabled = !(siteSettings.features && siteSettings.features.announcement === false);
-    if (!announcementEnabled) return;
-
-    const fallbackText = siteSettings.announcementText || defaultSettings.announcementText;
-
-    function showFallback() {
-      announce.innerHTML = '<span class="announce-link">' + escapeHtml(fallbackText) + '</span>';
-      announce.style.display = '';
-      document.documentElement.style.setProperty('--announcement-offset', '38px');
-    }
-
-    const api = window.SuveraAPI;
-    if (!api || typeof api.request !== 'function') {
-      showFallback();
-      return;
-    }
-
-    try {
-      // Use campaigns.list() which includes the organizationSlug query param.
-      // Falling back to api.request('/campaigns') omits the slug and returns 400.
-      const campaigns = await (api.campaigns && typeof api.campaigns.list === 'function'
-        ? api.campaigns.list()
-        : api.request('/campaigns'));
-
-      if (!Array.isArray(campaigns) || !campaigns.length) {
-        announce.style.display = 'none';
-        document.documentElement.style.setProperty('--announcement-offset', '0px');
-        return;
-      }
-
-      let currentIndex = 0;
-      let autoTimer = null;
-
-      function renderCurrent() {
-        const link = announce.querySelector('.announce-link');
-        if (link) link.textContent = campaigns[currentIndex].name;
-      }
-
-      function goTo(index) {
-        currentIndex = ((index % campaigns.length) + campaigns.length) % campaigns.length;
-        renderCurrent();
-      }
-
-      function startAuto() {
-        if (autoTimer) clearInterval(autoTimer);
-        if (campaigns.length > 1) {
-          autoTimer = setInterval(function () { goTo(currentIndex + 1); }, 4000);
-        }
-      }
-
-      if (campaigns.length > 1) {
-        announce.innerHTML =
-          '<button class="announce-arrow" type="button" aria-label="Önceki kampanya">&#8249;</button>' +
-          '<span class="announce-link">' + escapeHtml(campaigns[0].name) + '</span>' +
-          '<button class="announce-arrow" type="button" aria-label="Sonraki kampanya">&#8250;</button>';
-
-        const arrows = announce.querySelectorAll('.announce-arrow');
-        arrows[0].addEventListener('click', function () { goTo(currentIndex - 1); startAuto(); });
-        arrows[1].addEventListener('click', function () { goTo(currentIndex + 1); startAuto(); });
-      } else {
-        announce.innerHTML = '<span class="announce-link">' + escapeHtml(campaigns[0].name) + '</span>';
-      }
-
-      announce.style.display = '';
-      document.documentElement.style.setProperty('--announcement-offset', '38px');
-      startAuto();
-    } catch (_) {
-      showFallback();
-    }
-  }
-
   // ── INIT ALL ────────────────────────────────────
   // Redeem an abandoned-cart recovery link (?rt=token): scrub the token from the URL
   // and history FIRST (so it never lingers in the address bar, history or referrers),
@@ -1224,7 +1124,6 @@ import { escapeHtml } from './js/core/storefront-utils.js';
   function init() {
     injectSkipLink();
     applySiteSettings();
-    initCampaignBanner().catch(function () {});
     redirectPaymentReturn();
     void handleRecoveryLink();
     initSeoDefaults();

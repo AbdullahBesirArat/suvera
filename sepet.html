@@ -92,16 +92,6 @@
     .gift-prices span{font-size:14px;font-weight:500;color:var(--accent)}
     .gift-add-btn{height:42px;padding:0 18px;border:1px solid var(--black);background:#fff;font:inherit;font-size:11px;letter-spacing:1.8px;text-transform:uppercase;cursor:pointer}
     .gift-add-btn:hover{background:#1f1f1f;color:#fff}
-    .suggestions-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px}
-    .suggestions-note{font-size:11px;letter-spacing:1.8px;text-transform:uppercase;color:#635d57}
-    .suggestion-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
-    .suggest-card{text-decoration:none;color:inherit}
-    .suggest-card-media{aspect-ratio:3/4;background:linear-gradient(150deg,#dfd8cc,#cdc3b5);display:flex;align-items:center;justify-content:center;font-size:46px;overflow:hidden}
-    .suggest-card:nth-child(2) .suggest-card-media{background:linear-gradient(150deg,#d8e0d0,#b8c2b0)}
-    .suggest-card:nth-child(3) .suggest-card-media{background:linear-gradient(150deg,#e6ded3,#cdbbaa)}
-    .suggest-card:nth-child(4) .suggest-card-media{background:linear-gradient(150deg,#d7d7d7,#bebebe)}
-    .suggest-card p{font-family:var(--serif);font-size:18px;font-weight:300;margin:10px 0 4px}
-    .suggest-card span{font-size:12px;color:#6d665f}
     .checkout-card{padding:24px;position:sticky;top:100px}
     .checkout-kicker{font-size:10px;letter-spacing:2.4px;text-transform:uppercase;color:#635d57;margin-bottom:12px}
     .summary-title{font-family:var(--serif);font-size:30px;font-weight:300;margin:0 0 20px}
@@ -139,7 +129,7 @@
     @media(max-width:1100px){
       .cart-hero,.cart-layout{grid-template-columns:1fr}
       .checkout-card{position:static}
-      .service-list,.suggestion-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .service-list{grid-template-columns:repeat(2,minmax(0,1fr))}
     }
     @media(max-width:760px){
       body{padding-top:102px}
@@ -151,7 +141,7 @@
       .cart-item-img{width:86px;height:116px}
       .cart-item-price{grid-column:2;align-items:flex-start;text-align:left;padding-top:0}
       .gift-card{grid-template-columns:1fr;justify-items:start}
-      .service-list,.suggestion-grid,.footer-grid{grid-template-columns:1fr}
+      .service-list,.footer-grid{grid-template-columns:1fr}
       .footer-bottom{flex-direction:column}
     }
   </style>
@@ -248,34 +238,6 @@
             </div>
           </div>
 
-          <div class="section-card">
-            <div class="suggestions-head">
-              <h3 class="section-title" style="margin:0">Birlikte Güzel Durur</h3>
-              <div class="suggestions-note">Tamamlayıcı parçalar</div>
-            </div>
-            <div class="suggestion-grid">
-              <a class="suggest-card" href="urun">
-                <div class="suggest-card-media">🧕</div>
-                <p>Bağlama Yaka Bluz</p>
-                <span>1.799,90 TL</span>
-              </a>
-              <a class="suggest-card" href="urun">
-                <div class="suggest-card-media">🥻</div>
-                <p>Palazzo Keten Takım</p>
-                <span>1.099,90 TL</span>
-              </a>
-              <a class="suggest-card" href="urun">
-                <div class="suggest-card-media">👘</div>
-                <p>Krep Dokulu Abaya</p>
-                <span>1.249,90 TL</span>
-              </a>
-              <a class="suggest-card" href="urun">
-                <div class="suggest-card-media">🧣</div>
-                <p>İpek Modal Eşarp</p>
-                <span>349,90 TL</span>
-              </a>
-            </div>
-          </div>
         </div>
       </div>
 

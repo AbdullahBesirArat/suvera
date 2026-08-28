@@ -75,6 +75,36 @@ test('every theme string reaches the DOM through textContent only', () => {
   }
 });
 
+test('announcement is fail-closed, escaped, and uses only the canonical theme runtime', () => {
+  const announcement = code.slice(
+    code.indexOf('function applyAnnouncement'),
+    code.indexOf('function applySections')
+  );
+  assert.match(announcement, /!announcement\.enabled \|\| !text/);
+  assert.match(announcement, /node\.hidden = true/);
+  assert.match(announcement, /node\.hidden = false/);
+  assert.match(announcement, /element\('span', 'announce-text', text\)/);
+  assert.match(announcement, /internalHref\(announcement\.link\)/);
+  assert.match(announcement, /classList\.add\('announcement-visible'\)/);
+  assert.doesNotMatch(announcement, /innerHTML|insertAdjacentHTML|style\./);
+
+  const shared = fs.readFileSync(path.join(root, 'shared.js'), 'utf8');
+  const storefront = fs.readFileSync(path.join(root, 'js', 'storefront.js'), 'utf8');
+  assert.doesNotMatch(shared, /initCampaignBanner|announcementText/);
+  assert.doesNotMatch(storefront, /renderCampaignAnnouncement|campaignAnnouncement/);
+});
+
+test('announcement is hidden in the shared initial HTML and offsets follow visibility', () => {
+  const partial = fs.readFileSync(path.join(root, 'templates', 'partials', 'announcement.html'), 'utf8');
+  const css = fs.readFileSync(path.join(root, 'shared.css'), 'utf8');
+  assert.match(partial, /id="campaignAnnouncement"[^>]*hidden/);
+  assert.doesNotMatch(partial, />\s*[^<\s][^<]*<\/div>/);
+  assert.match(css, /\.announce\[hidden\]\s*\{\s*display:none !important/);
+  assert.match(css, /html\.announcement-visible body\s*\{\s*padding-top:102px !important/);
+  assert.match(css, /html\.announcement-visible #mainNav\.scrolled\s*\{\s*top:38px !important/);
+  assert.match(css, /html\.announcement-visible #mainNav\.scrolled\s*\{\s*top:34px !important/);
+});
+
 test('section types are the server allowlist, so a theme cannot name an arbitrary selector', () => {
   const selectors = code.slice(code.indexOf('var SECTION_SELECTORS'), code.indexOf('var TRUST_ICON_GLYPHS'));
   for (const type of [

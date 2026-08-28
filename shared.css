@@ -134,46 +134,48 @@ body { animation: pageFadeIn .45s ease both; }
    ANNOUNCE BAR
 ══════════════════════════════════════════════ */
 .announce {
-  background: #2a4827;
-  color: rgba(255,255,255,.85);
+  background: var(--theme-announcement-background, #2a4827) !important;
+  color: var(--theme-announcement-text, #ffffff) !important;
   text-align:center; padding:0 12px;
   font-size:11px; letter-spacing:2px; text-transform:uppercase;
   position:fixed; top:0; left:0; right:0; z-index:301;
   height:38px; display:flex; align-items:center; justify-content:center; gap:10px;
   transition: transform .35s ease;
 }
-.announce.hidden { transform: translateY(-100%); }
+.announce[hidden] { display:none !important; }
+.announce-text { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .announce-link {
-  min-width:0; max-width:min(700px, calc(100vw - 100px));
+  flex:0 0 auto; min-width:0; max-width:min(240px, calc(100vw - 100px));
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-  color:rgba(255,255,255,.92); text-decoration:none; flex:1; text-align:center;
+  color:inherit; text-decoration:underline; text-underline-offset:3px; text-align:center;
 }
-.announce-arrow {
-  width:26px; height:26px; flex-shrink:0; border:0; border-radius:50%;
-  background:transparent; color:rgba(255,255,255,.7);
-  display:grid; place-items:center; cursor:pointer;
-  font-size:18px; line-height:1; transition:color .2s ease, background .2s ease;
-}
-.announce-arrow:hover { color:#fff; background:rgba(255,255,255,.1); }
 
 /* ══════════════════════════════════════════════
    NAVBAR — transparent → solid on scroll
 ══════════════════════════════════════════════ */
-nav {
+nav,
+#mainNav {
   background: rgba(255,255,255,.96);
   border-bottom: 1px solid #e8e2d9;
-  position:fixed; top:var(--announcement-offset, 38px); left:0; right:0; z-index:300;
+  position:fixed; top:0 !important; left:0; right:0; z-index:300;
   display:flex; align-items:center; justify-content:space-between;
   padding:0 40px; height:64px;
   transition: background .4s ease, border-color .35s ease,
               box-shadow .35s ease, top .35s ease;
 }
-nav.scrolled {
+nav.scrolled,
+#mainNav.scrolled {
   background: #fff;
   border-bottom-color: #e8e2d9;
   box-shadow: 0 2px 24px rgba(0,0,0,.07);
-  top: 0;
+  top: 0 !important;
 }
+
+html.announcement-visible body { padding-top:102px !important; }
+html.announcement-visible nav,
+html.announcement-visible #mainNav,
+html.announcement-visible nav.scrolled,
+html.announcement-visible #mainNav.scrolled { top:38px !important; }
 
 /* Logo */
 .nav-logo {
@@ -945,6 +947,7 @@ body {
   overscroll-behavior-y: contain;
   max-width: 100%;
   overflow-x: clip !important;
+  padding-top:64px !important;
 }
 
 img,
@@ -953,6 +956,14 @@ video,
 canvas,
 svg {
   max-width: 100%;
+}
+
+.product-media-placeholder {
+  display:block;
+  width:100%;
+  height:100%;
+  min-height:48px;
+  background:linear-gradient(145deg, #eee9e1, #ddd6cc);
 }
 
 .mobile-bottom-nav,
@@ -1174,26 +1185,17 @@ img.is-lazy.is-loaded {
     top: 0 !important;
   }
 
-  .mobile-announcement-visible #mainNav {
-    top: 34px !important;
-  }
-
   .announce {
     height: 34px !important;
     padding-inline: 12px !important;
     font-size: 9.5px !important;
     letter-spacing: 1.4px !important;
-    transform: translateY(-100%) !important;
-    transition: transform .28s ease !important;
+    transform:none !important;
   }
 
-  .mobile-announcement-visible .announce {
-    transform: translateY(0) !important;
-  }
-
-  .announce.hidden {
-    transform: translateY(-100%) !important;
-  }
+  html.announcement-visible body { padding-top:92px !important; }
+  html.announcement-visible #mainNav,
+  html.announcement-visible #mainNav.scrolled { top:34px !important; }
 
   .nav-logo {
     font-size: 23px !important;
@@ -1412,7 +1414,7 @@ img.is-lazy.is-loaded {
     box-shadow: 16px 0 60px rgba(0, 0, 0, .22);
   }
 
-  .mobile-announcement-visible .mobile-drawer {
+  .announcement-visible .mobile-drawer {
     top: 92px !important;
     height: calc(100dvh - 92px) !important;
   }
@@ -1426,7 +1428,7 @@ img.is-lazy.is-loaded {
     background: rgba(18, 18, 18, .56) !important;
   }
 
-  .mobile-announcement-visible .mobile-overlay {
+  .announcement-visible .mobile-overlay {
     top: 92px !important;
   }
 

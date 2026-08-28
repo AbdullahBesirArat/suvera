@@ -771,20 +771,6 @@
     if(window.Suvera) Suvera.toast(isFav ? 'Favorilere eklendi' : 'Favorilerden çıkarıldı', isFav ? 'green' : 'dark');
   }
 
-  // ── NAV SCROLL ──
-  const nav = document.getElementById('mainNav');
-  const ann = document.querySelector('.announce');
-  const ANN_H = 38;
-  window.addEventListener('scroll', () => {
-    if(window.scrollY >= ANN_H) {
-      nav.classList.add('scrolled');
-      ann.classList.add('hidden');
-    } else {
-      nav.classList.remove('scrolled');
-      ann.classList.remove('hidden');
-    }
-  }, {passive:true});
-
   // ── SLIDER ──
   // Scope everything to the slider container to avoid class conflicts
   const INTERVAL = 5000; // 5 saniye

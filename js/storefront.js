@@ -63,7 +63,6 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
   function productCard(product) {
     const price = Number(product.sale_price || product.price || 0);
     const oldPrice = product.sale_price ? Number(product.price || 0) : null;
-    const emoji = product.emoji || String(product.name || '').trim().slice(0, 2).toUpperCase();
     const image = imageForColor(product, '');
     const responsive = image && window.SuveraAPI.responsiveImage ? window.SuveraAPI.responsiveImage(image, 'card') : { src: image, srcset: '', sizes: '' };
     const responsiveAttrs = responsive.srcset ? ` srcset="${escapeHtml(responsive.srcset)}" sizes="${escapeHtml(responsive.sizes)}"` : '';
@@ -75,13 +74,12 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
         data-product-name="${escapeHtml(product.name)}"
         data-product-price="${price}"
         data-product-price-label="${escapeHtml(money(price))}"
-        data-product-emoji="${escapeHtml(emoji)}"
         data-product-image="${escapeHtml(image)}"
         data-product-category="${escapeHtml(product.category_name || '')}"
         data-nav="urun?id=${id}">
         <div class="prod-img">
           <div class="prod-img-bg" data-css="background:linear-gradient(150deg,#d8d3c8,#c5bfb2)"></div>
-          ${image ? `<img class="prod-main-image" src="${escapeHtml(responsive.src)}"${responsiveAttrs} alt="${escapeHtml(product.name)}" loading="lazy" decoding="async" data-css="position:relative;z-index:1;width:100%;height:100%;object-fit:cover;"/>` : `<span class="prod-emoji" data-css="position:relative;z-index:1">${escapeHtml(emoji)}</span>`}
+          ${image ? `<img class="prod-main-image" src="${escapeHtml(responsive.src)}"${responsiveAttrs} alt="${escapeHtml(product.name)}" loading="lazy" decoding="async" data-css="position:relative;z-index:1;width:100%;height:100%;object-fit:cover;"/>` : '<span class="product-media-placeholder" aria-hidden="true"></span>'}
           <div class="prod-badges">${badge(product)}</div>
           <div class="prod-hover-actions">
             <button class="quick-add">Hızlı Ekle</button>
@@ -104,7 +102,6 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
   function featuredStripCard(product) {
     const price = Number(product.sale_price || product.price || 0);
     const oldPrice = product.sale_price ? Number(product.price || 0) : null;
-    const emoji = product.emoji || String(product.name || '').trim().slice(0, 2).toUpperCase();
     const image = imageForColor(product, '');
     const responsive = image && window.SuveraAPI.responsiveImage ? window.SuveraAPI.responsiveImage(image, 'card') : { src: image, srcset: '', sizes: '' };
     const responsiveAttrs = responsive.srcset ? ` srcset="${escapeHtml(responsive.srcset)}" sizes="${escapeHtml(responsive.sizes)}"` : '';
@@ -113,7 +110,7 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
     return `
       <div class="feat-strip-item" data-nav="urun?id=${id}">
         <div class="feat-strip-img">
-          ${image ? `<img src="${escapeHtml(responsive.src)}"${responsiveAttrs} alt="${escapeHtml(product.name)}" loading="lazy" decoding="async" data-css="width:100%;height:100%;object-fit:cover;display:block;"/>` : `<span>${escapeHtml(emoji)}</span>`}
+          ${image ? `<img src="${escapeHtml(responsive.src)}"${responsiveAttrs} alt="${escapeHtml(product.name)}" loading="lazy" decoding="async" data-css="width:100%;height:100%;object-fit:cover;display:block;"/>` : '<span class="product-media-placeholder" aria-hidden="true"></span>'}
         </div>
         <div class="feat-strip-info">
           <p>${escapeHtml(product.name)}</p>
@@ -128,14 +125,13 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
 
   function categoryCard(category) {
     const categoryId = encodeURIComponent(category.id);
-    const visual = String(category.name || '').trim().slice(0, 2).toUpperCase();
     const image = category.image_url ? window.SuveraAPI.assetUrl(category.image_url) : '';
     const imageStyle = image
       ? 'background-image:linear-gradient(to top, rgba(12,24,12,.58), rgba(12,24,12,.10) 55%),url(' + escapeHtml(image) + ');background-size:cover;background-position:center;'
       : '';
     return `
       <div class="cat-card" data-nav="urunler?category_id=${categoryId}">
-        <div class="cat-inner${image ? ' has-image' : ''}" data-css="${imageStyle}">${image ? '' : escapeHtml(visual)}</div>
+        <div class="cat-inner${image ? ' has-image' : ''}" data-css="${imageStyle}">${image ? '' : '<span class="product-media-placeholder" aria-hidden="true"></span>'}</div>
         <div class="cat-overlay">
           <h3>${escapeHtml(category.name || '')}</h3>
           ${category.slug ? '<p>' + escapeHtml(category.slug) + '</p>' : ''}
@@ -143,13 +139,14 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
       </div>`;
   }
 
-  function applyEditorialVisual(target, image, fallbackText) {
+  function applyEditorialVisual(target, image) {
     if (!target) return;
+    target.hidden = !image;
     target.classList.toggle('has-image', !!image);
     target.style.backgroundImage = image
       ? 'linear-gradient(to top, rgba(18,25,18,.54), rgba(18,25,18,.08) 58%),url(' + image + ')'
       : '';
-    target.textContent = image ? '' : fallbackText;
+    target.textContent = '';
   }
 
   function slideMarkup(slide, index) {
@@ -318,69 +315,11 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
     }
   }
 
-  function campaignLabel(campaign) {
-    const value = Number(campaign.value || 0);
-    const type = String(campaign.type || '').toLocaleLowerCase('tr-TR');
-    if (type.includes('percent') || type.includes('yuzde')) return '%' + value + ' indirim';
-    if (type.includes('bundle') || type.includes('3 al')) return campaign.name || 'Kampanya';
-    return campaign.name || 'Kampanya';
-  }
-
   function collectionHref(collection) {
     return safeHref(
       collection && collection.link_url,
       'urunler?collection=' + encodeURIComponent((collection && (collection.slug || collection.id)) || '')
     );
-  }
-
-  function renderAnnouncementItem(target, items, index) {
-    if (!target || !items.length) return;
-    var safeIndex = ((index % items.length) + items.length) % items.length;
-    var item = items[safeIndex];
-    target.dataset.index = String(safeIndex);
-    target.innerHTML = ''
-      + '<button class="announce-arrow" type="button" aria-label="Önceki kampanya">‹</button>'
-      + '<a class="announce-link" href="' + escapeHtml(item.href) + '">' + escapeHtml(item.label) + '</a>'
-      + '<button class="announce-arrow" type="button" aria-label="Sonraki kampanya">›</button>';
-    var buttons = target.querySelectorAll('.announce-arrow');
-    buttons[0].onclick = function () {
-      renderAnnouncementItem(target, items, safeIndex - 1);
-    };
-    buttons[1].onclick = function () {
-      renderAnnouncementItem(target, items, safeIndex + 1);
-    };
-  }
-
-  async function renderCampaignAnnouncement() {
-    const announcement = document.getElementById('campaignAnnouncement');
-    if (!window.SuveraAPI || !announcement) return;
-
-    try {
-      const results = await Promise.all([
-        window.SuveraAPI.campaigns.list().catch(function () { return []; }),
-        window.SuveraAPI.collections ? window.SuveraAPI.collections.list().catch(function () { return []; }) : [],
-      ]);
-      const campaigns = Array.isArray(results[0]) ? results[0] : [];
-      const collections = Array.isArray(results[1]) ? results[1] : [];
-      const campaignItems = campaigns.map(function (campaign) {
-        return {
-          label: '✦ ' + (campaign.name || 'Suvera kampanyası') + ' • ' + campaignLabel(campaign) + ' ✦',
-          href: 'urunler',
-        };
-      });
-      const collectionItems = collections.map(function (collection) {
-        return {
-          label: '✦ ' + (collection.title || 'Suvera koleksiyonu') + ' koleksiyonuna ait ürünler ✦',
-          href: collectionHref(collection),
-        };
-      });
-      const items = campaignItems.concat(collectionItems);
-      if (!items.length) return;
-
-      renderAnnouncementItem(announcement, items, Number(announcement.dataset.index || 0));
-    } catch (err) {
-      console.warn('Suvera kampanya alanı yüklenemedi:', err.message);
-    }
   }
 
   async function renderCategories(target, limit, selectedIds) {
@@ -538,8 +477,10 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
   // filterFeatured: true → show only products with featured_in_category=true (if any; else all)
   async function renderFeaturedStrip(target, limit, sourceProducts, filterFeatured) {
     if (!window.SuveraAPI || !target) return;
-
-    target.innerHTML = skeletonCards(limit || 5);
+    var label = document.getElementById('featuredProductsLabel');
+    target.hidden = true;
+    if (label) label.hidden = true;
+    target.innerHTML = '';
 
     try {
       // FIX: Reuse the product list already loaded on the page instead of refetching.
@@ -555,13 +496,14 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
       var items = pool.slice(0, limit);
 
       if (!items.length) {
-        target.innerHTML = '<div class="empty-state">Öne çıkan ürünler hazırlanıyor.</div>';
         return;
       }
 
       target.innerHTML = items.map(featuredStripCard).join('');
+      target.hidden = false;
+      if (label) label.hidden = false;
     } catch (err) {
-      target.innerHTML = '<div class="empty-state">Öne çıkan ürünler şu anda yüklenemiyor.</div>';
+      target.innerHTML = '';
     }
   }
 
@@ -676,6 +618,7 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
     var editorialFeatureLink = document.getElementById('editorialFeatureLink');
     var editorialFeatureVisual = document.getElementById('editorialFeatureVisual');
     var collectionFeatureVisual = document.getElementById('collectionFeatureVisual');
+    var collectionEditorial = document.getElementById('collectionEditorial');
     var pagination = document.getElementById('collectionPagination');
     var drawerSizes = document.getElementById('drawerSizes');
     var drawerPriceRange = document.getElementById('drawerPriceRange');
@@ -752,13 +695,11 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
           : null);
 
       if (collectionLinks) {
-        collectionLinks.innerHTML = (collections || []).length
-          ? collections.slice(0, 5).map(function (collection) {
+        collectionLinks.innerHTML = (collections || []).slice(0, 5).map(function (collection) {
               var href = safeHref(collection.link_url, 'urunler?collection=' + encodeURIComponent(collection.slug || collection.id));
               return '<a class="editorial-link" href="' + escapeHtml(href) + '">' +
                 escapeHtml(collection.title || 'Suvera Koleksiyonu') + ' <span>' + escapeHtml(collection.slug || 'Seçki') + '</span></a>';
-            }).join('')
-          : '<a class="editorial-link" href="urunler">Koleksiyon hazırlanıyor <span>Suvera</span></a>';
+            }).join('');
       }
 
       var featuredCollection = (collections || [])[0] || null;
@@ -767,16 +708,15 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
         var editorialImage = featuredEditorial.image_url ? window.SuveraAPI.assetUrl(featuredEditorial.image_url) : '';
         if (editorialFeatureTag) editorialFeatureTag.textContent = featuredEditorial.slug || 'Koleksiyon';
         if (editorialFeatureTitle) editorialFeatureTitle.innerHTML = escapeHtml(featuredEditorial.title || 'Suvera Koleksiyonu').replace(/\s+/g, '<br/>');
-        if (editorialFeatureDescription) editorialFeatureDescription.textContent = featuredEditorial.description || 'Panelya panelinden yayınlanan koleksiyon.';
+        if (editorialFeatureDescription) editorialFeatureDescription.textContent = featuredEditorial.description || '';
         if (editorialFeatureLink) editorialFeatureLink.href = safeHref(featuredEditorial.link_url, 'urunler');
-        applyEditorialVisual(editorialFeatureVisual, editorialImage, '🥻');
+        applyEditorialVisual(editorialFeatureVisual, editorialImage);
       }
 
       var collectionProducts = products;
 
       // ── Koleksiyon alt-kategori haritası ─────────────────────────────────
       // Computed once, used in both the sidebar and the editorial card below.
-      var colParam = activeCollection ? 'collection=' + encodeURIComponent(selectedCollectionKey) : '';
       var subCats = categories;
 
       // ── Editorial panel kategori sütunu ──────────────────────────────────
@@ -785,13 +725,11 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
         if (activeCollection) {
           // Koleksiyon aktifken: o koleksiyonun kategori dağılımını göster
           if (editorialCategoryHeading) editorialCategoryHeading.textContent = activeCollection.title || 'Koleksiyon';
-          editorLinks.innerHTML = subCats.length
-            ? subCats.map(function (cat) {
+          editorLinks.innerHTML = subCats.map(function (cat) {
                 var href = catalogHref(params, { category: cat.id });
                 return '<a class="editorial-link' + (String(cat.id) === String(selectedCategoryId) ? ' act' : '') + '" href="' + escapeHtml(href) + '">' +
                   escapeHtml(cat.name) + ' <span>' + cat.count + ' ürün</span></a>';
-              }).join('')
-            : '<a class="editorial-link" href="urunler?' + escapeHtml(colParam) + '">Ürünler yükleniyor <span>' + escapeHtml(activeCollection.slug || '') + '</span></a>';
+              }).join('');
         } else {
           // Koleksiyon yok: genel kategori linkleri
           if (editorialCategoryHeading) editorialCategoryHeading.textContent = 'Kategoriler';
@@ -845,7 +783,7 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
               var meta = colorMeta(facet.value);
               return '<button class="cf-dot' + active + '" type="button" data-css="background:' + escapeHtml(meta.css) + '" data-color="' + escapeHtml(facet.value) + '" title="' + escapeHtml(meta.label) + ' (' + facet.count + ' ürün)" aria-label="' + escapeHtml(meta.label) + ', ' + facet.count + ' ürün"></button>';
             }).join('')
-          : '<div class="empty-state">Renk filtresi hazır değil.</div>';
+          : '';
       }
 
       if (sizeWrap) {
@@ -854,7 +792,7 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
               var active = selectedSizes.has(normalizeSize(facet.value)) ? ' act' : '';
               return '<button class="size-btn' + active + '" type="button" data-size="' + escapeHtml(facet.value) + '">' + escapeHtml(facet.value) + ' <small>' + facet.count + '</small></button>';
             }).join('')
-          : '<div class="empty-state">Beden filtresi hazır değil.</div>';
+          : '';
       }
 
       if (drawerSizes) {
@@ -893,19 +831,20 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
       }
       if (activeCategory) {
         var categoryImage = activeCategory.image_url ? window.SuveraAPI.assetUrl(activeCategory.image_url) : '';
-        applyEditorialVisual(collectionFeatureVisual, categoryImage, '🧕');
-        if (!featuredEditorial) applyEditorialVisual(editorialFeatureVisual, categoryImage, '🥻');
+        applyEditorialVisual(collectionFeatureVisual, categoryImage);
+        if (!featuredEditorial) applyEditorialVisual(editorialFeatureVisual, categoryImage);
       } else {
-        applyEditorialVisual(collectionFeatureVisual, '', '🧕');
+        applyEditorialVisual(collectionFeatureVisual, '');
       }
       if (!activeCategory && (activeCollection || featuredCollection)) {
         var heroCollection = activeCollection || featuredCollection;
         var heroImage = heroCollection.image_url ? window.SuveraAPI.assetUrl(heroCollection.image_url) : '';
         if (featureTag) featureTag.textContent = heroCollection.slug || 'Öne Çıkan';
         if (featureTitle) featureTitle.innerHTML = escapeHtml(heroCollection.title || 'Suvera Seçkisi').replace(/\s+/g, '<br/>');
-        if (featureDescription) featureDescription.textContent = heroCollection.description || 'Yayındaki ürünler Panelya panelinden canlı gelir.';
-        applyEditorialVisual(collectionFeatureVisual, heroImage, '🧕');
+        if (featureDescription) featureDescription.textContent = heroCollection.description || '';
+        applyEditorialVisual(collectionFeatureVisual, heroImage);
       }
+      if (collectionEditorial) collectionEditorial.hidden = !(categories.length || collections.length);
 
       var resultCount = document.getElementById('productResultCount');
       if (resultCount) resultCount.textContent = String(Number(catalog.total || 0));
@@ -1080,7 +1019,6 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
 
   document.addEventListener('DOMContentLoaded', function () {
     renderRealNavigation();
-    renderCampaignAnnouncement();
     var homeProductsPromise = whenThemeSettled().then(function () {
       if (!document.getElementById('homepageSections')) return [];
       renderHeroSlider();

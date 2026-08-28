@@ -532,7 +532,7 @@
       const src = item.image && window.SuveraAPI ? window.SuveraAPI.assetUrl(item.image) : item.image;
       const media = src
         ? '<img src="' + escapeHtml(src) + '" alt="' + escapeHtml(item.name) + '" loading="lazy" decoding="async">'
-        : escapeHtml(item.emoji || '👗');
+        : '<span class="product-media-placeholder" aria-hidden="true"></span>';
       return media + '<span class="qty-badge">' + qty + '</span>';
     }
 

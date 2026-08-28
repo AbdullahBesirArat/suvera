@@ -300,12 +300,24 @@
 
   function applyAnnouncement(announcement) {
     var node = document.getElementById('campaignAnnouncement');
-    if (!node || !announcement) return;
-    if (!announcement.enabled) {
+    if (!node) return;
+    while (node.firstChild) node.removeChild(node.firstChild);
+    document.documentElement.classList.remove('announcement-visible');
+    var text = announcement && typeof announcement.text === 'string' ? announcement.text.trim() : '';
+    if (!announcement || !announcement.enabled || !text) {
       node.hidden = true;
       return;
     }
-    setText(node, announcement.text);
+    node.appendChild(element('span', 'announce-text', text));
+    var href = internalHref(announcement.link);
+    var label = typeof announcement.linkLabel === 'string' ? announcement.linkLabel.trim() : '';
+    if (href && label) {
+      var link = element('a', 'announce-link', label);
+      link.href = href;
+      node.appendChild(link);
+    }
+    node.hidden = false;
+    document.documentElement.classList.add('announcement-visible');
   }
 
   function applySections(theme) {

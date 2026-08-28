@@ -68,3 +68,19 @@ test('catalog URL state supports history, retry and accessible page changes', ()
   assert.match(template, /window\.SuveraCatalog\.updateQuery/);
   assert.match(template, /size: sizes\.join\(','\)/);
 });
+
+test('catalog results own their vertical flow and initial HTML contains no demo products', () => {
+  const template = read('urunler.html');
+  assert.match(template, /\.page-wrap\{position:relative;display:block;min-height:0;/);
+  assert.match(template, /\.sidebar-column\{position:absolute;/);
+  assert.match(template, /\.content\{[^}]*margin-left:230px/);
+  assert.match(template, /\.pagination:empty\{display:none;margin:0;/);
+  assert.match(template, /id="prodsGrid" aria-busy="true"><\/div>/);
+  assert.doesNotMatch(template, /Seçki hazırlanıyor|Koleksiyonlar yükleniyor|Öne çıkan ürünler yükleniyor/);
+  assert.doesNotMatch(template, /class="prod-card"|class="prod-emoji"|🧕|🥻/);
+  const customerLoadingSources = [
+    template, read('sepet.html'), read('siparis.html'), read('shared.js'),
+    read('js/storefront.js'), read('js/product-detail.js'), read('js/cart-ui.js'),
+  ].join('\n');
+  assert.doesNotMatch(customerLoadingSources, /🧕|🥻|👘|🧣|👗/);
+});
