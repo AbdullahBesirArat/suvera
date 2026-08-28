@@ -803,6 +803,8 @@
     });
     dots.forEach((d, i) => {
       d.classList.toggle('active', i === idx);
+      if (i === idx) d.setAttribute('aria-current', 'true');
+      else d.removeAttribute('aria-current');
     });
     cur = idx;
     startProgress();

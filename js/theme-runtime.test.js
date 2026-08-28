@@ -132,12 +132,12 @@ test('responsive themed hero uses picture media, safe text nodes, and an eager L
   assert.match(builder, /createElement\('picture'\)/);
   assert.match(builder, /settings\.mobileMediaId/);
   assert.match(builder, /source\.media = '\(max-width: 767px\)'/);
-  assert.match(builder, /image\.loading = 'eager'/);
-  assert.match(builder, /image\.fetchPriority = 'high'/);
+  assert.match(builder, /image\.loading = index === 0 \? 'eager' : 'lazy'/);
+  assert.match(builder, /image\.fetchPriority = index === 0 \? 'high' : 'auto'/);
   assert.match(builder, /image\.width = desktopImage \? 1600 : 1122/);
   assert.match(builder, /image\.height = desktopImage \? 800 : 1402/);
   assert.match(builder, /accent\.textContent = String\(settings\.accentText\)/);
-  assert.match(builder, /description\.textContent = String\(settings\.subtitle\)/);
+  assert.match(builder, /description\.textContent = String\(descriptionText\)/);
   assert.equal(builder.includes('innerHTML'), false, 'tenant hero text is never parsed as HTML');
   assert.equal(builder.includes('insertAdjacentHTML'), false, 'the themed hero is built as DOM nodes');
   assert.doesNotMatch(builder, /Yeni sezon|Koleksiyon|İstanbul/i, 'renderer invents no campaign copy');
@@ -152,7 +152,43 @@ test('mobile hero media is optional and desktop remains the canonical fallback',
   assert.match(builder, /const fallbackImage = desktopImage \|\| mobileImage/);
   assert.match(builder, /if \(mobileImage\)/, 'a source is only added when mobile media exists');
   assert.match(builder, /image\.src = fallbackImage/);
-  assert.match(storefront, /themed\.mobileMediaId/);
+  assert.match(storefront, /themedHeroSlides\(themed\)/);
+});
+
+test('builder hero renders ordered visible slides with accessible controls and legacy fallback', () => {
+  const storefront = fs.readFileSync(path.join(root, 'js', 'storefront.js'), 'utf8');
+  const resolver = storefront.slice(
+    storefront.indexOf('function themedHeroSlides'),
+    storefront.indexOf('function renderThemedHero')
+  );
+  const loader = storefront.slice(
+    storefront.indexOf('async function renderHeroSlider'),
+    storefront.indexOf('function collectionHref')
+  );
+  assert.match(resolver, /Array\.isArray\(settings && settings\.slides\)/);
+  assert.match(resolver, /slide\.enabled !== false/);
+  assert.match(resolver, /Number\(a\.order \|\| 0\) - Number\(b\.order \|\| 0\)/);
+  assert.match(loader, /builderSlides\.forEach/);
+  assert.match(loader, /renderHeroDots\([^,]+, builderSlides\.length\)/);
+  assert.match(loader, /control\.hidden = count < 2/);
+  assert.doesNotMatch(loader, /Math\.random|placeholder|fake/i);
+  const index = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  assert.match(index, /setAttribute\('aria-current', 'true'\)/);
+  assert.match(index, /removeAttribute\('aria-current'\)/);
+});
+
+test('category cards prefer owner media then deterministically fall back to active category products', () => {
+  const storefront = fs.readFileSync(path.join(root, 'js', 'storefront.js'), 'utf8');
+  const card = storefront.slice(storefront.indexOf('function categoryCard'), storefront.indexOf('function applyEditorialVisual'));
+  const loader = storefront.slice(storefront.indexOf('async function renderCategories'), storefront.indexOf('async function loadSectionProducts'));
+  assert.match(card, /category\.image_url \|\| category\.fallback_image_url/);
+  assert.match(loader, /!category\.image_url/);
+  assert.match(loader, /status: 'active'/);
+  assert.match(loader, /category: String\(category\.id\)/);
+  assert.match(loader, /sort: 'recommended'/);
+  assert.match(loader, /Math\.min\(3, missing\.length\)/, 'fallback requests stay bounded');
+  assert.match(loader, /imageForColor\(product, ''\)/);
+  assert.doesNotMatch(loader, /Math\.random|placeholder|fake/i);
 });
 
 test('the data-section builder performs no request or free-form query construction', () => {

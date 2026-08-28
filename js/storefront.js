@@ -125,7 +125,8 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
 
   function categoryCard(category) {
     const categoryId = encodeURIComponent(category.id);
-    const image = category.image_url ? window.SuveraAPI.assetUrl(category.image_url) : '';
+    const categoryImage = category.image_url || category.fallback_image_url || '';
+    const image = categoryImage ? window.SuveraAPI.assetUrl(categoryImage) : '';
     const imageStyle = image
       ? 'background-image:linear-gradient(to top, rgba(12,24,12,.58), rgba(12,24,12,.10) 55%),url(' + escapeHtml(image) + ');background-size:cover;background-position:center;'
       : '';
@@ -185,14 +186,27 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
     parent.appendChild(link);
   }
 
-  function renderThemedHero(slider, settings, theme) {
+  function themedHeroSlides(settings) {
+    const slides = Array.isArray(settings && settings.slides)
+      ? settings.slides.filter(function (slide) { return slide && slide.enabled !== false; })
+        .slice().sort(function (a, b) { return Number(a.order || 0) - Number(b.order || 0); })
+      : [];
+    if (slides.length) return slides.filter(function (slide) {
+      return slide.title || slide.accentText || slide.subtitle || slide.description || slide.mediaId || slide.mobileMediaId;
+    });
+    return settings && (settings.title || settings.accentText || settings.subtitle || settings.mediaId || settings.mobileMediaId)
+      ? [settings]
+      : [];
+  }
+
+  function renderThemedHero(slider, settings, theme, index) {
     const desktopRaw = settings.mediaId && theme && theme.media ? theme.media[settings.mediaId] : '';
     const mobileRaw = settings.mobileMediaId && theme && theme.media ? theme.media[settings.mobileMediaId] : '';
     const desktopImage = desktopRaw ? window.SuveraAPI.assetUrl(desktopRaw) : '';
     const mobileImage = mobileRaw ? window.SuveraAPI.assetUrl(mobileRaw) : '';
     const fallbackImage = desktopImage || mobileImage;
     const slide = document.createElement('div');
-    slide.className = 'slide active theme-hero';
+    slide.className = 'slide' + (index === 0 ? ' active' : '') + ' theme-hero';
     const background = document.createElement('div');
     background.className = 'slide-bg';
 
@@ -209,9 +223,9 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
       image.className = 'slide-bg-image';
       image.src = fallbackImage;
       image.alt = '';
-      image.loading = 'eager';
+      image.loading = index === 0 ? 'eager' : 'lazy';
       image.decoding = 'async';
-      image.fetchPriority = 'high';
+      image.fetchPriority = index === 0 ? 'high' : 'auto';
       image.width = desktopImage ? 1600 : 1122;
       image.height = desktopImage ? 800 : 1402;
       picture.appendChild(image);
@@ -246,10 +260,17 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
       }
       content.appendChild(heading);
     }
-    if (settings.subtitle) {
+    if (settings.subtitle && settings.description) {
+      const subtitle = document.createElement('p');
+      subtitle.className = 'slide-subtitle';
+      subtitle.textContent = String(settings.subtitle);
+      content.appendChild(subtitle);
+    }
+    const descriptionText = settings.description || settings.subtitle;
+    if (descriptionText) {
       const description = document.createElement('p');
       description.className = 'slide-desc';
-      description.textContent = String(settings.subtitle);
+      description.textContent = String(descriptionText);
       content.appendChild(description);
     }
     const actions = document.createElement('div');
@@ -258,7 +279,7 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
     appendHeroCta(actions, settings.secondaryCtaLabel, settings.secondaryCtaTarget, 'btn-slide-outline');
     if (actions.childNodes.length) content.appendChild(actions);
     slide.appendChild(content);
-    slider.prepend(slide);
+    slider.insertBefore(slide, slider.querySelector('.slider-arrow, .slider-dots, .slider-progress'));
   }
 
   function renderHeroDots(target, count) {
@@ -281,10 +302,9 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
     try {
       var themed = window.SuveraTheme ? window.SuveraTheme.sectionSettings('hero') : null;
       var theme = window.SuveraTheme ? window.SuveraTheme.theme : null;
-      var themedImage = themed && themed.mediaId && theme && theme.media ? theme.media[themed.mediaId] : '';
-      var themedMobileImage = themed && themed.mobileMediaId && theme && theme.media ? theme.media[themed.mobileMediaId] : '';
+      var builderSlides = themedHeroSlides(themed);
       var items;
-      if (themed && (themed.title || themed.accentText || themedImage || themedMobileImage)) {
+      if (builderSlides.length) {
         items = null;
       } else {
         const slides = await window.SuveraAPI.slider.list();
@@ -299,11 +319,12 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
         slider.insertAdjacentHTML('afterbegin', items.map(slideMarkup).join(''));
         renderHeroDots(document.getElementById('heroSliderDots'), items.length);
       } else {
-        renderThemedHero(slider, themed, theme);
-        renderHeroDots(document.getElementById('heroSliderDots'), 1);
+        builderSlides.forEach(function (slide, index) { renderThemedHero(slider, slide, theme, index); });
+        renderHeroDots(document.getElementById('heroSliderDots'), builderSlides.length);
       }
       slider.querySelectorAll('.slider-arrow, .slider-dots, .slider-progress').forEach(function (control) {
-        control.hidden = items ? items.length < 2 : true;
+        var count = items ? items.length : builderSlides.length;
+        control.hidden = count < 2;
       });
 
       if (typeof window.rebuildHeroSlider === 'function') {
@@ -332,6 +353,24 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
       if (ids.length) all = ids.map(function (id) { return all.find(function (item) { return String(item.id) === id; }); }).filter(Boolean);
       const items = all.slice(0, limit || all.length);
       if (!items.length) { target.closest('.home-builder-section')?.setAttribute('hidden', ''); return; }
+      const missing = items.filter(function (category) { return !category.image_url; });
+      let cursor = 0;
+      async function hydrateNextCategory() {
+        while (cursor < missing.length) {
+          const category = missing[cursor++];
+          try {
+            const query = new URLSearchParams({
+              page: '1', pageSize: '1', sort: 'recommended', status: 'active', category: String(category.id),
+            });
+            const result = await window.SuveraAPI.catalog.search(query);
+            const product = Array.isArray(result && result.items) ? result.items[0] : null;
+            category.fallback_image_url = product ? imageForColor(product, '') : '';
+          } catch (_) {
+            category.fallback_image_url = '';
+          }
+        }
+      }
+      await Promise.all(Array.from({ length: Math.min(3, missing.length) }, hydrateNextCategory));
       target.innerHTML = items.map(categoryCard).join('');
     } catch (err) {
       target.closest('.home-builder-section')?.setAttribute('hidden', '');
