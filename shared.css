@@ -121,6 +121,7 @@ body { animation: pageFadeIn .45s ease both; }
   opacity:0; transform:translateY(20px);
   transition: opacity .6s ease, transform .6s ease;
 }
+.stagger-children.show > * { opacity:1; transform:none; transition-delay:.54s; }
 .stagger-children.show > *:nth-child(1) { opacity:1; transform:none; transition-delay:.05s; }
 .stagger-children.show > *:nth-child(2) { opacity:1; transform:none; transition-delay:.12s; }
 .stagger-children.show > *:nth-child(3) { opacity:1; transform:none; transition-delay:.19s; }

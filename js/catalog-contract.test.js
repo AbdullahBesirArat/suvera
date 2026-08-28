@@ -73,6 +73,7 @@ test('catalog results own their vertical flow and initial HTML contains no demo 
   const template = read('urunler.html');
   assert.match(template, /\.page-wrap\{position:relative;display:block;min-height:0;/);
   assert.match(template, /\.sidebar-column\{position:absolute;/);
+  assert.match(template, /@media\(max-width:1024px\)[\s\S]*?\.sidebar-column\{display:none;/);
   assert.match(template, /\.content\{[^}]*margin-left:230px/);
   assert.match(template, /\.pagination:empty\{display:none;margin:0;/);
   assert.match(template, /id="prodsGrid" aria-busy="true"><\/div>/);
@@ -83,4 +84,17 @@ test('catalog results own their vertical flow and initial HTML contains no demo 
     read('js/storefront.js'), read('js/product-detail.js'), read('js/cart-ui.js'),
   ].join('\n');
   assert.doesNotMatch(customerLoadingSources, /🧕|🥻|👘|🧣|👗/);
+});
+
+test('loaded catalog cards beyond the eighth stagger child remain visible in normal flow', () => {
+  const styles = read('shared.css');
+  const revealedChildrenRule = styles.match(/\.stagger-children\.show\s*>\s*\*\s*\{([^}]*)\}/);
+
+  assert.ok(revealedChildrenRule, 'the reveal state must apply to every staggered child');
+  assert.match(revealedChildrenRule[1], /opacity\s*:\s*1/);
+  assert.match(revealedChildrenRule[1], /transform\s*:\s*none/);
+
+  const template = read('urunler.html');
+  assert.match(template, /class="prods-grid stagger-children" id="prodsGrid"/);
+  assert.match(template, /id="collectionPagination"><\/div>/);
 });
