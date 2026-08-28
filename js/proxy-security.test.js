@@ -395,9 +395,23 @@ test('the preview token is moved into an HttpOnly session cookie and stripped fr
   const cookie = cookies.find((c) => c.startsWith('suveraThemePreview='));
   assert.ok(cookie, 'preview cookie set');
   assert.match(cookie, /HttpOnly/);
-  assert.match(cookie, /SameSite=Lax/i);
+  assert.match(cookie, /SameSite=None/i);
   assert.match(cookie, /Secure/);
+  assert.match(cookie, /Partitioned/i);
   assert.doesNotMatch(cookie, /Max-Age/, 'a session cookie, so the token never lands in the persistent jar');
+});
+
+test('normal proxy cookies remain SameSite=Lax and non-partitioned', () => {
+  const cookie = proxy.serializeCookie(
+    { headers: { host: 'suvera-web.vercel.app' } },
+    'suveraSession',
+    'session-token',
+    { maxAge: 3600 },
+  );
+
+  assert.match(cookie, /SameSite=Lax/i);
+  assert.match(cookie, /Secure/i);
+  assert.doesNotMatch(cookie, /Partitioned/i);
 });
 
 test('the preview cookie is replayed only to preview-scoped reads, never to public routes', async () => {

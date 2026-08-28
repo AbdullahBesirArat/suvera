@@ -86,10 +86,11 @@ function serializeCookie(req, name, value, options = {}) {
     `${name}=${encodeURIComponent(value || '')}`,
     'Path=/',
     'HttpOnly',
-    'SameSite=Lax',
+    `SameSite=${options.sameSite === 'None' ? 'None' : 'Lax'}`,
   ];
 
   if (!isLocal) parts.push('Secure');
+  if (!isLocal && options.partitioned) parts.push('Partitioned');
   if (options.maxAge != null) parts.push(`Max-Age=${Math.max(0, Number(options.maxAge) || 0)}`);
   return parts.join('; ');
 }
@@ -401,7 +402,10 @@ module.exports = async function handler(req, res) {
       const token = payload.preview_session_token;
       // A session cookie on purpose: no Max-Age, so it dies with the browser session and is
       // never written to the persistent cookie jar. The token is short-lived server-side too.
-      responseCookies.push(serializeCookie(req, THEME_PREVIEW_COOKIE, typeof token === 'string' ? token : ''));
+      responseCookies.push(serializeCookie(req, THEME_PREVIEW_COOKIE, typeof token === 'string' ? token : '', {
+        sameSite: 'None',
+        partitioned: true,
+      }));
       const { preview_session_token: _previewToken, ...rest } = payload;
       outgoingBuffer = Buffer.from(JSON.stringify(rest));
     }
@@ -417,4 +421,5 @@ module.exports.validProxyPath = validProxyPath;
 module.exports.isCustomerAuthPath = isCustomerAuthPath;
 module.exports.storefrontOrigin = storefrontOrigin;
 module.exports.parseCookies = parseCookies;
+module.exports.serializeCookie = serializeCookie;
 module.exports.stripSessionTokens = stripSessionTokens;
