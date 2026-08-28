@@ -517,35 +517,21 @@ import { escapeHtml } from './js/core/storefront-utils.js';
         </div>
         <nav class="mobile-nav-items" aria-label="Mobil menu">
           <a href="anasayfa" class="mobile-nav-item">Ana Sayfa</a>
-          <button type="button" class="mobile-nav-item" data-action="toggle-mobile-sub" data-sub="mobGiyim" aria-expanded="false" aria-controls="mobGiyim">
-            Giyim <span aria-hidden="true">›</span>
+          <a href="urunler?sort=newest" class="mobile-nav-item">Yeni Gelenler</a>
+          <div id="mobileCategoriesItem" hidden>
+          <button type="button" class="mobile-nav-item" data-action="toggle-mobile-sub" data-sub="mobileCategoryLinks" aria-expanded="false" aria-controls="mobileCategoryLinks">
+            Kategoriler <span aria-hidden="true">›</span>
           </button>
-          <div class="mobile-nav-sub" id="mobGiyim">
-            <a href="urunler">Tümü</a>
-            <a href="urunler">Elbise</a>
-            <a href="urunler">Bluz & Gömlek</a>
-            <a href="urunler">Pantolon & Etek</a>
-            <a href="urunler">Takım & Kombin</a>
+          <div class="mobile-nav-sub" id="mobileCategoryLinks"></div>
           </div>
-          <button type="button" class="mobile-nav-item" data-action="toggle-mobile-sub" data-sub="mobDis" aria-expanded="false" aria-controls="mobDis">
-            Dış Giyim <span aria-hidden="true">›</span>
+          <a href="urunler?sort=best_selling" class="mobile-nav-item" id="mobileBestSellersLink" hidden>En Çok Satanlar</a>
+          <div id="mobileCollectionsItem" hidden>
+          <button type="button" class="mobile-nav-item" data-action="toggle-mobile-sub" data-sub="mobileCollectionLinks" aria-expanded="false" aria-controls="mobileCollectionLinks">
+            Koleksiyonlar <span aria-hidden="true">›</span>
           </button>
-          <div class="mobile-nav-sub" id="mobDis">
-            <a href="urunler">Kaban & Mont</a>
-            <a href="urunler">Trençkot</a>
-            <a href="urunler">Ceket & Blazer</a>
+          <div class="mobile-nav-sub" id="mobileCollectionLinks"></div>
           </div>
-          <button type="button" class="mobile-nav-item" data-action="toggle-mobile-sub" data-sub="mobAbaya" aria-expanded="false" aria-controls="mobAbaya">
-            Abaya & Ferace <span aria-hidden="true">›</span>
-          </button>
-          <div class="mobile-nav-sub" id="mobAbaya">
-            <a href="urunler">Abaya</a>
-            <a href="urunler">Ferace</a>
-            <a href="urunler">Kuşaklı Modeller</a>
-          </div>
-          <a href="urunler" class="mobile-nav-item">Eşarp & Aksesuar</a>
-          <a href="urunler" class="mobile-nav-item">Koleksiyonlar</a>
-          <a href="urunler" class="mobile-nav-item outlet" data-css="color:#a83232">Outlet</a>
+          <a href="urunler" class="mobile-nav-item">Tüm Ürünler</a>
         </nav>
         <div class="mobile-nav-footer">
           <a href="giris">👤 &nbsp; Hesabım</a>

@@ -138,6 +138,39 @@ test('the data-section builder performs no request or free-form query constructi
   assert.equal(storefront.includes('sectionSettings(\'product-grid\').source'), false);
 });
 
+test('homepage product sections use only active real catalog data and support exact owner selections', () => {
+  const storefront = fs.readFileSync(path.join(root, 'js', 'storefront.js'), 'utf8');
+  const loader = storefront.slice(
+    storefront.indexOf('async function loadSectionProducts'),
+    storefront.indexOf('function appendNavigationLink')
+  );
+  assert.match(loader, /settings\.productIds/);
+  assert.match(loader, /catalog\.byIds\(selectedIds\)/);
+  assert.match(loader, /product\.status === 'active'/);
+  assert.match(loader, /status: 'active'/);
+  assert.match(loader, /sort: settings\.sort \|\| 'newest'/);
+  assert.doesNotMatch(loader, /Math\.random|placeholder|fake/i);
+});
+
+test('homepage navigation is populated from real categories, collections, and paid-sale results', () => {
+  const storefront = fs.readFileSync(path.join(root, 'js', 'storefront.js'), 'utf8');
+  const navigation = storefront.slice(
+    storefront.indexOf('async function renderRealNavigation'),
+    storefront.indexOf('async function renderProducts')
+  );
+  assert.match(navigation, /SuveraAPI\.categories\.list/);
+  assert.match(navigation, /SuveraAPI\.collections\.list/);
+  assert.match(navigation, /sort: 'best_selling'/);
+  assert.match(navigation, /status: 'active'/);
+  assert.match(navigation, /collection\.slug \|\| collection\.id/);
+  const markup = [
+    fs.readFileSync(path.join(root, 'templates', 'partials', 'navigation.html'), 'utf8'),
+    fs.readFileSync(path.join(root, 'shared.js'), 'utf8'),
+  ].join('\n');
+  assert.doesNotMatch(markup, /editor-secimleri|category=abaya|category=dis-giyim|tag=outlet/i);
+  assert.doesNotMatch(markup, /collection=all/i);
+});
+
 // --- wiring -----------------------------------------------------------------------------------
 
 test('the theme runtime is loaded on every storefront page', () => {

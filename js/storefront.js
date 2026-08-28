@@ -402,13 +402,83 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
 
   async function loadSectionProducts(settings, limit) {
     var source = settings && settings.source ? settings.source : { type: 'products' };
-    if (source.type === 'category' || source.type === 'collection') {
-      var query = new URLSearchParams({ page: '1', pageSize: String(limit), sort: settings.sort || 'newest' });
-      query.set(source.type === 'category' ? 'category' : 'collection', String(source.id));
+    var selectedIds = Array.isArray(settings && settings.productIds)
+      ? settings.productIds.map(Number).filter(function (id) { return Number.isInteger(id) && id > 0; }).slice(0, limit)
+      : [];
+    if (selectedIds.length) {
+      var selected = await window.SuveraAPI.catalog.byIds(selectedIds);
+      return (Array.isArray(selected) ? selected : []).filter(function (product) {
+        return product && product.status === 'active';
+      }).slice(0, limit);
+    }
+    if (source.type === 'products' || source.type === 'category' || source.type === 'collection') {
+      var query = new URLSearchParams({
+        page: '1', pageSize: String(limit), sort: settings.sort || 'newest', status: 'active',
+      });
+      if (source.type === 'category' || source.type === 'collection') {
+        query.set(source.type === 'category' ? 'category' : 'collection', String(source.id));
+      }
       var catalog = await window.SuveraAPI.catalog.search(query);
       return Array.isArray(catalog && catalog.items) ? catalog.items : [];
     }
-    return window.SuveraAPI.products.list('?status=active&limit=' + limit);
+    return [];
+  }
+
+  function appendNavigationLink(target, label, href, className) {
+    if (!target || !label || !href) return;
+    var link = document.createElement('a');
+    link.href = href;
+    link.textContent = label;
+    if (className) link.className = className;
+    target.appendChild(link);
+  }
+
+  async function renderRealNavigation() {
+    if (!window.SuveraAPI) return;
+    try {
+      var results = await Promise.all([
+        window.SuveraAPI.categories.list().catch(function () { return []; }),
+        window.SuveraAPI.collections.list().catch(function () { return []; }),
+        window.SuveraAPI.catalog.search({ page: 1, pageSize: 1, sort: 'best_selling', status: 'active' })
+          .catch(function () { return { items: [] }; }),
+      ]);
+      var categories = Array.isArray(results[0]) ? results[0] : [];
+      var collections = Array.isArray(results[1]) ? results[1] : [];
+      var hasBestSellers = Array.isArray(results[2] && results[2].items) && results[2].items.length > 0;
+      var desktopCategories = document.getElementById('desktopCategoryMenu');
+      var mobileCategories = document.getElementById('mobileCategoryLinks');
+      if (desktopCategories) desktopCategories.replaceChildren();
+      if (mobileCategories) mobileCategories.replaceChildren();
+      categories.slice(0, 9).forEach(function (category) {
+        var href = 'urunler?category_id=' + encodeURIComponent(category.id);
+        appendNavigationLink(desktopCategories, category.name, href, 'mega-link');
+        appendNavigationLink(mobileCategories, category.name, href);
+      });
+      var desktopCategoryItem = document.getElementById('desktopCategoriesItem');
+      var mobileCategoryItem = document.getElementById('mobileCategoriesItem');
+      if (desktopCategoryItem) desktopCategoryItem.hidden = !categories.length;
+      if (mobileCategoryItem) mobileCategoryItem.hidden = !categories.length;
+      var desktopCollections = document.getElementById('desktopCollectionMenu');
+      var mobileCollections = document.getElementById('mobileCollectionLinks');
+      if (desktopCollections) desktopCollections.replaceChildren();
+      if (mobileCollections) mobileCollections.replaceChildren();
+      collections.slice(0, 9).forEach(function (collection) {
+        var collectionKey = collection.slug || collection.id;
+        var href = 'urunler?collection=' + encodeURIComponent(collectionKey);
+        appendNavigationLink(desktopCollections, collection.title, href, 'mega-link');
+        appendNavigationLink(mobileCollections, collection.title, href);
+      });
+      ['desktopCollectionsItem', 'mobileCollectionsItem'].forEach(function (id) {
+        var node = document.getElementById(id);
+        if (node) node.hidden = !collections.length;
+      });
+      ['desktopBestSellersLink', 'mobileBestSellersLink'].forEach(function (id) {
+        var node = document.getElementById(id);
+        if (node) node.hidden = !hasBestSellers;
+      });
+    } catch (err) {
+      console.warn('Suvera navigasyon verisi yüklenemedi:', err.message);
+    }
   }
 
   async function renderProducts(target, limit, settings) {
@@ -1005,6 +1075,7 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
   }
 
   document.addEventListener('DOMContentLoaded', function () {
+    renderRealNavigation();
     renderCampaignAnnouncement();
     var homeProductsPromise = whenThemeSettled().then(function () {
       if (!document.getElementById('homepageSections')) return [];
