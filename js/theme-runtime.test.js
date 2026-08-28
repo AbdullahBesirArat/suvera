@@ -169,6 +169,13 @@ test('homepage navigation is populated from real categories, collections, and pa
   ].join('\n');
   assert.doesNotMatch(markup, /editor-secimleri|category=abaya|category=dis-giyim|tag=outlet/i);
   assert.doesNotMatch(markup, /collection=all/i);
+  const sharedCss = fs.readFileSync(path.join(root, 'shared.css'), 'utf8');
+  for (const id of [
+    'desktopCategoriesItem', 'desktopCollectionsItem', 'desktopBestSellersLink',
+    'mobileCategoriesItem', 'mobileCollectionsItem', 'mobileBestSellersLink',
+  ]) {
+    assert.match(sharedCss, new RegExp(`#${id}\\[hidden\\]`), `${id} must stay hidden without real rows`);
+  }
 });
 
 // --- wiring -----------------------------------------------------------------------------------

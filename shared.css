@@ -731,6 +731,12 @@ footer .footer-bottom span {
 }
 
 .consent-banner[hidden] { display:none; }
+
+/* Dynamic catalogue navigation stays absent until its real data source has rows. */
+#desktopCategoriesItem[hidden], #desktopCollectionsItem[hidden], #desktopBestSellersLink[hidden],
+#mobileCategoriesItem[hidden], #mobileCollectionsItem[hidden], #mobileBestSellersLink[hidden] {
+  display: none !important;
+}
 .consent-banner {
   position:fixed;
   z-index:1200;
