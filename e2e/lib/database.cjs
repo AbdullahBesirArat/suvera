@@ -237,6 +237,30 @@ async function seedFixtures(adminUrl) {
       [orgBId]
     );
 
+    // Migration 064 intentionally preserves the three-section legacy homepage. The
+    // storefront regression below exercises the category-slider renderer, so make that
+    // section explicit in this disposable tenant instead of relying on invented/static
+    // category markup. Production theme snapshots are never rewritten by this fixture.
+    const themeService = require(path.join(API_DIR, 'modules', 'themes', 'service.js'));
+    const publishedTheme = await themeService.resolvePublishedTheme(client, orgAId);
+    if (publishedTheme && !publishedTheme.config.sections.some((section) => section.type === 'category-slider')) {
+      const draftTheme = await themeService.createDraft(client, { organizationId: orgAId });
+      const config = draftTheme.config;
+      const productSectionIndex = config.sections.findIndex((section) => section.type === 'product-grid');
+      const insertAt = productSectionIndex >= 0 ? productSectionIndex + 1 : config.sections.length;
+      config.sections.splice(insertAt, 0, {
+        id: 'categories', type: 'category-slider', enabled: true, order: insertAt,
+        settings: { categoryIds: [String(categoryA.rows[0].id)], limit: 8 },
+      });
+      config.sections.forEach((section, index) => { section.order = index; });
+      const savedTheme = await themeService.saveDraft(client, {
+        organizationId: orgAId, config, expectedHash: draftTheme.validation_hash,
+      });
+      await themeService.publishDraft(client, {
+        organizationId: orgAId, expectedHash: savedTheme.validation_hash, reason: 'E2E category renderer fixture',
+      });
+    }
+
     const productsA = [];
     for (let index = 0; index < 26; index += 1) {
       productsA.push(await insertProduct(client, orgAId, categoryA.rows[0].id, index));
