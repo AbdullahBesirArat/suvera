@@ -521,6 +521,9 @@ const colorMeta = (value) => sharedColorMeta(value, '#e9dfd0');
       stage.addEventListener('click', function (event) {
         if (event.target === stage) closeImageLightbox();
       });
+      window.Suvera?.bindHorizontalSwipe(stage, function (step) {
+        if (!lightbox.classList.contains('zoomed')) stepLightbox(step);
+      });
     }
     // Escape is handled by the shared dialog primitive. Arrow keys move between images:
     // the thumbnails are behind the modal and inert while it is open, so without this a
@@ -529,6 +532,16 @@ const colorMeta = (value) => sharedColorMeta(value, '#e9dfd0');
       if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
       event.preventDefault();
       stepLightbox(event.key === 'ArrowRight' ? 1 : -1);
+    });
+  }
+
+  function bindMainGallerySwipe() {
+    const mainMedia = document.getElementById('detailMainMedia');
+    if (!mainMedia) return;
+    window.Suvera?.bindHorizontalSwipe(mainMedia, function (step) {
+      const images = Array.isArray(currentProduct.images) ? currentProduct.images : [];
+      if (images.length < 2) return;
+      setActiveThumb((activeImageIndex + step + images.length) % images.length);
     });
   }
 
@@ -805,6 +818,7 @@ const colorMeta = (value) => sharedColorMeta(value, '#e9dfd0');
 
   document.addEventListener('DOMContentLoaded', function () {
     bindImageLightbox();
+    bindMainGallerySwipe();
     loadProduct();
   });
 })();

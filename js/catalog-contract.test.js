@@ -108,6 +108,42 @@ test('managed hero preserves portrait garments on desktop and keeps mobile frami
   assert.doesNotMatch(template, /suvera-istanbul-editorial\.png/);
 });
 
+test('mobile swipe uses one pointer contract without hijacking vertical scroll', () => {
+  const shared = read('shared.js');
+  assert.match(shared, /function bindHorizontalSwipe\(element, onSwipe, options\)/);
+  assert.match(shared, /event\.pointerType === 'mouse'/);
+  assert.match(shared, /Math\.abs\(dx\) < threshold \|\| Math\.abs\(dx\) <= Math\.abs\(dy\) \* dominance/);
+  assert.match(shared, /onSwipe\(dx < 0 \? 1 : -1, event\)/);
+  assert.match(shared, /if \(!suppressClick\) return;[\s\S]*?event\.preventDefault\(\);[\s\S]*?event\.stopPropagation\(\)/);
+
+  const homepage = read('index.html');
+  assert.match(homepage, /bindHorizontalSwipe\(slider, dir => window\.changeSlide\(dir\)\)/);
+  assert.doesNotMatch(homepage, /addEventListener\('touchstart'/);
+  assert.match(read('css/home.css'), /\.hero-slider\{[^}]*touch-action:pan-y/);
+  assert.match(read('css/home.css'), /\.home-product-rail\{[^}]*grid-template-columns:none!important;[^}]*grid-auto-flow:column!important;[^}]*grid-auto-columns:minmax\(66vw,1fr\)!important/);
+
+  const product = read('js/product-detail.js');
+  assert.match(product, /bindHorizontalSwipe\(mainMedia/);
+  assert.match(product, /bindHorizontalSwipe\(stage/);
+  assert.match(read('urun.html'), /\.main-media\{[^}]*touch-action:pan-y/);
+  assert.match(read('urun.html'), /\.image-lightbox-stage\{[^}]*touch-action:pan-y/);
+});
+
+test('product cards keep actions in the media overlay and remove quick add presentation', () => {
+  const renderer = read('js/storefront.js');
+  const card = renderer.slice(renderer.indexOf('function productCard'), renderer.indexOf('function slideMarkup'));
+  assert.match(card, /class="prod-media-actions"/);
+  assert.match(card, /aria-label="Favorilere ekle"/);
+  assert.match(card, /aria-label="Ürünü hızlı görüntüle"/);
+  assert.doesNotMatch(card, /quick-add|Hızlı Ekle/);
+
+  const styles = read('shared.css');
+  assert.match(styles, /\.prod-media-actions \{[\s\S]*?position:absolute; top:12px; right:12px/);
+  assert.match(styles, /\.prod-media-actions \.quick-fav,[\s\S]*?width:44px; height:44px/);
+  assert.match(styles, /\.mobile-bottom-nav \{[\s\S]*?bottom: 0 !important;/);
+  assert.match(styles, /padding: 6px 10px calc\(6px \+ env\(safe-area-inset-bottom\)\)/);
+});
+
 test('product lightbox stays viewport-anchored and exposes complete gallery navigation', () => {
   const sharedStyles = read('shared.css');
   const fade = sharedStyles.slice(sharedStyles.indexOf('@keyframes pageFadeIn'), sharedStyles.indexOf('body { animation'));

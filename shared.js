@@ -10,6 +10,45 @@ import { escapeHtml } from './js/core/storefront-utils.js';
   // ── CART STATE ──────────────────────────────────
   window.Suvera = window.Suvera || {};
 
+  function bindHorizontalSwipe(element, onSwipe, options) {
+    if (!element || typeof onSwipe !== 'function' || element.dataset.swipeBound === 'true') return;
+    const settings = options || {};
+    const threshold = Number(settings.threshold) || 48;
+    const dominance = Number(settings.dominance) || 1.2;
+    let pointerId = null;
+    let startX = 0;
+    let startY = 0;
+    let suppressClick = false;
+
+    element.dataset.swipeBound = 'true';
+    element.addEventListener('pointerdown', function (event) {
+      if (event.pointerType === 'mouse' || !event.isPrimary) return;
+      pointerId = event.pointerId;
+      startX = event.clientX;
+      startY = event.clientY;
+    });
+    element.addEventListener('pointerup', function (event) {
+      if (event.pointerId !== pointerId) return;
+      const dx = event.clientX - startX;
+      const dy = event.clientY - startY;
+      pointerId = null;
+      if (Math.abs(dx) < threshold || Math.abs(dx) <= Math.abs(dy) * dominance) return;
+      suppressClick = true;
+      onSwipe(dx < 0 ? 1 : -1, event);
+      setTimeout(function () { suppressClick = false; }, 0);
+    });
+    element.addEventListener('pointercancel', function (event) {
+      if (event.pointerId === pointerId) pointerId = null;
+    });
+    element.addEventListener('click', function (event) {
+      if (!suppressClick) return;
+      event.preventDefault();
+      event.stopPropagation();
+      suppressClick = false;
+    }, true);
+  }
+  window.Suvera.bindHorizontalSwipe = bindHorizontalSwipe;
+
   // ── CSP-safe inline style hydration ──────────────
   // Renderers emit data-css="..." instead of style="..." so served markup and
   // innerHTML carry no inline styles under a strict style-src. Declarations are
@@ -315,6 +354,7 @@ import { escapeHtml } from './js/core/storefront-utils.js';
     button.setAttribute('aria-pressed', active ? 'true' : 'false');
     if (button.matches('.quick-fav, .prod-wish, #favToggle, [data-favorite-button]')) {
       button.textContent = active ? '♥' : '♡';
+      button.setAttribute('aria-label', active ? 'Favorilerden çıkar' : 'Favorilere ekle');
     }
   }
 
@@ -615,7 +655,7 @@ import { escapeHtml } from './js/core/storefront-utils.js';
       if (!product) return;
       const result = toggleFavorite(product);
       const isActive = result.active;
-      btn.textContent = isActive ? '❤️' : '🤍';
+      syncFavoriteButton(btn, product);
       showToast(isActive ? 'Favorilere eklendi ❤️' : 'Favorilerden çıkarıldı', isActive ? 'green' : 'dark');
     }, true); // useCapture = true
   }

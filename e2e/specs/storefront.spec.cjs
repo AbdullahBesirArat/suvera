@@ -7,12 +7,46 @@ const {
   test,
 } = require('../fixtures.cjs');
 
+async function swipe(locator, from, to) {
+  await locator.dispatchEvent('pointerdown', {
+    pointerId: 7, pointerType: 'touch', isPrimary: true,
+    clientX: from.x, clientY: from.y,
+  });
+  await locator.dispatchEvent('pointerup', {
+    pointerId: 7, pointerType: 'touch', isPrimary: true,
+    clientX: to.x, clientY: to.y,
+  });
+}
+
 test.describe('A03 Suvera storefront full-stack', () => {
   test('1-2 ana sayfa açılır ve canlı ürün/kategori listeleri yüklenir', async ({ page, e2eState }) => {
     await page.goto(e2eState.origins.storefront);
     await expect(page.locator('#homeProductsGrid .prod-card')).toHaveCount(8);
     await expect(page.locator('#homeCategoryGrid .cat-card')).toHaveCount(1);
     await expect(page.locator(`#homeProductsGrid .prod-card[data-product-id="${e2eState.fixtures.raceProduct.id}"]`)).toBeVisible();
+  });
+
+  test('mobil hero swipe yönü, wrap-around ve dikey scroll ayrımı korunur', async ({ page, e2eState }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(e2eState.origins.storefront);
+    const slider = page.locator('#heroSlider');
+    await page.evaluate(() => {
+      const root = document.getElementById('heroSlider');
+      root.hidden = false;
+      root.querySelectorAll(':scope > .slide').forEach((slide) => slide.remove());
+      root.insertAdjacentHTML('afterbegin', '<div class="slide active"></div><div class="slide"></div>');
+      document.getElementById('heroSliderDots').innerHTML = '<button class="slider-dot active"></button><button class="slider-dot"></button>';
+      window.rebuildHeroSlider();
+    });
+
+    await swipe(slider, { x: 320, y: 300 }, { x: 220, y: 306 });
+    await expect(slider.locator(':scope > .slide').nth(1)).toHaveClass(/active/);
+    await swipe(slider, { x: 320, y: 300 }, { x: 220, y: 306 });
+    await expect(slider.locator(':scope > .slide').first()).toHaveClass(/active/);
+    await swipe(slider, { x: 120, y: 300 }, { x: 230, y: 306 });
+    await expect(slider.locator(':scope > .slide').nth(1)).toHaveClass(/active/);
+    await swipe(slider, { x: 200, y: 240 }, { x: 225, y: 350 });
+    await expect(slider.locator(':scope > .slide').nth(1)).toHaveClass(/active/);
   });
 
   test('3 katalog pagination ikinci sayfaya geçer', async ({ page, e2eState }) => {
@@ -108,6 +142,12 @@ test.describe('A03 Suvera storefront full-stack', () => {
     await page.goto(`${e2eState.origins.storefront}/urun?id=${productId}`);
     const thumbs = page.locator('#detailThumbs .thumb-btn');
     await expect(thumbs).toHaveCount(2);
+    const mainMedia = page.locator('#detailMainMedia');
+    await swipe(mainMedia, { x: 300, y: 300 }, { x: 210, y: 305 });
+    await expect(page.locator('#galleryCounter')).toHaveText('2 / 2');
+    await expect(thumbs.nth(1)).toHaveClass(/active/);
+    await swipe(mainMedia, { x: 120, y: 300 }, { x: 220, y: 305 });
+    await expect(page.locator('#galleryCounter')).toHaveText('1 / 2');
     await thumbs.nth(1).click();
     await expect(page.locator('#galleryCounter')).toHaveText('2 / 2');
 
@@ -122,6 +162,13 @@ test.describe('A03 Suvera storefront full-stack', () => {
       const box = element.getBoundingClientRect();
       return box.x === 0 && box.y === 0 && box.width === innerWidth && box.height === innerHeight;
     })).toBe(true);
+
+    await swipe(page.locator('#imageLightboxStage'), { x: 300, y: 300 }, { x: 210, y: 305 });
+    await expect(image).toHaveAttribute('src', firstImage);
+    await expect(page.locator('#imageLightboxCount')).toHaveText('1 / 2');
+    await swipe(page.locator('#imageLightboxStage'), { x: 120, y: 300 }, { x: 220, y: 305 });
+    await expect(image).toHaveAttribute('src', secondImage);
+    await expect(page.locator('#imageLightboxCount')).toHaveText('2 / 2');
 
     await page.locator('#imageLightboxNext').click();
     await expect(image).toHaveAttribute('src', firstImage);
@@ -218,7 +265,12 @@ test.describe('A03 Suvera storefront full-stack', () => {
     await page.goto(`${e2eState.origins.storefront}/urunler`);
     const card = page.locator('#prodsGrid .prod-card').first();
     await expect(card).toHaveAttribute('data-product-id', /\d+/);
+    await expect(card.locator('.quick-add')).toHaveCount(0);
+    await expect(card.locator('.prod-img > .prod-media-actions')).toHaveCount(1);
+    await expect(card.locator('.quick-fav')).toHaveAttribute('aria-label', 'Favorilere ekle');
+    await expect(card.locator('.quick-view')).toHaveAttribute('aria-label', 'Ürünü hızlı görüntüle');
     await card.locator('[data-action="toggle-fav"]').click();
+    await expect(card.locator('.quick-fav')).toHaveAttribute('aria-label', 'Favorilerden çıkar');
     await page.goto(`${e2eState.origins.storefront}/favoriler`);
     await expect(page.locator('#favoritesCount')).toHaveText('1');
     await expect(page.locator('#favoritesGrid [data-favorite-id]')).toHaveCount(1);

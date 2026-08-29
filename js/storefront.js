@@ -81,10 +81,9 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
           <div class="prod-img-bg" data-css="background:linear-gradient(150deg,#d8d3c8,#c5bfb2)"></div>
           ${image ? `<img class="prod-main-image" src="${escapeHtml(responsive.src)}"${responsiveAttrs} alt="${escapeHtml(product.name)}" loading="lazy" decoding="async" data-css="position:relative;z-index:1;width:100%;height:100%;object-fit:cover;"/>` : '<span class="product-media-placeholder" aria-hidden="true"></span>'}
           <div class="prod-badges">${badge(product)}</div>
-          <div class="prod-hover-actions">
-            <button class="quick-add">Hızlı Ekle</button>
-            <button class="quick-fav" data-action="toggle-fav">♡</button>
-            <button class="quick-view" title="Hızlı Bak">Bak</button>
+          <div class="prod-media-actions">
+            <button class="quick-fav" type="button" data-action="toggle-fav" data-stop aria-label="Favorilere ekle" aria-pressed="false">♡</button>
+            <button class="quick-view" type="button" data-stop aria-label="Ürünü hızlı görüntüle" title="Ürünü hızlı görüntüle">Bak</button>
           </div>
         </div>
         <div class="prod-info">
