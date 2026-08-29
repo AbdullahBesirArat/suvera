@@ -95,6 +95,44 @@ test.describe('A03 Suvera storefront full-stack', () => {
     expect(cart[0].variant_id).toBeTruthy();
   });
 
+  test('ürün galerisi seçili medyayı viewport lightbox içinde açar ve gezdirir', async ({ page, e2eState }) => {
+    const productId = e2eState.fixtures.tenantA.productId;
+    const firstImage = `${e2eState.origins.storefront}/favicon.svg?gallery=1`;
+    const secondImage = `${e2eState.origins.storefront}/favicon.svg?gallery=2`;
+    await page.route(`**/api/products/${productId}*`, async (route) => {
+      const response = await route.fetch();
+      const product = await response.json();
+      await route.fulfill({ response, json: { ...product, images: [firstImage, secondImage] } });
+    });
+
+    await page.goto(`${e2eState.origins.storefront}/urun?id=${productId}`);
+    const thumbs = page.locator('#detailThumbs .thumb-btn');
+    await expect(thumbs).toHaveCount(2);
+    await thumbs.nth(1).click();
+    await expect(page.locator('#galleryCounter')).toHaveText('2 / 2');
+
+    await page.locator('#detailMainMedia').click();
+    const lightbox = page.locator('#imageLightbox');
+    const image = page.locator('#imageLightboxImg');
+    await expect(lightbox).toHaveClass(/open/);
+    await expect(image).toBeVisible();
+    await expect(image).toHaveAttribute('src', secondImage);
+    await expect(page.locator('#imageLightboxCount')).toHaveText('2 / 2');
+    expect(await lightbox.evaluate((element) => {
+      const box = element.getBoundingClientRect();
+      return box.x === 0 && box.y === 0 && box.width === innerWidth && box.height === innerHeight;
+    })).toBe(true);
+
+    await page.locator('#imageLightboxNext').click();
+    await expect(image).toHaveAttribute('src', firstImage);
+    await expect(page.locator('#imageLightboxCount')).toHaveText('1 / 2');
+    await page.locator('#imageLightboxPrev').click();
+    await expect(image).toHaveAttribute('src', secondImage);
+    await page.locator('#imageLightboxClose').click();
+    await expect(lightbox).not.toHaveClass(/open/);
+    await expect(lightbox).toHaveAttribute('aria-hidden', 'true');
+  });
+
   test('12-14 sepet miktarı artar, azalır ve ürün silinir', async ({ page, e2eState }) => {
     await setCart(page, e2eState, e2eState.fixtures.tenantA);
     await page.goto(`${e2eState.origins.storefront}/sepet`);

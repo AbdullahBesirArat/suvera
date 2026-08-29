@@ -98,3 +98,29 @@ test('loaded catalog cards beyond the eighth stagger child remain visible in nor
   assert.match(template, /class="prods-grid stagger-children" id="prodsGrid"/);
   assert.match(template, /id="collectionPagination"><\/div>/);
 });
+
+test('managed hero preserves portrait garments on desktop and keeps mobile framing intentional', () => {
+  const styles = read('css/home.css');
+  assert.match(styles, /\.theme-hero \.slide-bg-image\{[^}]*object-fit:contain;[^}]*object-position:right center/);
+  assert.match(styles, /@media\(max-width:47\.99rem\)[\s\S]*?\.theme-hero \.slide-bg-image\{[^}]*object-fit:cover;[^}]*object-position:68% center/);
+  const template = read('index.html');
+  assert.doesNotMatch(template, /url\(['"]assets\//);
+  assert.doesNotMatch(template, /suvera-istanbul-editorial\.png/);
+});
+
+test('product lightbox stays viewport-anchored and exposes complete gallery navigation', () => {
+  const sharedStyles = read('shared.css');
+  const fade = sharedStyles.slice(sharedStyles.indexOf('@keyframes pageFadeIn'), sharedStyles.indexOf('body { animation'));
+  assert.doesNotMatch(fade, /transform/);
+
+  const template = read('urun.html');
+  assert.match(template, /id="imageLightboxPrev"/);
+  assert.match(template, /id="imageLightboxNext"/);
+  assert.match(template, /\.image-lightbox-nav\[hidden\]\{display:none\}/);
+
+  const controller = read('js/product-detail.js');
+  assert.match(controller, /function stepLightbox\(step\)/);
+  assert.match(controller, /stepLightbox\(-1\)/);
+  assert.match(controller, /stepLightbox\(1\)/);
+  assert.match(controller, /event\.target === stage/);
+});

@@ -79,6 +79,8 @@ const colorMeta = (value) => sharedColorMeta(value, '#e9dfd0');
     const stage = document.getElementById('imageLightboxStage');
     const img = document.getElementById('imageLightboxImg');
     const zoomButton = document.getElementById('imageLightboxZoom');
+    const prevButton = document.getElementById('imageLightboxPrev');
+    const nextButton = document.getElementById('imageLightboxNext');
     const count = document.getElementById('imageLightboxCount');
     if (!lightbox || !stage || !img) return;
 
@@ -100,6 +102,9 @@ const colorMeta = (value) => sharedColorMeta(value, '#e9dfd0');
     if (count) {
       count.textContent = (index + 1) + ' / ' + Math.max(currentProduct.images.length, 1);
     }
+    const hasMultipleImages = currentProduct.images.length > 1;
+    if (prevButton) prevButton.hidden = !hasMultipleImages;
+    if (nextButton) nextButton.hidden = !hasMultipleImages;
     lightbox.classList.add('open');
     requestAnimationFrame(function () {
       resetLightboxView(stage);
@@ -473,6 +478,8 @@ const colorMeta = (value) => sharedColorMeta(value, '#e9dfd0');
     const lightbox = document.getElementById('imageLightbox');
     const closeButton = document.getElementById('imageLightboxClose');
     const zoomButton = document.getElementById('imageLightboxZoom');
+    const prevButton = document.getElementById('imageLightboxPrev');
+    const nextButton = document.getElementById('imageLightboxNext');
     const stage = document.getElementById('imageLightboxStage');
     if (!lightbox) return;
 
@@ -495,22 +502,42 @@ const colorMeta = (value) => sharedColorMeta(value, '#e9dfd0');
         });
       });
     }
+    if (prevButton) {
+      prevButton.addEventListener('click', function (event) {
+        event.stopPropagation();
+        stepLightbox(-1);
+      });
+    }
+    if (nextButton) {
+      nextButton.addEventListener('click', function (event) {
+        event.stopPropagation();
+        stepLightbox(1);
+      });
+    }
     lightbox.addEventListener('click', function (event) {
       if (event.target === lightbox) closeImageLightbox();
     });
+    if (stage) {
+      stage.addEventListener('click', function (event) {
+        if (event.target === stage) closeImageLightbox();
+      });
+    }
     // Escape is handled by the shared dialog primitive. Arrow keys move between images:
     // the thumbnails are behind the modal and inert while it is open, so without this a
     // keyboard user could only ever see the one image they opened.
     lightbox.addEventListener('keydown', function (event) {
       if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
-      const images = Array.isArray(currentProduct.images) ? currentProduct.images : [];
-      if (images.length < 2) return;
       event.preventDefault();
-      const step = event.key === 'ArrowRight' ? 1 : -1;
-      const next = (activeImageIndex + step + images.length) % images.length;
-      setActiveThumb(next);
-      showLightboxImage(next);
+      stepLightbox(event.key === 'ArrowRight' ? 1 : -1);
     });
+  }
+
+  function stepLightbox(step) {
+    const images = Array.isArray(currentProduct.images) ? currentProduct.images : [];
+    if (images.length < 2) return;
+    const next = (activeImageIndex + step + images.length) % images.length;
+    setActiveThumb(next);
+    showLightboxImage(next);
   }
 
   // Swaps the visible image without reopening the dialog, so focus and the trap survive.
