@@ -63,12 +63,12 @@
     .service-card strong{display:block;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:6px}
     .service-card p{margin:0;font-size:12px;color:#70685f;line-height:1.6}
     .cta-row{display:grid;grid-template-columns:1fr 1fr 54px;gap:10px;padding-top:18px}
-    .buy-btn,.wa-btn{border:none;border-radius:6px;cursor:pointer}
+    .buy-btn,.product-social-btn{border:none;border-radius:6px;cursor:pointer}
     .buy-btn{background:var(--black);color:#fff;padding:16px 20px;font-family:var(--sans);font-size:12px;letter-spacing:2px;text-transform:uppercase}
     .buy-btn:hover{background:var(--accent)}
     .buy-btn.secondary{background:#fff;color:var(--black);border:1px solid var(--line)}
     .buy-btn.secondary:hover{background:#f4f0ea;color:var(--black)}
-    .wa-btn{background:#25d366;color:#fff;font-size:22px}
+    .product-social-btn{background:#4c3228;color:#fff;font-size:22px;justify-content:center}
     .cart-feedback{display:none;margin-top:10px;border:1px solid rgba(61,107,56,.26);background:#f1f7ef;color:#2f5f2b;border-radius:8px;padding:11px 13px;font-size:13px;line-height:1.45}
     .cart-feedback.show{display:block}
     .mini-note{padding-top:14px;font-size:12px;color:#7a736a;line-height:1.7}
@@ -131,7 +131,7 @@
     .footer-col ul li a{font-size:13px;color:rgba(255,255,255,.45);text-decoration:none;font-weight:300}
     .footer-bottom{border-top:1px solid rgba(255,255,255,.07);padding-top:22px;display:flex;justify-content:space-between;font-size:11.5px;color:rgba(255,255,255,.3)}
     @media(max-width:1180px){.product-main{grid-template-columns:1fr}.gallery-panel,.info-panel{position:static;max-height:none}.story-grid{grid-template-columns:1fr}.related-grid{grid-template-columns:repeat(2,1fr)}}
-    @media(max-width:760px){body{padding-top:102px}.page-shell{padding:0 16px 32px}.product-breadcrumb{font-size:11px;padding:10px 0 12px}.product-main{gap:16px}.gallery-panel{grid-template-columns:1fr}.gallery-thumbs{grid-template-columns:repeat(4,1fr);order:2}.gallery-note{font-size:11px}.info-panel{padding:22px 18px}.product-title{font-size:30px}.price-current{font-size:26px}.story-copy h2,.measure-card h2,.related-section h2{font-size:28px}.service-grid{grid-template-columns:1fr}.cta-row{grid-template-columns:1fr}.wa-btn{height:48px}.related-grid{grid-template-columns:1fr}.footer-grid{grid-template-columns:1fr 1fr;gap:28px}footer{padding:0 20px 24px}.footer-bottom{flex-direction:column;gap:10px}}
+    @media(max-width:760px){body{padding-top:102px}.page-shell{padding:0 16px 32px}.product-breadcrumb{font-size:11px;padding:10px 0 12px}.product-main{gap:16px}.gallery-panel{grid-template-columns:1fr}.gallery-thumbs{grid-template-columns:repeat(4,1fr);order:2}.gallery-note{font-size:11px}.info-panel{padding:22px 18px}.product-title{font-size:30px}.price-current{font-size:26px}.story-copy h2,.measure-card h2,.related-section h2{font-size:28px}.service-grid{grid-template-columns:1fr}.cta-row{grid-template-columns:1fr}.product-social-btn{height:48px}.related-grid{grid-template-columns:1fr}.footer-grid{grid-template-columns:1fr 1fr;gap:28px}footer{padding:0 20px 24px}.footer-bottom{flex-direction:column;gap:10px}}
   </style>
 </head>
 <body>
@@ -180,19 +180,15 @@
         <button class="size-guide-trigger" type="button" id="sizeGuideBtn" hidden aria-haspopup="dialog">Beden Rehberi</button>
       </div>
 
-      <div class="section-block">
+      <div class="section-block" data-store-service-card hidden>
         <div class="section-head"><h3>Alışveriş Notları</h3><span>Hızlı bilgilendirme</span></div>
-        <div class="service-grid">
-          <div class="service-card"><strong>Ücretsiz Kargo</strong><p>600 TL üzeri siparişlerde Türkiye geneli ücretsiz teslimat.</p></div>
-          <div class="service-card"><strong>Kolay İade</strong><p>İade ve değişim süreci için sipariş sonrası destek ekibi yanınızda.</p></div>
-          <div class="service-card"><strong>Güvenli Ödeme</strong><p>İyzico ve havale seçenekleriyle tamamlanan güvenli checkout akışı.</p></div>
-        </div>
+        <div class="service-grid" data-store-service-notes></div>
       </div>
 
       <div class="cta-row">
         <button class="buy-btn" id="detailAddCartBtn" type="button" data-action="add-to-cart" aria-describedby="cartFeedback">Sepete Ekle</button>
         <button class="buy-btn secondary" type="button" data-action="buy-now" aria-describedby="cartFeedback">Satın Al</button>
-        <button class="wa-btn" type="button" aria-label="WhatsApp ile ürün hakkında sor">💬</button>
+        <a class="product-social-btn" data-store-instagram hidden target="_blank" rel="noopener noreferrer" aria-label="Suvera Instagram hesabını aç">◎</a>
       </div>
       <div class="cart-feedback" id="cartFeedback" role="status" aria-live="polite"></div>
       <button class="compare-toggle" type="button" id="compareToggle" aria-pressed="false">Karşılaştır</button>
@@ -230,12 +226,9 @@
           <button class="info-trigger" type="button" data-action="detail-accordion">Beden ve Ölçü</button>
           <div class="info-body" id="detailMeasurementBody"></div>
         </div>
-        <div class="info-item">
+        <div class="info-item" hidden>
           <button class="info-trigger" type="button" data-action="detail-accordion">Teslimat ve İade</button>
-          <div class="info-body">
-            <p>Siparişler 1-3 iş günü içinde hazırlanır. Kargo çıktığında takip numarası hesabınıza ve sipariş ekranına işlenir.</p>
-            <p>Kullanılmamış ürünlerde değişim ve iade desteği için bizimle iletişime geçebilirsiniz.</p>
-          </div>
+          <div class="info-body"></div>
         </div>
       </div>
     </aside>

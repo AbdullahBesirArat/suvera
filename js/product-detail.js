@@ -354,7 +354,7 @@ const colorMeta = (value) => sharedColorMeta(value, '#e9dfd0');
     const storyText = (product.product_story && product.product_story.trim())
       || details.story || story.join(' ') || 'Bu ürün, sade çizgiyi yumuşak kumaş hissiyle bir araya getirir.';
     const shortText = details.short_description || story[0] || 'Rahat kalıp, dengeli duruş ve sezon boyunca sık kullanılacak bir parça.';
-    const deliveryText = details.delivery_note || 'Siparişler 1-3 iş günü içinde hazırlanır. Kargo çıktığında takip numarası hesabınıza ve sipariş ekranına işlenir.\nKullanılmamış ürünlerde değişim ve iade desteği için bizimle iletişime geçebilirsiniz.';
+    const deliveryText = String(details.delivery_note || '').trim();
     const measurementData = explicitMeasurementLines(product);
     const sizeLabels = productSizeLabels(product);
     const sizeSummary = sizeLabels.length ? 'Mevcut bedenler: ' + sizeLabels.join(', ') + '.' : 'Ölçü bilgisi paylaşılmadı.';
@@ -410,6 +410,8 @@ const colorMeta = (value) => sharedColorMeta(value, '#e9dfd0');
 
     const deliveryBodies = document.querySelectorAll('.info-body');
     if (deliveryBodies[2]) {
+      const deliveryItem = deliveryBodies[2].closest('.info-item');
+      if (deliveryItem) deliveryItem.hidden = !deliveryText;
       deliveryBodies[2].innerHTML = deliveryText.split('\n').filter(Boolean).map(function (line) {
         return '<p>' + escapeHtml(line.trim()) + '</p>';
       }).join('');
@@ -808,13 +810,6 @@ const colorMeta = (value) => sharedColorMeta(value, '#e9dfd0');
       window.location.href = 'siparis';
     }
   };
-
-  document.addEventListener('click', function (event) {
-    const waBtn = event.target.closest('.wa-btn');
-    if (!waBtn) return;
-    const text = encodeURIComponent('Merhaba, ' + currentProduct.name + ' ürünü hakkında bilgi almak istiyorum.');
-    window.open('https://wa.me/905555555555?text=' + text, '_blank');
-  });
 
   document.addEventListener('DOMContentLoaded', function () {
     bindImageLightbox();

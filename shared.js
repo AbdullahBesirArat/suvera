@@ -89,11 +89,9 @@ import { escapeHtml } from './js/core/storefront-utils.js';
   const PROFILE_KEY = 'suveraCustomerProfile';
   const defaultSettings = {
     siteName: 'SUVERA – Modern Tesettür Giyim',
-    freeShippingLimit: 600,
     features: {
       newBadge: true,
       favorites: true,
-      whatsapp: true,
       maintenance: false,
     },
   };
@@ -559,6 +557,7 @@ import { escapeHtml } from './js/core/storefront-utils.js';
         <div class="mobile-nav-footer">
           <a href="giris">👤 &nbsp; Hesabım</a>
           <a href="sepet">🛍️ &nbsp; Sepetim</a>
+          <a class="mobile-store-instagram" data-store-instagram hidden target="_blank" rel="noopener noreferrer" aria-label="Suvera Instagram hesabını aç"><span data-store-instagram-handle></span></a>
         </div>
       </div>
     </div>`;
@@ -997,13 +996,6 @@ import { escapeHtml } from './js/core/storefront-utils.js';
       [/^kariyer$/i, 'iletisim'],
       [/^is birligi$/i, 'iletisim'],
       [/^bize ulasin/i, 'iletisim#iletisim-kanallari'],
-      [/^e-posta:/i, 'iletisim#iletisim-kanallari'],
-      [/^whatsapp$/i, 'iletisim#iletisim-kanallari'],
-      [/^0850/i, 'iletisim#iletisim-kanallari'],
-      [/^instagram$/i, 'iletisim#iletisim-kanallari'],
-      [/^tiktok$/i, 'iletisim#iletisim-kanallari'],
-      [/^pinterest$/i, 'iletisim#iletisim-kanallari'],
-      [/^youtube$/i, 'iletisim#iletisim-kanallari'],
       [/^elbise$/i, 'urunler'],
       [/^abaya$/i, 'urunler'],
       [/^takim$/i, 'urunler'],

@@ -3,6 +3,7 @@
 
   const SITE_ORIGIN = window.SUVERA_SITE_ORIGIN || location.origin || 'https://suvera.com.tr';
   const DEFAULT_IMAGE = SITE_ORIGIN + '/og-cover.svg';
+  let currentStoreProfile = null;
 
   function toAbsolute(path) {
     if (!path) return SITE_ORIGIN + '/';
@@ -85,25 +86,7 @@
     const name = settings.name || document.title || 'Suvera';
     const description = settings.description || 'Suvera modern tesettur giyim seckileri.';
 
-    applyJsonLd('suvera-organization-schema', {
-      '@context': 'https://schema.org',
-      '@type': 'Organization',
-      name: 'Suvera',
-      url: SITE_ORIGIN,
-      logo: SITE_ORIGIN + '/favicon.svg',
-      sameAs: [
-        'https://www.instagram.com/',
-        'https://www.tiktok.com/',
-        'https://www.pinterest.com/'
-      ],
-      contactPoint: {
-        '@type': 'ContactPoint',
-        telephone: '+90-850-000-7872',
-        contactType: 'customer service',
-        areaServed: 'TR',
-        availableLanguage: ['tr', 'en']
-      }
-    });
+    applyStoreProfile(currentStoreProfile);
 
     applyJsonLd('suvera-website-schema', {
       '@context': 'https://schema.org',
@@ -126,6 +109,28 @@
     });
   }
 
+  function applyStoreProfile(profile) {
+    currentStoreProfile = profile || null;
+    const source = currentStoreProfile || {};
+    const schema = {
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      name: source.displayName || 'Suvera',
+      url: SITE_ORIGIN,
+      logo: SITE_ORIGIN + '/favicon.svg'
+    };
+    if (source.instagramUrl) schema.sameAs = [source.instagramUrl];
+    if (source.addressLine1 || source.addressLine2 || source.locality) {
+      schema.address = {
+        '@type': 'PostalAddress',
+        streetAddress: [source.addressLine1, source.addressLine2].filter(Boolean).join(', '),
+        addressLocality: source.locality || '',
+        addressCountry: 'TR'
+      };
+    }
+    applyJsonLd('suvera-organization-schema', schema);
+  }
+
   window.SuveraSEO = {
     origin: SITE_ORIGIN,
     defaultImage: DEFAULT_IMAGE,
@@ -133,6 +138,7 @@
     applyPageMeta: applyPageMeta,
     applyJsonLd: applyJsonLd,
     applyBaseSchemas: applyBaseSchemas,
+    applyStoreProfile: applyStoreProfile,
   };
 
   ensureMeta('name', 'theme-color').content = '#2f6041';

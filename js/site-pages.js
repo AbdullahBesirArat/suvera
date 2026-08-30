@@ -949,7 +949,6 @@ import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseIma
 
   function bindSupportForms() {
     [
-      ['contactForm', 'Mesajiniz kaydedildi. Suvera destek ekibi en kisa surede donus yapacak.'],
       ['returnRequestForm', 'Iade veya degisim talebiniz not edildi. Siparis kodunuzla birlikte destek ekibi sizi yonlendirecek.'],
       ['passwordResetForm', 'Sifre sifirlama baglantisi hazir durumda. Canli entegrasyonda e-posta servisine baglanacak.'],
     ].forEach(function (entry) {

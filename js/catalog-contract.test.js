@@ -144,6 +144,63 @@ test('product cards keep actions in the media overlay and remove quick add prese
   assert.match(styles, /padding: 6px 10px calc\(6px \+ env\(safe-area-inset-bottom\)\)/);
 });
 
+test('store profile uses canonical settings without fake social or contact fallbacks', () => {
+  const source = read('js/store-profile.js');
+  const footer = read('templates/partials/footer.html');
+  const contact = read('iletisim.html');
+  const scripts = read('templates/partials/scripts.html');
+  const seo = read('js/site-seo.js');
+  const shared = read('shared.js');
+  const ogCover = read('og-cover.svg');
+
+  assert.match(source, /SuveraAPI\.organization\.current\(\)/);
+  assert.match(source, /settings\.serviceNotes/);
+  assert.match(source, /canonicalInstagramUrl/);
+  assert.match([footer, contact, shared].join('\n'), /rel="noopener noreferrer"/);
+  assert.match(source, /Suvera Instagram hesabını aç/);
+  assert.match(footer, /data-store-profile/);
+  assert.match(footer, /data-store-address-line1/);
+  assert.match(footer, /data-store-service-notes/);
+  assert.match(contact, /data-store-address-card/);
+  assert.match(scripts, /js\/store-profile\.js/);
+  assert.doesNotMatch([footer, contact, seo].join('\n'), /href=["']#|javascript:void\(0\)|https:\/\/www\.instagram\.com\/["']/i);
+  assert.doesNotMatch([contact, seo].join('\n'), /0850 000 78 72|destek@suvera\.com|Hafta ici 09|tiktok\.com|pinterest\.com/i);
+  assert.doesNotMatch(ogCover, /600 TL|ucretsiz kargo|ücretsiz kargo/i);
+});
+
+test('store profile normalization preserves declared data and omits missing optional values', () => {
+  const listeners = {};
+  const context = {
+    URL,
+    CustomEvent: class CustomEvent {},
+    window: { addEventListener() {}, dispatchEvent() {} },
+    document: {
+      readyState: 'loading',
+      addEventListener(name, handler) { listeners[name] = handler; },
+      querySelectorAll() { return []; },
+      querySelector() { return null; },
+    },
+  };
+  vm.runInNewContext(read('js/store-profile.js'), context);
+  const profile = context.window.SuveraStoreProfile.normalize({
+    store_settings: {
+      brand: { name: 'SUVERA BUTİK' }, storeType: 'Butik Mağaza',
+      social: { instagramHandle: '@suvera.butik', instagramUrl: 'https://instagram.com/suvera.butik/' },
+      contact: { addressLine1: 'Bağlarbaşı Mahallesi', addressLine2: 'Bağdat Caddesi 402 C', district: 'Maltepe', city: 'İstanbul', postalCode: '34844' },
+      serviceNotes: ['Güvenli Alışveriş', 'Aynı Gün Kargo'],
+    },
+  });
+  assert.equal(profile.instagramUrl, 'https://www.instagram.com/suvera.butik');
+  assert.equal(profile.instagramHandle, '@suvera.butik');
+  assert.equal(profile.locality, 'Maltepe / İstanbul 34844');
+  assert.equal(Array.from(profile.serviceNotes).join('|'), 'Güvenli Alışveriş|Aynı Gün Kargo');
+
+  const missing = context.window.SuveraStoreProfile.normalize({ store_settings: {} });
+  assert.equal(missing.instagramUrl, '');
+  assert.equal(missing.addressLine1, '');
+  assert.equal(Array.from(missing.serviceNotes).length, 0);
+});
+
 test('product lightbox stays viewport-anchored and exposes complete gallery navigation', () => {
   const sharedStyles = read('shared.css');
   const fade = sharedStyles.slice(sharedStyles.indexOf('@keyframes pageFadeIn'), sharedStyles.indexOf('body { animation'));

@@ -759,6 +759,62 @@ footer .footer-bottom span {
   color: rgba(255,255,255,.68) !important;
 }
 
+.store-service-strip {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+  margin:0 0 34px;
+}
+.store-service-strip[hidden] { display:none; }
+.store-service-item {
+  min-height:52px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:10px 14px;
+  border:1px solid rgba(255,255,255,.14);
+  color:rgba(255,255,255,.88);
+  text-align:center;
+  font-size:11px;
+  letter-spacing:.08em;
+}
+.store-profile { display:grid; gap:7px; }
+.store-profile[hidden] { display:none; }
+.store-profile p { margin:0; }
+.store-profile-name { color:#fff !important; font-weight:500; letter-spacing:.08em; }
+.store-profile-type { font-size:12px; }
+.store-profile-address,
+.store-contact-address {
+  display:grid;
+  gap:3px;
+  color:rgba(255,255,255,.68);
+  font-size:12px;
+  font-style:normal;
+  line-height:1.6;
+}
+.store-contact-address { color:inherit; font-size:14px; }
+.store-instagram-link {
+  width:max-content;
+  min-height:44px;
+  display:inline-flex;
+  align-items:center;
+  gap:9px;
+  color:rgba(255,255,255,.9);
+  text-decoration:none;
+  white-space:nowrap;
+}
+.page-card .store-instagram-link,
+.page-side-card .store-instagram-link { color:var(--accent); }
+.mobile-store-instagram { min-height:44px; }
+
+@media(max-width:900px) {
+  .store-service-strip { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:600px) {
+  .store-service-strip { display:flex; overflow-x:auto; scroll-snap-type:x mandatory; margin-bottom:26px; }
+  .store-service-item { flex:0 0 min(72vw,260px); scroll-snap-align:start; }
+}
+
 .consent-banner[hidden] { display:none; }
 
 /* Dynamic catalogue navigation stays absent until its real data source has rows. */
