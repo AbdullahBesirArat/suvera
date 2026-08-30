@@ -158,6 +158,8 @@ test('store profile uses canonical settings without fake social or contact fallb
   assert.match(source, /canonicalInstagramUrl/);
   assert.match([footer, contact, shared].join('\n'), /rel="noopener noreferrer"/);
   assert.match(source, /Suvera Instagram hesabını aç/);
+  assert.match(read('shared.css'), /\.mobile-nav-footer:has\(\.mobile-store-instagram\)\s*\{[\s\S]*?display:\s*flex\s*!important/);
+  assert.match(read('shared.css'), /\.mobile-nav-footer:has\(\.mobile-store-instagram\) \.mobile-store-instagram\s*\{[\s\S]*?min-height:\s*44px/);
   assert.match(footer, /data-store-profile/);
   assert.match(footer, /data-store-address-line1/);
   assert.match(footer, /data-store-service-notes/);

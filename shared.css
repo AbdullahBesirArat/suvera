@@ -1625,6 +1625,25 @@ img.is-lazy.is-loaded {
     display: none !important;
   }
 
+  .mobile-nav-footer:has(.mobile-store-instagram) {
+    display: flex !important;
+    align-items: center;
+    padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
+  }
+
+  .mobile-nav-footer:has(.mobile-store-instagram) > a:not(.mobile-store-instagram) {
+    display: none;
+  }
+
+  .mobile-nav-footer:has(.mobile-store-instagram) .mobile-store-instagram {
+    width: 100%;
+    min-height: 44px;
+    justify-content: center;
+    border: 1px solid #eee7dc;
+    border-radius: 12px;
+    background: #fbfaf7;
+  }
+
   .filter-drawer {
     inset: 0 !important;
     top: 0 !important;
