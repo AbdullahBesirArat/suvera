@@ -8,12 +8,15 @@ const test = require('node:test');
 const root = path.resolve(__dirname, '..');
 const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 
-test('category results suppress editorial and duplicate featured products', () => {
+test('category and collection results suppress discovery and duplicate featured products', () => {
   const template = read('urunler.html');
   const renderer = read('js/storefront.js');
   assert.doesNotMatch(template, /id="featuredProductsStrip"|id="featuredProductsLabel"/);
-  assert.match(template, /\.collection-editorial\[hidden\]\{display:none;\}/);
-  assert.match(renderer, /collectionEditorial\.hidden = Boolean\(selectedCategoryId\)/);
+  assert.match(template, /\.catalog-discovery\[hidden\],\.page-wrap\[hidden\],\.discovery-section\[hidden\]\{display:none;\}/);
+  assert.match(renderer, /if \(discovery\) discovery\.hidden = !discoveryLanding/);
+  assert.match(renderer, /if \(results\) results\.hidden = discoveryLanding/);
+  assert.match(renderer, /'category', 'category_id', 'collection', 'collection_slug'/);
+  assert.doesNotMatch(template, /collection-editorial|editorialCategoryLinks|editorialFeature/);
   assert.doesNotMatch(renderer, /renderFeaturedStrip\(document\.getElementById\('featuredProductsStrip'\)/);
   assert.match(template, /id="collectionTitle"[\s\S]*?id="prodsGrid"/);
 });

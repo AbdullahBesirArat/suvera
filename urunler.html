@@ -41,24 +41,30 @@
 
     /* BREADCRUMB */
     .breadcrumb{padding:18px 48px 12px;font-size:12px;color:#635d55;letter-spacing:.5px;}
-    .collection-editorial{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(280px,.7fr);gap:24px;padding:8px 40px 28px;}
-    .collection-editorial[hidden]{display:none;}
-    .editorial-panel,.editorial-feature{background:var(--white);border:1px solid var(--light);}
-    .editorial-panel{padding:34px 38px;}
-    .editorial-kicker{font-size:10.5px;letter-spacing:2.8px;text-transform:uppercase;color:#4f6b45;margin-bottom:18px;}
-    .editorial-grid{display:grid;grid-template-columns:1fr 1fr 180px;gap:28px;align-items:start;}
-    .editorial-col h3{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:#3d5c36;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--light);}
-    .editorial-link{display:flex;justify-content:space-between;gap:10px;padding:10px 0;color:var(--mid);text-decoration:none;font-size:14px;transition:color .2s,transform .2s;}
-    .editorial-link:hover{color:var(--black);transform:translateX(2px);}
-    .editorial-link.act{color:var(--black);font-weight:600;}
-    .editorial-link span{color:#635d55;font-size:12px;}
-    .editorial-feature{padding:20px;display:flex;flex-direction:column;justify-content:space-between;background:linear-gradient(180deg,#f8f4ed 0%,#f2ede6 100%);}
-    .editorial-visual{min-height:180px;border-radius:6px;background:linear-gradient(140deg,#dfd6c8,#cfc3b4);display:flex;align-items:center;justify-content:center;font-size:66px;margin-bottom:18px;background-size:cover;background-position:center;}
-    .editorial-visual.has-image{color:transparent;min-height:220px;}
-    .editorial-feature small{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#4f6b45;}
-    .editorial-feature h2{font-family:var(--serif);font-size:36px;font-weight:300;line-height:1.02;margin:10px 0 14px;}
-    .editorial-feature p{font-size:13px;line-height:1.8;color:var(--mid);}
-    .editorial-cta{margin-top:16px;display:inline-flex;align-items:center;gap:8px;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#3d5c36;text-decoration:none;}
+    .catalog-discovery{max-width:1360px;margin:0 auto;padding:10px 40px 72px;}
+    .catalog-discovery[hidden],.page-wrap[hidden],.discovery-section[hidden]{display:none;}
+    .discovery-section+.discovery-section{margin-top:72px;}
+    .discovery-heading{margin-bottom:24px;}
+    .discovery-heading h1,.discovery-heading h2{font-family:var(--serif);font-size:clamp(34px,4vw,50px);font-weight:400;line-height:1;letter-spacing:.02em;}
+    .discovery-heading p{margin-top:9px;color:#635d55;font-size:13px;letter-spacing:.03em;}
+    .discovery-category-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;}
+    .discovery-collection-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;}
+    .discovery-card{display:block;min-width:0;background:var(--white);border:1px solid rgba(91,78,66,.14);border-radius:12px;overflow:hidden;color:var(--black);text-decoration:none;box-shadow:0 5px 24px rgba(42,33,24,.045);transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;}
+    .discovery-card:hover{transform:translateY(-3px);border-color:rgba(91,78,66,.3);box-shadow:0 12px 32px rgba(42,33,24,.09);}
+    .discovery-card:focus-visible{outline:3px solid #3d5c36;outline-offset:3px;}
+    .discovery-card-media{position:relative;overflow:hidden;background:linear-gradient(145deg,#eee9e1,#ddd6cc);aspect-ratio:4/5;}
+    .discovery-collection-card .discovery-card-media{aspect-ratio:16/10;}
+    .discovery-card-media img{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover;object-position:center;transition:transform .45s ease;}
+    .discovery-card:hover .discovery-card-media img{transform:scale(1.025);}
+    .discovery-card-copy{min-height:74px;padding:15px 16px 16px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;}
+    .discovery-card-title{display:block;font-family:var(--serif);font-size:22px;font-weight:500;line-height:1.05;overflow-wrap:anywhere;}
+    .discovery-card-count{display:block;margin-top:5px;color:#635d55;font-size:12px;line-height:1.2;}
+    .discovery-card-arrow{width:34px;height:34px;border:1px solid var(--light);border-radius:50%;display:grid;place-items:center;font-size:16px;color:#3d5c36;}
+    .discovery-empty{padding:28px 20px;background:rgba(255,255,255,.58);border:1px solid var(--light);border-radius:10px;color:#635d55;font-size:13px;}
+    .discovery-skeleton{pointer-events:none;box-shadow:none;}
+    .discovery-skeleton .discovery-card-media,.discovery-skeleton-line,.discovery-skeleton-count{background:linear-gradient(90deg,#eee9e1 25%,#f7f3ed 50%,#eee9e1 75%);background-size:200% 100%;animation:skeletonPulse 1.4s ease-in-out infinite;}
+    .discovery-skeleton-line{height:18px;width:68%;border-radius:4px;}
+    .discovery-skeleton-count{height:10px;width:42%;border-radius:4px;margin-top:9px;}
     .breadcrumb a{color:#635d55;text-decoration:none;transition:color .2s;}
     .breadcrumb a:hover{color:var(--accent);}
     .breadcrumb span{margin:0 6px;}
@@ -182,8 +188,9 @@
     .footer-col ul li a:hover{color:var(--accent2);}
     .footer-bottom{border-top:1px solid rgba(255,255,255,.07);padding-top:22px;display:flex;justify-content:space-between;font-size:11.5px;color:rgba(255,255,255,.3);}
 
-    @media(max-width:1024px){.collection-editorial{grid-template-columns:1fr;}.editorial-grid{grid-template-columns:1fr 1fr;}.sidebar-column{display:none;}.content{margin-left:0;}.prods-grid{grid-template-columns:repeat(3,1fr);}.footer-grid{grid-template-columns:1fr 1fr;}}
-    @media(max-width:640px){body{padding-top:92px;}nav{padding:0 20px;}.breadcrumb{padding:14px 18px 10px;font-size:11.5px;white-space:nowrap;overflow-x:auto;}.collection-editorial{padding:0 18px 18px;gap:14px;}.editorial-panel{padding:22px 18px;}.editorial-kicker{font-size:10px;letter-spacing:2.4px;margin-bottom:16px;}.editorial-grid{grid-template-columns:1fr;gap:18px;}.editorial-link{padding:8px 0;font-size:13.5px;}.editorial-feature{padding:18px;}.editorial-visual{min-height:160px;font-size:54px;margin-bottom:16px;}.editorial-feature h2{font-size:32px;line-height:1.06;}.editorial-feature p{font-size:12.5px;line-height:1.7;}.content{padding:0 18px 24px;}.content-header{align-items:flex-start;margin-bottom:20px;}.content-title{font-size:32px;}.content-meta{width:100%;justify-content:space-between;gap:12px;}.sort-select{max-width:170px;padding:8px 10px;}.prods-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}.featured-strip{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}.prod-card:hover{transform:none;box-shadow:none;}.prod-img{font-size:48px;}.prod-badges{top:8px;left:8px;}.badge{font-size:8.5px;padding:4px 7px;letter-spacing:1px;}.prod-fav{opacity:1;top:8px;right:8px;width:34px;height:34px;}.prod-hover-actions{position:static;transform:none;padding:0 10px 12px;background:#fff;}.quick-add{min-height:38px;font-size:9.5px;letter-spacing:1.4px;}.prod-info{padding:12px 10px 10px;}.prod-info h4{font-size:15px;}.prod-price{gap:6px;flex-wrap:wrap;}.filter-mobile-btn{width:100%;justify-content:center;min-height:40px;}footer{padding:0 20px 24px;}.footer-bottom{flex-direction:column;gap:12px;}}
+    @media(max-width:1024px){.catalog-discovery{padding-inline:28px;}.discovery-category-grid{grid-template-columns:repeat(3,minmax(0,1fr));}.sidebar-column{display:none;}.content{margin-left:0;}.prods-grid{grid-template-columns:repeat(3,1fr);}.footer-grid{grid-template-columns:1fr 1fr;}}
+    @media(max-width:720px){.discovery-category-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}.discovery-collection-grid{grid-template-columns:1fr;gap:14px;}}
+    @media(max-width:640px){body{padding-top:92px;}nav{padding:0 20px;}.breadcrumb{padding:14px 18px 10px;font-size:11.5px;white-space:nowrap;overflow-x:auto;}.catalog-discovery{padding:4px 18px 48px;}.discovery-section+.discovery-section{margin-top:52px;}.discovery-heading{margin-bottom:17px;}.discovery-heading h1,.discovery-heading h2{font-size:34px;}.discovery-heading p{font-size:12px;margin-top:7px;}.discovery-card{border-radius:9px;}.discovery-card-copy{min-height:68px;padding:12px 11px 13px;gap:7px;}.discovery-card-title{font-size:19px;}.discovery-card-count{font-size:11px;}.discovery-card-arrow{width:30px;height:30px;font-size:14px;}.discovery-collection-card .discovery-card-copy{padding-inline:14px;}.content{padding:0 18px 24px;}.content-header{align-items:flex-start;margin-bottom:20px;}.content-title{font-size:32px;}.content-meta{width:100%;justify-content:space-between;gap:12px;}.sort-select{max-width:170px;padding:8px 10px;}.prods-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}.featured-strip{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}.prod-card:hover{transform:none;box-shadow:none;}.prod-img{font-size:48px;}.prod-badges{top:8px;left:8px;}.badge{font-size:8.5px;padding:4px 7px;letter-spacing:1px;}.prod-fav{opacity:1;top:8px;right:8px;width:34px;height:34px;}.prod-hover-actions{position:static;transform:none;padding:0 10px 12px;background:#fff;}.quick-add{min-height:38px;font-size:9.5px;letter-spacing:1.4px;}.prod-info{padding:12px 10px 10px;}.prod-info h4{font-size:15px;}.prod-price{gap:6px;flex-wrap:wrap;}.filter-mobile-btn{width:100%;justify-content:center;min-height:40px;}footer{padding:0 20px 24px;}.footer-bottom{flex-direction:column;gap:12px;}}
   </style>
 </head>
 <body>
@@ -196,45 +203,28 @@
 
 <div class="breadcrumb">
   <a href="anasayfa">Ana Sayfa</a><span>›</span>
-  <a href="urunler" id="collectionBreadcrumbLink">Kategoriler</a><span>›</span>
+  <a href="urunler" id="collectionBreadcrumbLink">Kategoriler</a><span id="collectionBreadcrumbDivider">›</span>
   <span id="collectionBreadcrumbCurrent">Seçki</span>
 </div>
 
-<section class="collection-editorial" id="collectionEditorial" hidden>
-  <div class="editorial-panel">
-    <div class="editorial-kicker" id="collectionKicker"></div>
-    <div class="editorial-grid">
-      <div class="editorial-col">
-        <h3 id="editorialCategoryHeading">Kategoriler</h3>
-        <div id="editorialCategoryLinks"></div>
-      </div>
-      <div class="editorial-col">
-        <h3>Koleksiyonlar</h3>
-        <div id="editorialCollectionLinks"></div>
-      </div>
-      <div class="editorial-feature">
-        <div class="editorial-visual" id="editorialFeatureVisual" hidden></div>
-        <div>
-          <small id="editorialFeatureTag"></small>
-          <h2 id="editorialFeatureTitle"></h2>
-          <p id="editorialFeatureDescription"></p>
-          <a class="editorial-cta" href="urunler" id="editorialFeatureLink">Keşfet →</a>
-        </div>
-      </div>
+<section class="catalog-discovery" id="catalogDiscovery" aria-label="Kategori ve koleksiyon keşfi" hidden>
+  <section class="discovery-section" aria-labelledby="collectionTitle">
+    <div class="discovery-heading" id="catalogDiscoveryHeading">
+      <h1 id="collectionTitle">Kategoriler</h1>
     </div>
-  </div>
-  <div class="editorial-feature">
-    <div class="editorial-visual" id="collectionFeatureVisual" hidden></div>
-    <div>
-      <small id="collectionFeatureTag"></small>
-      <h2 id="collectionFeatureTitle"></h2>
-      <p id="collectionFeatureDescription"></p>
-      <a class="editorial-cta" href="#prodsGrid">Ürünlere in →</a>
+    <div class="discovery-category-grid" id="catalogDiscoveryCategories" aria-live="polite"></div>
+    <p class="discovery-empty" id="catalogDiscoveryCategoryEmpty" hidden>Henüz kategori bulunmuyor.</p>
+  </section>
+  <section class="discovery-section" id="catalogDiscoveryCollectionsSection" aria-labelledby="catalogDiscoveryCollectionsTitle">
+    <div class="discovery-heading">
+      <h2 id="catalogDiscoveryCollectionsTitle">Koleksiyonlar</h2>
+      <p>Suvera seçkilerini keşfedin.</p>
     </div>
-  </div>
+    <div class="discovery-collection-grid" id="catalogDiscoveryCollections" aria-live="polite"></div>
+  </section>
 </section>
 
-<div class="page-wrap">
+<div class="page-wrap" id="catalogResults">
 
   <!-- SIDEBAR -->
   <div class="sidebar-column">
@@ -270,8 +260,7 @@
   <!-- CONTENT -->
   <div class="content">
     <div class="content-header">
-      <div>
-        <h1 class="content-title" id="collectionTitle">Seçki</h1>
+      <div id="catalogResultsHeading">
         <p class="result-count" role="status" aria-live="polite" aria-atomic="true">Toplam <strong id="productResultCount">0</strong> ürün bulunmaktadır.</p>
       </div>
       <div class="content-meta">
