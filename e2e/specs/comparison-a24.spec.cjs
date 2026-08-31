@@ -14,6 +14,8 @@ test.describe('A24.4 product comparison', () => {
 
     // Add product A from its page; the compare bar reflects the count.
     await page.goto(`${e2eState.origins.storefront}/urun?id=${a}`);
+    const acceptConsent = page.locator('[data-consent-action="accept-all"]');
+    if (await acceptConsent.isVisible()) await acceptConsent.click();
     const toggle = page.locator('#compareToggle');
     await expect(toggle).toBeVisible();
     await toggle.click();

@@ -18,6 +18,8 @@ test.describe('A24.1 recently viewed', () => {
     expect(Number.isInteger(a) && Number.isInteger(b) && Number.isInteger(c)).toBe(true);
 
     await page.goto(`${e2eState.origins.storefront}/urun?id=${a}`);
+    const acceptConsent = page.locator('[data-consent-action="accept-all"]');
+    if (await acceptConsent.isVisible()) await acceptConsent.click();
     await page.goto(`${e2eState.origins.storefront}/urun?id=${b}`);
 
     const section = page.locator('#recentlyViewedSection');
@@ -49,6 +51,8 @@ test.describe('A24.1 recently viewed', () => {
     await dbQuery('delete from customer_recently_viewed where organization_id=$1 and customer_account_id=$2', [organizationId, accountId]);
 
     await page.goto(`${e2eState.origins.storefront}/urun?id=${a}`);
+    const acceptConsent = page.locator('[data-consent-action="accept-all"]');
+    if (await acceptConsent.isVisible()) await acceptConsent.click();
     await page.goto(`${e2eState.origins.storefront}/urun?id=${b}`);
 
     await page.goto(`${e2eState.origins.storefront}/giris`);

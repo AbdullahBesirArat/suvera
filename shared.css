@@ -749,6 +749,7 @@ nav.scrolled .hamburger span { background:#1a1a1a; }
 }
 
 footer .footer-col a,
+footer .footer-link-button,
 footer .social-btn {
   color: rgba(255,255,255,.82) !important;
 }

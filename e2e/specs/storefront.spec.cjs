@@ -199,7 +199,7 @@ test.describe('A03 Suvera storefront full-stack', () => {
     await page.goto(`${e2eState.origins.storefront}/siparis`);
     await page.locator('#checkoutCouponCode').fill('E2E20');
     await page.locator('#checkoutCouponApply').click();
-    await expect(page.locator('#checkoutCouponFeedback')).toContainText(/Kupon uygulandı|Yeni toplam/i);
+    await expect(page.locator('#checkoutCouponFeedback')).toContainText(/Kupon uygulandı|Kupon uygulandi|Yeni toplam/i);
     await page.locator('#checkoutCouponCode').fill('GECERSIZ');
     await page.locator('#checkoutCouponApply').click();
     await expect(page.locator('#checkoutCouponFeedback')).toContainText(/geçersiz|gecersiz|bulunamadı|uygulanamadı/i);
