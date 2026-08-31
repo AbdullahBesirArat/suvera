@@ -12,6 +12,7 @@ test('category results suppress editorial and duplicate featured products', () =
   const template = read('urunler.html');
   const renderer = read('js/storefront.js');
   assert.doesNotMatch(template, /id="featuredProductsStrip"|id="featuredProductsLabel"/);
+  assert.match(template, /\.collection-editorial\[hidden\]\{display:none;\}/);
   assert.match(renderer, /collectionEditorial\.hidden = Boolean\(selectedCategoryId\)/);
   assert.doesNotMatch(renderer, /renderFeaturedStrip\(document\.getElementById\('featuredProductsStrip'\)/);
   assert.match(template, /id="collectionTitle"[\s\S]*?id="prodsGrid"/);
