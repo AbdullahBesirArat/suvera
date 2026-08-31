@@ -37,10 +37,12 @@ test('cart contains only real items, note and non-empty summary surfaces', () =>
   assert.match(template, /id="cartItems"[\s\S]*?id="cartOrderNoteCard"[\s\S]*?id="cartSummaryCard"/);
   assert.match(template, /id="cartSummaryCard" hidden/);
   assert.match(template, /\.cart-list-head\[hidden\],\.section-stack\[hidden\],\.checkout-card\[hidden\]\{display:none\}/);
+  assert.match(template, /\.summary-row\[hidden\]\{display:none\}/);
   assert.match(template, /<h3>Sepetiniz boş\.<\/h3>[\s\S]*?>Ürünleri Keşfet<\/a>/);
 
   const renderer = read('js/cart-ui.js');
   assert.match(renderer, /summaryCard\.hidden = !list\.length/);
+  assert.match(renderer, /discount > 0 \? `-\$\{money\(discount\)\}` : money\(0\)/);
   assert.match(renderer, /orderNoteCard\.hidden = !list\.length/);
   assert.match(renderer, /Sepetiniz boş\./);
   assert.match(renderer, /Ürünleri Keşfet/);

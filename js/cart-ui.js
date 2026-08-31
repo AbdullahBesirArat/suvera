@@ -164,7 +164,7 @@ import { formatMoney as money, escapeHtml } from './core/storefront-utils.js';
     if (subtotalEl) subtotalEl.textContent = money(subtotal);
     if (shippingEl) shippingEl.textContent = shipping ? money(shipping) : 'Ücretsiz';
     if (discountRow) discountRow.hidden = discount <= 0;
-    if (discountEl) discountEl.textContent = `-${money(discount)}`;
+    if (discountEl) discountEl.textContent = discount > 0 ? `-${money(discount)}` : money(0);
     if (totalEl) totalEl.textContent = money(Math.max(0, subtotal - discount) + shipping);
     const summaryCard = document.getElementById('cartSummaryCard');
     const orderNoteCard = document.getElementById('cartOrderNoteCard');
