@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hesabim | SUVERA</title>
-  <meta name="description" content="Suvera hesabinizda siparis gecmisi, favoriler ve temel profil bilgilerini goruntuleyin." />
+  <title>Hesabım | SUVERA</title>
+  <meta name="description" content="Suvera hesabınızda sipariş geçmişi, favoriler ve temel profil bilgilerini görüntüleyin." />
   <link rel="canonical" href="https://suvera.com.tr/hesabim" />
     {{> head-defaults}}<link rel="stylesheet" href="css/site-pages.css" />
 </head>
@@ -13,33 +13,33 @@
   {{> navigation}}
 
   <main id="main" tabindex="-1" class="info-page-shell" data-page-root="accountPage">
-    <div class="page-breadcrumb"><a href="anasayfa">Ana Sayfa</a><span>›</span><span>Hesabim</span></div>
+    <div class="page-breadcrumb"><a href="anasayfa">Ana Sayfa</a><span>›</span><span>Hesabım</span></div>
 
     <section class="page-hero">
       <div class="page-hero-card">
-        <div class="hero-kicker">Musteri Paneli</div>
-        <h1 class="hero-title">Profil, siparis ve<br/>favoriler tek yerde.</h1>
-        <p class="page-copy">Checkout sonrasinda kaydedilen siparis ozetleri ve favori urunleriniz bu sayfada gorunur. E-posta ve siparis kodu ile canli hesap verisi yuklenebilir.</p>
+        <div class="hero-kicker">Müşteri Paneli</div>
+        <h1 class="hero-title">Profil, sipariş ve<br/>favoriler tek yerde.</h1>
+        <p class="page-copy">Ödeme sonrasında kaydedilen sipariş özetleri ve favori ürünleriniz bu sayfada görünür. E-posta ve sipariş kodu ile canlı hesap verisi yüklenebilir.</p>
         <div class="page-kv-grid">
           <div class="page-kv"><small>Ad Soyad</small><strong id="accountName">-</strong></div>
           <div class="page-kv"><small>E-posta</small><strong id="accountEmail">-</strong></div>
           <div class="page-kv"><small>Telefon</small><strong id="accountPhone">-</strong></div>
-          <div class="page-kv"><small>Durum</small><strong>Aktif Musteri</strong></div>
+          <div class="page-kv"><small>Durum</small><strong>Aktif Müşteri</strong></div>
         </div>
         <div class="page-stats" id="accountStats"></div>
       </div>
       <aside class="page-side-card">
         <div class="hero-kicker">Hizli Islemler</div>
         <div class="page-actions">
-          <a class="page-btn" href="siparis-takip">Siparis Takip</a>
+          <a class="page-btn" href="siparis-takip">Sipariş Takip</a>
           <a class="page-btn-secondary" href="favoriler">Favoriler</a>
-          <a class="page-btn-secondary" href="sifre-sifirla">Sifre Ayarlari</a>
+          <a class="page-btn-secondary" href="sifre-sifirla">Şifre Ayarları</a>
           <button class="page-btn-secondary" id="accountLogout" type="button">Çıkış Yap</button>
         </div>
         <form id="accountLookupForm" class="page-form" style="margin-top:18px;">
           <label for="accountLookupEmail">E-posta</label>
           <input id="accountLookupEmail" name="email" type="email" autocomplete="email" placeholder="ornek@mail.com" required />
-          <label for="accountLookupOrder">Siparis kodu</label>
+          <label for="accountLookupOrder">Sipariş kodu</label>
           <input id="accountLookupOrder" name="orderCode" type="text" placeholder="SVR-..." required />
           <button class="page-btn" type="submit">Hesabi getir</button>
           <div id="accountLookupMessage" class="page-empty" style="display:none;"></div>
@@ -51,17 +51,17 @@
       <div class="page-stack">
         <article class="page-card">
           <div class="page-section-head">
-            <h2 class="page-section-title">Siparis Gecmisi</h2>
-            <span class="page-section-subtitle">Yerel kayit</span>
+            <h2 class="page-section-title">Sipariş Geçmişi</h2>
+            <span class="page-section-subtitle">Yerel kayıt</span>
           </div>
-          <div id="accountOrders" class="page-empty">Siparisler yukleniyor.</div>
+          <div id="accountOrders" class="page-empty">Siparişler yükleniyor.</div>
         </article>
         <article class="page-card" id="addressBookCard">
           <div class="page-section-head">
             <h2 class="page-section-title">Adres Defterim</h2>
             <span class="page-section-subtitle">Teslimat ve fatura</span>
           </div>
-          <div id="addressBookList" class="page-stack" aria-live="polite">Adresler yukleniyor.</div>
+          <div id="addressBookList" class="page-stack" aria-live="polite">Adresler yükleniyor.</div>
           <button class="page-btn-secondary" id="addressAddButton" type="button" data-css="margin-top:14px;">Yeni adres ekle</button>
           <form id="addressForm" class="page-form" data-css="margin-top:16px;" hidden>
             <input type="hidden" id="addressId" />
@@ -152,23 +152,23 @@
       <aside class="page-stack">
         <article class="page-card">
           <div class="page-section-head">
-            <h2 class="page-section-title">Favori Ozet</h2>
-            <span class="page-section-subtitle">Kayitli urunler</span>
+            <h2 class="page-section-title">Favori Özeti</h2>
+            <span class="page-section-subtitle">Kayıtlı ürünler</span>
           </div>
-          <div id="accountFavorites" class="page-empty">Favori urunler yukleniyor.</div>
+          <div id="accountFavorites" class="page-empty">Favori ürünler yükleniyor.</div>
         </article>
         <article class="page-card">
           <div class="page-section-head">
             <h2 class="page-section-title">E-posta Degistir</h2>
-            <span class="page-section-subtitle">Onay linki</span>
+            <span class="page-section-subtitle">Onay bağlantısı</span>
           </div>
           <form id="emailChangeForm" class="page-form">
             <label for="emailChangeNew">Yeni e-posta</label>
             <input id="emailChangeNew" type="email" name="new_email" required placeholder="yeni@mail.com" />
             <label for="emailChangePassword">Mevcut parola</label>
-            <input id="emailChangePassword" type="password" name="password" required placeholder="Mevcut sifre" />
-            <button class="page-btn" type="submit">Onay linki gonder</button>
-            <p id="emailChangeNote" class="page-form-note">Yeni adrese onay baglantisi gonderilir. Onaylamadan once mevcut adres degismez.</p>
+            <input id="emailChangePassword" type="password" name="password" required placeholder="Mevcut şifre" />
+            <button class="page-btn" type="submit">Onay bağlantısı gönder</button>
+            <p id="emailChangeNote" class="page-form-note">Yeni adrese onay bağlantısı gönderilir. Onaylamadan önce mevcut adres değişmez.</p>
           </form>
         </article>
       </aside>
@@ -202,7 +202,7 @@
         }
         try {
           await window.SuveraAPI.customerAuth.requestEmailChange(newEmail, password);
-          note.textContent = 'Onay linki ' + newEmail + ' adresine gonderildi. Postanizi kontrol edin.';
+          note.textContent = 'Onay bağlantısı ' + newEmail + ' adresine gönderildi. Postanızı kontrol edin.';
           form.reset();
         } catch (err) {
           note.textContent = (err && err.message) || 'E-posta degistirme talebi gonderilemedi.';

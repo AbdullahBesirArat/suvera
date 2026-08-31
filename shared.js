@@ -122,7 +122,7 @@ import { escapeHtml } from './js/core/storefront-utils.js';
     const id = productKey(product);
     return {
       id,
-      name: product.name || 'Suvera Urunu',
+      name: product.name || 'Suvera Ürünü',
       price: Number(product.price || 0),
       image: product.image || '',
       emoji: product.emoji || '',
@@ -905,10 +905,10 @@ import { escapeHtml } from './js/core/storefront-utils.js';
     panel.className = 'mobile-search-panel';
     panel.setAttribute('aria-hidden', 'true');
     panel.innerHTML = [
-      '<div class="mobile-search-sheet" role="dialog" aria-modal="true" aria-label="Urun arama">',
+      '<div class="mobile-search-sheet" role="dialog" aria-modal="true" aria-label="Ürün arama">',
       '  <div class="mobile-search-head">',
-      '    <input class="mobile-search-input" type="search" placeholder="Urun, kategori veya koleksiyon ara" autocomplete="off"/>',
-      '    <button class="mobile-search-close" type="button" aria-label="Aramayi kapat">x</button>',
+      '    <input class="mobile-search-input" type="search" placeholder="Ürün, kategori veya koleksiyon ara" autocomplete="off"/>',
+      '    <button class="mobile-search-close" type="button" aria-label="Aramayı kapat">×</button>',
       '  </div>',
       '  <div class="mobile-search-suggestions">',
       '    <a href="urunler">Yeni gelenler</a>',
@@ -1037,33 +1037,33 @@ import { escapeHtml } from './js/core/storefront-utils.js';
     const path = (location.pathname.split('/').pop() || 'anasayfa').toLowerCase();
     const currentDescription = ((document.querySelector('meta[name="description"]') || {}).content || '').trim();
     const titleMap = {
-      'anasayfa': 'Suvera | Modern Tesettur Giyim',
-      'urunler': 'Urunler | Suvera',
-      'urun': 'Urun Detayi | Suvera',
+      'anasayfa': 'Suvera | Modern Tesettür Giyim',
+      'urunler': 'Ürünler | Suvera',
+      'urun': 'Ürün Detayı | Suvera',
       'sepet': 'Sepetim | Suvera',
-      'giris': 'Uye Girisi | Suvera',
-      'siparis': 'Odeme ve Teslimat | Suvera',
+      'giris': 'Üye Girişi | Suvera',
+      'siparis': 'Ödeme ve Teslimat | Suvera',
       'suvera': 'Suvera',
     };
     const descriptionMap = {
-      'anasayfa': 'Suvera modern tesettur giyim seckileri, guvenli alisveris akisi ve rafine koleksiyon deneyimi sunar.',
-      'urunler': 'Suvera koleksiyonundaki urunleri kesfedin, filtreleyin ve favorilerinize ekleyin.',
-      'urun': 'Suvera urun detaylarinda olcu, stok, teslimat ve benzer urun bilgilerini inceleyin.',
-      'sepet': 'Suvera sepetinizdeki urunleri kontrol edin ve odeme adimina hazirlanin.',
-      'giris': 'Suvera hesabiniza girin, siparislerinizi ve favorilerinizi tek ekrandan yonetin.',
-      'siparis': 'Suvera checkout akisinda teslimat, iletisim ve odeme adimlarini guvenli sekilde tamamlayin.',
-      'suvera': 'Suvera modern tesettur giyim vitrini.',
+      'anasayfa': 'Suvera modern tesettür giyim seçkileri, güvenli alışveriş akışı ve rafine koleksiyon deneyimi sunar.',
+      'urunler': 'Suvera koleksiyonundaki ürünleri keşfedin, filtreleyin ve favorilerinize ekleyin.',
+      'urun': 'Suvera ürün detaylarında ölçü, stok, teslimat ve benzer ürün bilgilerini inceleyin.',
+      'sepet': 'Suvera sepetinizdeki ürünleri kontrol edin ve ödeme adımına hazırlanın.',
+      'giris': 'Suvera hesabınıza girin, siparişlerinizi ve favorilerinizi tek ekrandan yönetin.',
+      'siparis': 'Suvera ödeme akışında teslimat, iletişim ve ödeme adımlarını güvenli şekilde tamamlayın.',
+      'suvera': 'Suvera modern tesettür giyim vitrini.',
     };
 
     window.SuveraSEO.applyPageMeta({
       title: titleMap[path] || document.title || 'Suvera',
-      description: descriptionMap[path] || currentDescription || 'Suvera modern tesettur giyim vitrini.',
+      description: descriptionMap[path] || currentDescription || 'Suvera modern tesettür giyim vitrini.',
       path: location.pathname + location.search,
     });
     window.SuveraSEO.applyBaseSchemas({
       path: location.pathname + location.search,
       name: titleMap[path] || document.title || 'Suvera',
-      description: descriptionMap[path] || currentDescription || 'Suvera modern tesettur giyim vitrini.',
+      description: descriptionMap[path] || currentDescription || 'Suvera modern tesettür giyim vitrini.',
     });
   }
 

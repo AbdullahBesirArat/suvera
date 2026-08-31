@@ -18,7 +18,7 @@ function count(text, pattern) {
 }
 
 test('all storefront templates build to static HTML with complete SEO metadata', () => {
-  assert.equal(manifest.pages.length, 25);
+  assert.equal(manifest.pages.length, 26);
   for (const page of manifest.pages) {
     const html = read(dist, page);
     assert.doesNotMatch(html, /\{\{[>#]/, page);

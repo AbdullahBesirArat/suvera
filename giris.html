@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="description" content="Suvera uye girisi, hesap erisimi ve sifre sifirlama adimlari." />
+  <meta name="description" content="Suvera üye girişi, hesap erişimi ve şifre sıfırlama adımları." />
   <link rel="canonical" href="https://suvera.com.tr/giris" />
   <meta name="theme-color" content="#2a4827" />
   {{> head-defaults}}
@@ -112,7 +112,7 @@
     <h1 class="form-title">Üye Girişi</h1>
     <div id="verifyBanner" class="login-notice verify auth-hidden" role="alert">
       <span id="verifyBannerMessage">E-postanizi dogrulayin.</span>
-      <a href="#" id="resendVerificationLink" class="verify-resend">Yeniden gonder</a>
+      <a href="#" id="resendVerificationLink" class="verify-resend">Yeniden gönder</a>
     </div>
     <div id="loginToast" class="login-notice success auth-hidden" role="status" aria-live="polite"></div>
 
@@ -336,7 +336,7 @@
     setAuthBusy('registerForm', true);
     try {
       await window.SuveraAPI.customerAuth.register({ name, email, password });
-      showToast('Kayit tamamlandi — e-postaniza dogrulama baglantisi gonderildi.');
+      showToast('Kayıt tamamlandı — e-postanıza doğrulama bağlantısı gönderildi.');
       showVerifyBanner(email);
     } catch (err) {
       showAuthError('registerForm', 'registerError', err.message || 'Üyelik oluşturulamadı.', emailField);

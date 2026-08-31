@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="description" content="Suvera sepet sayfasi, siparis ozeti ve odeme oncesi guvenli kontrol adimlarini sunar." />
+  <meta name="description" content="Suvera sepet sayfası, sipariş özeti ve ödeme öncesi güvenli kontrol adımlarını sunar." />
   <link rel="canonical" href="https://suvera.com.tr/sepet" />
   <meta name="theme-color" content="#2a4827" />
   {{> head-defaults}}
@@ -23,19 +23,6 @@
     .breadcrumb li+li::before{content:'›';margin-right:6px;opacity:.55}
     .breadcrumb a{color:inherit;text-decoration:none}
     .breadcrumb span{margin:0 6px;opacity:.55}
-    .cart-hero{display:grid;grid-template-columns:minmax(0,1.2fr) 320px;gap:24px;margin-bottom:26px}
-    .hero-card,.hero-side{background:var(--white);border:1px solid var(--light)}
-    .hero-card{padding:30px 34px}
-    .hero-kicker{font-size:10px;letter-spacing:2.8px;text-transform:uppercase;color:var(--accent-soft);margin-bottom:16px}
-    .hero-title{font-family:var(--serif);font-size:52px;font-weight:300;line-height:.95;margin-bottom:14px}
-    .hero-copy{max-width:620px;font-size:14px;line-height:1.9;color:var(--mid)}
-    .hero-meta{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
-    .meta-pill{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border:1px solid var(--light);font-size:11px;letter-spacing:1.6px;text-transform:uppercase;background:#faf8f4}
-    .hero-side{padding:24px;background:linear-gradient(180deg,#f7f3ed 0%,#efe9df 100%)}
-    .hero-side-icon{height:160px;border-radius:6px;background:linear-gradient(140deg,#ded3c4,#cdbdaa);display:flex;align-items:center;justify-content:center;font-size:72px;margin-bottom:18px}
-    .hero-side small{display:block;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--accent-soft);margin-bottom:10px}
-    .hero-side h2{font-family:var(--serif);font-size:34px;font-weight:300;line-height:1.02;margin-bottom:10px}
-    .hero-side p{font-size:13px;line-height:1.8;color:var(--mid)}
     .cart-layout{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:28px;align-items:start}
     .cart-main,.checkout-card,.section-card{background:var(--white);border:1px solid var(--light)}
     .cart-main{padding:26px 30px}
@@ -45,6 +32,7 @@
     .clear-btn{background:none;border:none;padding:0;font:inherit;font-size:11px;letter-spacing:1.7px;text-transform:uppercase;color:#635d57;cursor:pointer}
     .clear-btn:hover{color:#c44}
     .cart-list-head{display:grid;grid-template-columns:minmax(0,1fr) 140px;padding:12px 0 6px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#635d57}
+    .cart-list-head[hidden],.section-stack[hidden],.checkout-card[hidden]{display:none}
     .cart-item{display:grid;grid-template-columns:120px minmax(0,1fr) 140px;gap:22px;padding:24px 0;border-bottom:1px solid var(--light);align-items:start}
     .cart-item-img{width:120px;height:152px;background:linear-gradient(150deg,#e9e3d9,#d9cfc0);color:inherit;text-decoration:none;display:flex;align-items:center;justify-content:center;font-size:48px;overflow:hidden}
     .cart-item-body{min-width:0}
@@ -70,28 +58,11 @@
     .section-stack{display:grid;gap:18px;margin-top:18px}
     .section-card{padding:22px 24px}
     .section-title{font-family:var(--serif);font-size:28px;font-weight:300;margin:0 0 14px}
-    .shipping-progress{display:grid;gap:12px}
-    .progress-copy{font-size:13px;line-height:1.7;color:var(--mid)}
-    .progress-bar{height:10px;background:#efebe3;border-radius:999px;overflow:hidden}
-    .progress-fill{height:100%;width:0;background:linear-gradient(90deg,#4a6340,#2a4827);transition:width .3s ease}
-    .service-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-    .service-box{border:1px solid var(--light);padding:14px;background:#faf8f4}
-    .service-box strong{display:block;font-size:11px;letter-spacing:1.7px;text-transform:uppercase;margin-bottom:6px}
-    .service-box span{font-size:12px;color:#635d57;line-height:1.7}
     .order-note-btn{display:inline-flex;align-items:center;gap:8px;background:none;border:none;padding:0;font:inherit;font-size:11px;letter-spacing:1.8px;text-transform:uppercase;color:#635d57;cursor:pointer}
     .order-note-btn:hover{color:var(--accent)}
     .order-note-wrap{display:none;margin-top:14px}
     .order-note-wrap.open{display:block}
     .order-note-area{width:100%;min-height:92px;padding:14px 16px;border:1px solid var(--light);outline:none;font:inherit;font-size:13px;resize:vertical;background:#fcfbf8}
-    .gift-card{display:grid;grid-template-columns:74px minmax(0,1fr) auto;gap:16px;align-items:center;border:1px solid var(--light);background:#faf8f4;padding:16px}
-    .gift-visual{height:86px;background:linear-gradient(140deg,#e2d8ca,#d5c6b4);display:flex;align-items:center;justify-content:center;font-size:34px}
-    .gift-card h4{font-family:var(--serif);font-size:21px;font-weight:300;margin:0 0 4px}
-    .gift-card p{font-size:12px;color:#635d57;line-height:1.7;margin:0 0 8px}
-    .gift-prices{display:flex;gap:8px;align-items:baseline}
-    .gift-prices del{font-size:12px;color:#5f5f5f}
-    .gift-prices span{font-size:14px;font-weight:500;color:var(--accent)}
-    .gift-add-btn{height:42px;padding:0 18px;border:1px solid var(--black);background:#fff;font:inherit;font-size:11px;letter-spacing:1.8px;text-transform:uppercase;cursor:pointer}
-    .gift-add-btn:hover{background:#1f1f1f;color:#fff}
     .checkout-card{padding:24px;position:sticky;top:100px}
     .checkout-kicker{font-size:10px;letter-spacing:2.4px;text-transform:uppercase;color:#635d57;margin-bottom:12px}
     .summary-title{font-family:var(--serif);font-size:30px;font-weight:300;margin:0 0 20px}
@@ -104,13 +75,6 @@
     .summary-total{display:flex;justify-content:space-between;gap:14px;align-items:flex-end;margin-bottom:18px}
     .summary-total dt{font-size:12px;letter-spacing:1.6px;text-transform:uppercase;color:#635d57}
     .summary-total dd{font-size:28px;font-weight:500;margin:0}
-    .coupon-input-row{margin-bottom:14px;padding:14px 16px;border:1px dashed var(--light);background:#fcfaf6;font-size:12px;line-height:1.7;color:#635d57}
-    .coupon-input-row>strong,.coupon-input-row>label{display:block;font-size:10px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:#635d57;margin-bottom:6px}
-    .coupon-controls{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:10px}
-    .coupon-controls input{min-width:0;border:1px solid var(--light);padding:10px 11px;font:inherit;text-transform:uppercase}
-    .coupon-controls button{border:0;background:#2a4827;color:#fff;padding:10px 13px;font:inherit;cursor:pointer}
-    .coupon-result{margin-top:8px;color:#3d6b38}
-    .coupon-remove{display:none;margin-top:6px;border:0;background:none;padding:0;color:#9a5a50;text-decoration:underline;cursor:pointer;font:inherit}
     .btn-checkout{display:block;width:100%;padding:16px;background:#202020;color:#fff;text-decoration:none;text-align:center;font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px}
     .btn-checkout:hover{background:#2a4827}
     .alt-pay{border:1px solid #d7def5;background:#fbfcff;padding:14px 16px;font-size:12px;line-height:1.7;color:#445}
@@ -127,7 +91,7 @@
     .footer-col a{font-size:13px;color:rgba(255,255,255,.48);text-decoration:none}
     .footer-bottom{border-top:1px solid rgba(255,255,255,.07);padding-top:22px;display:flex;justify-content:space-between;gap:14px;font-size:11px;color:rgba(255,255,255,.32)}
     @media(max-width:1100px){
-      .cart-hero,.cart-layout{grid-template-columns:1fr}
+      .cart-layout{grid-template-columns:1fr}
       .checkout-card{position:static}
       .service-list{grid-template-columns:repeat(2,minmax(0,1fr))}
     }
@@ -140,7 +104,6 @@
       .cart-item{grid-template-columns:86px minmax(0,1fr);gap:16px}
       .cart-item-img{width:86px;height:116px}
       .cart-item-price{grid-column:2;align-items:flex-start;text-align:left;padding-top:0}
-      .gift-card{grid-template-columns:1fr;justify-items:start}
       .service-list,.footer-grid{grid-template-columns:1fr}
       .footer-bottom{flex-direction:column}
     }
@@ -156,68 +119,32 @@
       <ol><li><a href="anasayfa">Ana Sayfa</a></li><li aria-current="page">Sepet</li></ol>
     </div>
 
-    <section class="cart-hero">
-      <div class="hero-card">
-        <div class="hero-kicker">Sepet Özeti</div>
-        <h1 class="hero-title">Seçtiklerin hazır,
-          <br/>son dokunuş kaldı.</h1>
-      <p class="hero-copy">Sepetinizdeki Suvera parçalarını kontrol edin, sipariş notunuzu ekleyin ve güvenli alışveriş akışına devam edin.</p>
-        <div class="hero-meta">
-          <div class="meta-pill">Güvenli ödeme</div>
-          <div class="meta-pill">Hızlı kargo</div>
-          <div class="meta-pill">Kolay iade</div>
-        </div>
-      </div>
-      <aside class="hero-side">
-        <div class="hero-side-icon">🛍️</div>
-        <small>Sepette Ayrıcalık</small>
-        <h2>Her adımda
-          <br/>daha net,
-          <br/>daha düzenli.</h2>
-        <p>Ücretsiz kargo eşiği, not alanı ve tamamlayıcı ürün önerileri tek akışta görünür durumda.</p>
-      </aside>
-    </section>
-
     <section class="cart-layout">
       <div>
         <div class="cart-main">
           <div class="cart-head">
             <div>
-              <h2 class="page-title">Sepetim</h2>
-              <div class="page-count">(0 Ürün)</div>
+              <h1 class="page-title">Sepetim</h1>
+              <div class="page-count">0 ürün</div>
               <p id="cartStatus" class="cart-status"></p>
             </div>
             <button class="clear-btn" type="button" data-cart-mutation data-action="clear-cart" aria-label="Sepetteki tüm ürünleri temizle">Sepeti Temizle</button>
           </div>
 
-          <div class="cart-list-head">
+          <div class="cart-list-head" id="cartListHead" hidden>
             <span>Ürünler</span>
             <span style="text-align:right">Toplam</span>
           </div>
 
           <div id="cartItems" aria-busy="true">
             <div class="cart-empty">
-              <h3>Sepetiniz boş</h3>
-              <p>Yeni sezon seçkisinden birkaç parça ekleyerek devam edebilirsiniz.</p>
-              <a class="empty-cta" href="urunler">Alışverişe Dön</a>
+              <h3>Sepetiniz boş.</h3>
+              <a class="empty-cta" href="urunler">Ürünleri Keşfet</a>
             </div>
           </div>
         </div>
 
-        <div class="section-stack">
-          <div class="section-card">
-            <h3 class="section-title">Kargo Avantajı</h3>
-            <div class="shipping-progress">
-              <div class="progress-copy" id="freeShippingCopy">Ücretsiz kargo için sepetinizi güncelliyoruz.</div>
-              <div class="progress-bar"><div class="progress-fill" id="freeShippingBar"></div></div>
-              <div class="service-list">
-                <div class="service-box"><strong>24 Saatte Hazırlık</strong><span>Onaylanan siparişler hızlıca paketlenir.</span></div>
-                <div class="service-box"><strong>Kolay Değişim</strong><span>Beden ve model değişiminde yalın süreç.</span></div>
-                <div class="service-box"><strong>Güvenli Paketleme</strong><span>Her sipariş korumalı ve düzenli hazırlanır.</span></div>
-              </div>
-            </div>
-          </div>
-
+        <div class="section-stack" id="cartOrderNoteCard" hidden>
           <div class="section-card">
             <button class="order-note-btn" type="button" data-action="toggle-order-note">Sipariş Notu Ekle</button>
             <div class="order-note-wrap" id="orderNoteWrap">
@@ -225,53 +152,22 @@
             </div>
           </div>
 
-          <div class="section-card">
-            <h3 class="section-title">Hediye Paketi</h3>
-            <div class="gift-card">
-              <div class="gift-visual">🎁</div>
-              <div>
-                <h4>Standart Hediye Paketi</h4>
-                <p>Sade dokulu kutu, korumalı iç ambalaj ve zarif kart eşliğiyle hazırlanır.</p>
-                <div class="gift-prices"><del>50,00 TL</del><span>45,00 TL</span></div>
-              </div>
-              <button class="gift-add-btn" id="giftAddBtn" type="button" data-action="toggle-gift">Sepete Ekle</button>
-            </div>
-          </div>
-
         </div>
       </div>
 
-      <aside class="checkout-card">
+      <aside class="checkout-card" id="cartSummaryCard" hidden>
         <div class="checkout-kicker">Ödeme Öncesi</div>
         <h3 class="summary-title" id="cartSummaryTitle">Sipariş Özeti</h3>
         <dl class="summary-panel" aria-labelledby="cartSummaryTitle">
           <div class="summary-row"><dt>Sepet Toplamı</dt><dd id="subtotal">0,00 TL</dd></div>
-          <div class="summary-row" id="cartDiscountRow" hidden><dt>İndirim</dt><dd id="cartDiscount">-0,00 TL</dd></div>
-          <div class="summary-row"><dt>Kargo</dt><dd id="cartShipping" style="color:#4a7c59">Ücretsiz</dd></div>
+          <div class="summary-row" id="cartDiscountRow" hidden><dt>İndirim</dt><dd id="cartDiscount">0,00 TL</dd></div>
+          <div class="summary-row"><dt>Kargo</dt><dd id="cartShipping">0,00 TL</dd></div>
           <div class="summary-divider" aria-hidden="true"></div>
           <div class="summary-total"><dt>Genel Toplam</dt><dd id="total">0,00 TL</dd></div>
         </dl>
 
-        <div class="coupon-input-row">
-          <label for="cartCouponCode">Kupon kodu</label>
-          <span id="cartCouponHelp">Kupon checkout sırasında sunucuda yeniden doğrulanır.</span>
-          <div class="coupon-controls">
-            <input id="cartCouponCode" aria-describedby="cartCouponHelp cartCouponResult" aria-invalid="false" autocomplete="off" placeholder="KUPON KODU" />
-            <button id="cartCouponApply" data-cart-mutation type="button">Kuponu uygula</button>
-          </div>
-          <div class="coupon-result" id="cartCouponResult" role="status"></div>
-          <button class="coupon-remove" id="cartCouponRemove" data-cart-mutation type="button">Kuponu kaldır</button>
-        </div>
-
         <a id="cartCheckoutLink" aria-describedby="checkoutAvailability" aria-disabled="true" class="btn-checkout">Satın Al →</a>
         <p id="checkoutAvailability">Sepetiniz boşken ödeme adımına geçilemez.</p>
-
-        <div class="alt-pay">
-          <strong>Ödeme Bilgisi</strong>
-          Kart ve havale seçenekleri bir sonraki adımda güvenli ödeme akışında sunulur.
-        </div>
-
-        <div class="summary-foot">🔒 Tüm işlemler SSL ile şifrelenir. Siparişinizi güvenle tamamlayabilirsiniz.</div>
       </aside>
     </section>
   </main>
@@ -279,31 +175,9 @@
   {{> footer}}
 {{> consent}}
   {{> scripts}}
-  <script src="js/coupon-ui.js"></script>
   <script type="module" src="js/cart-ui.js"></script>
   <script>
     const CHECKOUT_NOTE_KEY = 'suveraCheckoutNote';
-    const GIFT_WRAP_KEY = 'suveraGiftWrap';
-
-    function cartItems() {
-      return window.SuveraCartUI ? window.SuveraCartUI.loadCart() : [];
-    }
-
-    function cartSubtotalValue() {
-      return window.SuveraCartUI ? window.SuveraCartUI.cartSubtotal(cartItems()) : 0;
-    }
-
-    function freeShippingLimit() {
-      const settings = window.SuveraCartUI && window.SuveraCartUI.storeSettings ? window.SuveraCartUI.storeSettings() : null;
-      const configured = Number(settings && settings.freeShippingThreshold || 0);
-      if (configured > 0) return configured;
-      try {
-        const saved = JSON.parse(localStorage.getItem('suveraSiteSettings') || 'null');
-        return Number(saved?.freeShippingLimit || 600);
-      } catch (_) {
-        return 600;
-      }
-    }
 
     function toggleOrderNote() {
       document.getElementById('orderNoteWrap').classList.toggle('open');
@@ -315,97 +189,21 @@
       localStorage.setItem(CHECKOUT_NOTE_KEY, field.value.trim());
     }
 
-    function saveGiftWrapState(active) {
-      localStorage.setItem(GIFT_WRAP_KEY, active ? 'true' : 'false');
-    }
-
-    function toggleGift() {
-      const btn = document.getElementById('giftAddBtn');
-      const added = btn.dataset.added === 'true';
-      btn.dataset.added = added ? 'false' : 'true';
-      btn.textContent = added ? 'Sepete Ekle' : 'Eklendi';
-      saveGiftWrapState(!added);
-      if (window.showToast) window.showToast(added ? 'Hediye paketi çıkarıldı' : 'Hediye paketi eklendi', added ? 'dark' : 'green');
-    }
-
-    function hydrateCheckoutPreferences() {
+    function hydrateCheckoutNote() {
       const noteField = document.getElementById('orderNoteArea');
       const noteWrap = document.getElementById('orderNoteWrap');
       const note = localStorage.getItem(CHECKOUT_NOTE_KEY) || '';
       if (noteField) noteField.value = note;
       if (note && noteWrap) noteWrap.classList.add('open');
-
-      const btn = document.getElementById('giftAddBtn');
-      const giftAdded = localStorage.getItem(GIFT_WRAP_KEY) === 'true';
-      if (btn) {
-        btn.dataset.added = giftAdded ? 'true' : 'false';
-        btn.textContent = giftAdded ? 'Eklendi' : 'Sepete Ekle';
-      }
-    }
-
-    function updateFreeShippingStatus() {
-      const subtotal = cartSubtotalValue();
-      const limit = freeShippingLimit();
-      const remaining = Math.max(limit - subtotal, 0);
-      const progress = limit ? Math.min((subtotal / limit) * 100, 100) : 100;
-      const copy = document.getElementById('freeShippingCopy');
-      const bar = document.getElementById('freeShippingBar');
-      if (!copy || !bar) return;
-
-      if (!subtotal) {
-        copy.textContent = `Sepetinizi oluşturarak ${limit.toLocaleString('tr-TR')} TL üzeri ücretsiz kargodan yararlanın.`;
-      } else if (remaining > 0) {
-        copy.textContent = `Ücretsiz kargo için sadece ${remaining.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TL daha ekleyin.`;
-      } else {
-        copy.textContent = 'Harika, siparişiniz ücretsiz kargo avantajına ulaştı.';
-      }
-
-      bar.style.width = progress + '%';
-    }
-
-    function enhanceEmptyState() {
-      const container = document.getElementById('cartItems');
-      if (!container) return;
-      if (cartItems().length) return;
-      container.innerHTML = `
-        <div class="cart-empty">
-          <h3>Sepetiniz boş</h3>
-          <p>Yeni sezon seçkisinden birkaç parça ekleyerek alışverişe devam edebilirsiniz.</p>
-          <a class="empty-cta" href="urunler">Alışverişe Dön</a>
-        </div>`;
-    }
-
-    function refreshCartExperience() {
-      updateFreeShippingStatus();
-      enhanceEmptyState();
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      hydrateCheckoutPreferences();
+      hydrateCheckoutNote();
       const noteField = document.getElementById('orderNoteArea');
       if (noteField) {
         noteField.addEventListener('input', saveCheckoutNote);
       }
-      setTimeout(refreshCartExperience, 0);
     });
-
-    const originalChangeQty = window.changeQty;
-    window.changeQty = function(indexOrBtn, delta) {
-      if (typeof originalChangeQty === 'function') originalChangeQty(indexOrBtn, delta);
-      refreshCartExperience();
-    };
-
-    const originalRemoveCartItem = window.removeCartItem;
-    window.removeCartItem = function(index) {
-      if (typeof originalRemoveCartItem === 'function') originalRemoveCartItem(index);
-      refreshCartExperience();
-    };
-
-    const originalClearCart = window.clearCart;
-    window.clearCart = function() {
-      if (typeof originalClearCart === 'function') originalClearCart();
-      refreshCartExperience();
-    };
   </script>
 </body>
 </html>

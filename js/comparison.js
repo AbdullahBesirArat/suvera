@@ -8,11 +8,14 @@
   const STORAGE_KEY = 'suvera:comparison:v1';
   const MAX = 4;
 
+  const preferencesAllowed = () => !window.SuveraConsent || window.SuveraConsent.allows('preferences');
+
   function parseIds(raw) {
     return [...new Set(String(raw || '').split(',').map((v) => Number(v.trim())).filter((n) => Number.isInteger(n) && n > 0))].slice(0, MAX);
   }
 
   function readLocal() {
+    if (!preferencesAllowed()) return [];
     try {
       const list = JSON.parse(window.localStorage.getItem(STORAGE_KEY) || '[]');
       return Array.isArray(list) ? parseIds(list.join(',')) : [];
@@ -22,6 +25,7 @@
   }
 
   function writeLocal(ids) {
+    if (!preferencesAllowed()) return;
     try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(parseIds(ids.join(',')))); } catch (_) { /* ignore */ }
   }
 
@@ -226,6 +230,7 @@
     bindComparePage();
     void renderComparePage();
   }
+
 
   window.SuveraComparison = { STORAGE_KEY, MAX, parseIds, readLocal, writeLocal, add, remove, mergeAfterLogin, reflect };
 

@@ -38,7 +38,7 @@
   function applyPageMeta(options) {
     const settings = options || {};
     const title = settings.title || document.title || 'Suvera';
-    const description = settings.description || 'Suvera modern tesettur giyim seckileri.';
+    const description = settings.description || 'Suvera modern tesettür giyim seçkileri.';
     const url = toAbsolute(settings.path || location.pathname + location.search);
     const image = toAbsolute(settings.image || DEFAULT_IMAGE);
     const type = settings.type || 'website';
@@ -84,7 +84,7 @@
     const settings = options || {};
     const path = settings.path || location.pathname;
     const name = settings.name || document.title || 'Suvera';
-    const description = settings.description || 'Suvera modern tesettur giyim seckileri.';
+    const description = settings.description || 'Suvera modern tesettür giyim seçkileri.';
 
     applyStoreProfile(currentStoreProfile);
 

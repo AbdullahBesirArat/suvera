@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>E-posta Dogrulama | Suvera</title>
+  <title>E-posta Doğrulama | Suvera</title>
   <meta name="description" content="Suvera hesabinizin e-posta dogrulamasini tamamlayin." />
   <meta name="robots" content="noindex, nofollow" />
   <link rel="canonical" href="https://suvera.com.tr/dogrula" />
@@ -14,17 +14,17 @@
   {{> navigation}}
 
   <main id="main" tabindex="-1" class="info-page-shell">
-    <div class="page-breadcrumb"><a href="anasayfa">Ana Sayfa</a><span>›</span><span>E-posta Dogrulama</span></div>
+    <div class="page-breadcrumb"><a href="anasayfa">Ana Sayfa</a><span>›</span><span>E-posta Doğrulama</span></div>
     <section class="page-hero">
       <div class="page-hero-card">
         <div class="hero-kicker">Hesap</div>
         <h1 class="hero-title" id="verifyTitle">E-postaniz dogrulaniyor...</h1>
-        <p class="page-copy" id="verifyMessage">Lutfen bekleyin, baglantiyi dogruluyoruz.</p>
+        <p class="page-copy" id="verifyMessage">Lütfen bekleyin, bağlantıyı doğruluyoruz.</p>
       </div>
       <aside class="page-side-card">
         <div class="page-checklist">
           <div class="page-check"><strong>Tek kullanim</strong><span>Linkler tek seferlik ve 24 saat gecerlidir.</span></div>
-          <div class="page-check"><strong>Guvenli</strong><span>Tokenlar yalnizca hash olarak saklanir.</span></div>
+          <div class="page-check"><strong>Güvenli</strong><span>Tokenlar yalnızca hash olarak saklanır.</span></div>
         </div>
       </aside>
     </section>
@@ -35,10 +35,10 @@
           <h2 class="page-section-title">Sonuc</h2>
           <span class="page-section-subtitle" id="verifyBadge">Bekleniyor</span>
         </div>
-        <p class="page-form-note" id="verifyNote">Baglanti dogrulamasi devam ediyor.</p>
+        <p class="page-form-note" id="verifyNote">Bağlantı doğrulaması devam ediyor.</p>
         <div class="page-form-actions" style="margin-top:16px;">
-          <a class="page-btn" href="hesabim">Hesabima git</a>
-          <a class="page-btn-secondary" href="giris">Giris</a>
+          <a class="page-btn" href="hesabim">Hesabıma git</a>
+          <a class="page-btn-secondary" href="giris">Giriş</a>
         </div>
       </article>
     </section>
@@ -65,7 +65,7 @@
       }
 
       if (!token) {
-        setState('err', 'Gecersiz baglanti', 'Dogrulama linki eksik veya hatali.');
+        setState('err', 'Geçersiz bağlantı', 'Doğrulama bağlantısı eksik veya hatalı.');
         return;
       }
 
@@ -79,7 +79,7 @@
             setState('ok', 'E-postaniz dogrulandi', 'Tesekkurler. Artik hesabinizdaki tum islemleri yapabilirsiniz.');
           }
         } catch (err) {
-          setState('err', 'Dogrulama basarisiz', (err && err.message) || 'Link gecersiz veya suresi dolmus olabilir.');
+          setState('err', 'Doğrulama başarısız', (err && err.message) || 'Bağlantı geçersiz veya süresi dolmuş olabilir.');
         }
       })();
     });

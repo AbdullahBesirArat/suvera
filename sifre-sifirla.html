@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sifre Sifirla | SUVERA</title>
-  <meta name="description" content="Suvera hesabiniz icin sifre sifirlama talebi olusturun." />
+  <title>Şifre Sıfırla | SUVERA</title>
+  <meta name="description" content="Suvera hesabınız için şifre sıfırlama talebi oluşturun." />
   <link rel="canonical" href="https://suvera.com.tr/sifre-sifirla" />
   {{> head-defaults}}
   <link rel="stylesheet" href="css/site-pages.css" />
@@ -14,17 +14,17 @@
   {{> navigation}}
 
   <main id="main" tabindex="-1" class="info-page-shell">
-    <div class="page-breadcrumb"><a href="anasayfa">Ana Sayfa</a><span>›</span><a href="giris">Giris</a><span>›</span><span>Sifre Sifirla</span></div>
+    <div class="page-breadcrumb"><a href="anasayfa">Ana Sayfa</a><span>›</span><a href="giris">Giriş</a><span>›</span><span>Şifre Sıfırla</span></div>
     <section class="page-hero">
       <div class="page-hero-card">
         <div class="hero-kicker">Guvenlik</div>
-        <h1 class="hero-title">Yeni sifre baglantinizi<br/>bir dakikada alin.</h1>
+        <h1 class="hero-title">Yeni şifre bağlantınızı<br/>bir dakikada alın.</h1>
         <p class="page-copy">Canli e-posta servisi devreye alindiginda sifirlama baglantisi otomatik gonderilecek. Simdi bu ekran yerel akis ve form deneyimini saglar.</p>
       </div>
       <aside class="page-side-card">
         <div class="page-checklist">
-          <div class="page-check"><strong>E-posta dogrulama</strong><span>Baglanti yalnizca kayitli e-postaya gider.</span></div>
-          <div class="page-check"><strong>Tek kullanim</strong><span>Baglantilar tek oturum icin uretilir.</span></div>
+          <div class="page-check"><strong>E-posta doğrulama</strong><span>Bağlantı yalnızca kayıtlı e-postaya gider.</span></div>
+          <div class="page-check"><strong>Tek kullanım</strong><span>Bağlantılar tek oturum için üretilir.</span></div>
         </div>
       </aside>
     </section>
@@ -32,7 +32,7 @@
     <section class="page-grid single">
       <article class="page-card">
         <div class="page-section-head">
-          <h2 class="page-section-title">Sifre Sifirlama Formu</h2>
+          <h2 class="page-section-title">Şifre Sıfırlama Formu</h2>
           <span class="page-section-subtitle">Hazir</span>
         </div>
         <form class="page-form" id="passwordResetForm">
@@ -42,15 +42,15 @@
               <input id="resetEmail" type="email" placeholder="ornek@suvera.com" required />
             </div>
             <div class="full" id="resetPasswordWrap" style="display:none;">
-              <label for="resetNewPassword">Yeni sifre</label>
+              <label for="resetNewPassword">Yeni şifre</label>
               <input id="resetNewPassword" type="password" placeholder="En az 8 karakter" />
             </div>
           </div>
           <div class="page-form-actions">
-            <button type="submit" class="page-btn">Baglanti Gonder</button>
-            <a class="page-btn-secondary" href="giris">Girise Don</a>
+            <button type="submit" class="page-btn">Bağlantı Gönder</button>
+            <a class="page-btn-secondary" href="giris">Girişe Dön</a>
           </div>
-          <p class="page-form-note" id="resetFormNote">Kayitli e-postaniza sifirlama baglantisi gonderilir.</p>
+          <p class="page-form-note" id="resetFormNote">Kayıtlı e-postanıza sıfırlama bağlantısı gönderilir.</p>
         </form>
       </article>
     </section>
@@ -82,13 +82,13 @@
         try {
           if (token) {
             await window.SuveraAPI.customerAuth.confirmReset(token, password.value);
-            note.textContent = 'Sifreniz guncellendi. Giris sayfasina donebilirsiniz.';
+            note.textContent = 'Şifreniz güncellendi. Giriş sayfasına dönebilirsiniz.';
             return;
           }
           await window.SuveraAPI.customerAuth.requestReset(email.value.trim());
-          note.textContent = 'E-posta kayitli ise sifirlama baglantisi gonderildi.';
+          note.textContent = 'E-posta kayıtlı ise sıfırlama bağlantısı gönderildi.';
         } catch (err) {
-          note.textContent = err.message || 'Sifre sifirlama islemi tamamlanamadi.';
+          note.textContent = err.message || 'Şifre sıfırlama işlemi tamamlanamadı.';
         }
       });
     });

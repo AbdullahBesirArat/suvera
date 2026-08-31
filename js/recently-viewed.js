@@ -9,7 +9,10 @@
   const MAX = 24;
   const TTL_MS = 90 * 24 * 60 * 60 * 1000;
 
+  const preferencesAllowed = () => !window.SuveraConsent || window.SuveraConsent.allows('preferences');
+
   function readLocal() {
+    if (!preferencesAllowed()) return [];
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY);
       const list = raw ? JSON.parse(raw) : [];
@@ -25,6 +28,7 @@
   }
 
   function writeLocal(list) {
+    if (!preferencesAllowed()) return;
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(list.slice(0, MAX)));
     } catch (_) { /* storage may be unavailable/full */ }
@@ -49,6 +53,7 @@
   }
 
   async function record(id) {
+    if (!preferencesAllowed()) return;
     recordLocal(id);
     if (signedIn() && window.SuveraAPI && window.SuveraAPI.recentlyViewed) {
       try { await window.SuveraAPI.recentlyViewed.record(id); } catch (_) { /* best effort */ }
@@ -102,6 +107,7 @@
   }
 
   async function fetchItems(excludeId) {
+    if (!preferencesAllowed()) return [];
     const api = window.SuveraAPI;
     if (!api) return [];
     if (signedIn() && api.recentlyViewed) {

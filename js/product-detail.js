@@ -331,7 +331,7 @@ const colorMeta = (value) => sharedColorMeta(value, '#e9dfd0');
     wrap.querySelectorAll('.size-btn').forEach(function (button) {
       button.addEventListener('click', function () {
         if (button.disabled) {
-          showCartFeedback('Bu beden bu renk icin stokta yok. Lutfen farkli beden/renk deneyin.', { success: false });
+          showCartFeedback('Bu beden bu renk için stokta yok. Lütfen farklı beden/renk deneyin.', { success: false });
           return;
         }
         wrap.querySelectorAll('.size-btn').forEach(function (item) { item.classList.remove('active'); item.setAttribute('aria-pressed', 'false'); });
@@ -767,7 +767,7 @@ const colorMeta = (value) => sharedColorMeta(value, '#e9dfd0');
       });
       if (window.showToast) {
         window.showToast(
-          result.active ? 'Favorilere eklendi' : 'Favorilerden kaldirildi',
+          result.active ? 'Favorilere eklendi' : 'Favorilerden kaldırıldı',
           result.active ? 'green' : 'dark'
         );
       }
@@ -784,7 +784,7 @@ const colorMeta = (value) => sharedColorMeta(value, '#e9dfd0');
     try {
       if (!id) {
         const items = await window.SuveraAPI.products.list('?status=active&limit=24');
-        if (!items || !items.length) throw new Error('Suvera urunleri hazirlaniyor.');
+        if (!items || !items.length) throw new Error('Suvera ürünleri hazırlanıyor.');
         id = items[0].id;
         params.set('id', id);
         history.replaceState({}, '', 'urun?' + params.toString());

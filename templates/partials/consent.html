@@ -1,10 +1,47 @@
-<section class="consent-banner" id="consentBanner" data-shared-partial="consent" aria-label="Çerez tercihleri" hidden>
-  <div>
-    <strong>Gizlilik tercihleriniz</strong>
-    <p>Zorunlu depolama mağazanın çalışmasını sağlar. İsteğe bağlı ölçüm yalnız izninizle etkinleşir.</p>
+<section class="consent-banner" id="consentBanner" data-shared-partial="consent" role="dialog" aria-labelledby="consentBannerTitle" aria-describedby="consentBannerDescription" hidden>
+  <div class="consent-banner-copy">
+    <strong id="consentBannerTitle">Çerez tercihleri</strong>
+    <p id="consentBannerDescription">Deneyiminizi geliştirmek ve tercihlerinizi hatırlamak için çerezlerden yararlanıyoruz. Zorunlu depolama sitenin çalışması için gereklidir.</p>
+    <a href="cerez-politikasi">Çerez Politikası</a>
   </div>
   <div class="consent-actions">
-    <button type="button" data-consent="essential">Yalnız zorunlu</button>
-    <button type="button" data-consent="analytics">Ölçüme izin ver</button>
+    <button type="button" data-consent-action="accept-all">Tümünü Kabul Et</button>
+    <button type="button" data-consent-action="necessary-only">Yalnızca Zorunlu</button>
+    <button type="button" data-consent-action="manage">Tercihleri Yönet</button>
   </div>
 </section>
+
+<div class="consent-modal" id="consentPreferences" role="dialog" aria-modal="true" aria-labelledby="consentPreferencesTitle" aria-describedby="consentPreferencesDescription" hidden>
+  <div class="consent-sheet">
+    <div class="consent-sheet-head">
+      <div>
+        <span class="consent-eyebrow">Gizlilik Merkezi</span>
+        <h2 id="consentPreferencesTitle">Çerez tercihlerinizi yönetin</h2>
+      </div>
+      <button class="consent-close" type="button" data-consent-action="close" data-consent-close aria-label="Çerez tercihlerini kapat">×</button>
+    </div>
+    <p id="consentPreferencesDescription" class="consent-sheet-intro">Yalnızca gerçekten kullanılan depolama ve ölçüm mekanizmalarını seçebilirsiniz. Kararınızı daha sonra alt bilgideki bağlantıdan değiştirebilirsiniz.</p>
+    <div class="consent-category-list">
+      <div class="consent-category">
+        <div><strong>Zorunlu</strong><p>Sepet, oturum, güvenli ödeme akışı ve açıkça kullandığınız mağaza özelliklerinin çalışmasını sağlar.</p></div>
+        <label class="consent-switch"><input type="checkbox" checked disabled aria-label="Zorunlu çerezler her zaman etkin"/><span>Her zaman etkin</span></label>
+      </div>
+      <div class="consent-category">
+        <div><strong>Tercihler</strong><p>Son görüntülenen ürünler ve karşılaştırma listeniz gibi cihazınızdaki kolaylıkları hatırlar.</p></div>
+        <label class="consent-switch"><input id="consentPreferencesToggle" type="checkbox"/><span>Tercihlere izin ver</span></label>
+      </div>
+      <div class="consent-category">
+        <div><strong>Analitik</strong><p>Sayfa performansını kişisel bilgi veya reklam profili oluşturmadan, örneklenmiş Web Vitals ölçümleriyle iyileştirmemize yardımcı olur.</p></div>
+        <label class="consent-switch"><input id="consentAnalyticsToggle" type="checkbox"/><span>Analitiğe izin ver</span></label>
+      </div>
+      <div class="consent-category consent-category-unused">
+        <div><strong>Pazarlama</strong><p>Reklam çerezi, pikseli veya üçüncü taraf pazarlama takipçisi şu anda kullanılmıyor.</p></div>
+        <span class="consent-unused">Şu anda kullanılmıyor</span>
+      </div>
+    </div>
+    <div class="consent-sheet-actions">
+      <button type="button" class="consent-secondary" data-consent-action="necessary-only">Yalnızca Zorunlu</button>
+      <button type="button" class="consent-primary" data-consent-action="save-preferences">Tercihleri Kaydet</button>
+    </div>
+  </div>
+</div>

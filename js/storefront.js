@@ -41,7 +41,7 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
   function stockLabel(product) {
     const rawStock = product.stock ?? product.stock_quantity ?? product.quantity;
     const stock = Number(rawStock);
-    if (Number.isFinite(stock) && stock > 0 && stock <= 3) return 'Son ' + stock + ' urun';
+    if (Number.isFinite(stock) && stock > 0 && stock <= 3) return 'Son ' + stock + ' ürün';
     if (product.in_stock === false || product.is_active === false) return 'Stokta yok';
     if (product.in_stock === true || (Number.isFinite(stock) && stock > 0)) return 'Stokta';
     return '';
@@ -859,7 +859,7 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
       title.textContent = activeCategory
         ? activeCategory.name
         : (activeCollection ? activeCollection.title : (selectedQuery ? '"' + selectedQuery + '" için sonuçlar' : 'Tüm Ürünler'));
-      if (breadcrumbLink) breadcrumbLink.textContent = activeCategory ? activeCategory.name : (activeCollection ? activeCollection.title : 'Tüm Ürünler');
+      if (breadcrumbLink) breadcrumbLink.textContent = activeCategory ? 'Kategoriler' : (activeCollection ? activeCollection.title : 'Tüm Ürünler');
       if (breadcrumbCurrent) breadcrumbCurrent.textContent = selectedQuery ? 'Arama' : (activeCategory ? activeCategory.name : (activeCollection ? 'Koleksiyon' : 'Seçki'));
       if (kicker) kicker.textContent = activeCategory
         ? activeCategory.name + ' Seçkisi'
@@ -886,7 +886,9 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
         if (featureDescription) featureDescription.textContent = heroCollection.description || '';
         applyEditorialVisual(collectionFeatureVisual, heroImage);
       }
-      if (collectionEditorial) collectionEditorial.hidden = !(categories.length || collections.length);
+      // Category results are a shopping surface: title, controls and products come first.
+      // Keep the optional catalogue landing editorial only for non-category browsing.
+      if (collectionEditorial) collectionEditorial.hidden = Boolean(selectedCategoryId) || !(categories.length || collections.length);
 
       var resultCount = document.getElementById('productResultCount');
       if (resultCount) resultCount.textContent = String(Number(catalog.total || 0));
@@ -899,7 +901,6 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
       grid.setAttribute('aria-busy', 'false');
       renderCatalogPagination(pagination, currentPage, Number(catalog.totalPages || 0));
 
-      renderFeaturedStrip(document.getElementById('featuredProductsStrip'), 5, collectionProducts, !!selectedCategoryId);
       if (window.Suvera && window.Suvera.refreshWishlistButtons) {
         window.Suvera.refreshWishlistButtons();
       }
@@ -993,7 +994,7 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
         image,
       });
     } catch (err) {
-      console.warn('Urun sepete eklenemedi:', err.message);
+      console.warn('Ürün sepete eklenemedi:', err.message);
     }
   };
 
@@ -1034,15 +1035,15 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
       }
       var kvkk = document.getElementById('kvkk');
       if (kvkk && !kvkk.checked) {
-        if (status) status.textContent = 'Devam etmek icin KVKK onayini isaretleyin.';
+        if (status) status.textContent = 'Devam etmek için KVKK onayını işaretleyin.';
         return;
       }
       if (status) status.textContent = 'Gonderiliyor...';
       window.SuveraAPI.newsletter.subscribe(email).then(function () {
-        if (status) status.textContent = 'Bultene kayit alindi. Tesekkurler!';
+        if (status) status.textContent = 'Bültene kayıt alındı. Teşekkürler!';
         form.reset();
       }).catch(function (err) {
-        if (status) status.textContent = (err && err.message) || 'Kayit gerceklestirilemedi.';
+        if (status) status.textContent = (err && err.message) || 'Kayıt gerçekleştirilemedi.';
       });
     });
   }

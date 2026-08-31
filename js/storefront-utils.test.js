@@ -10,6 +10,8 @@ test('shared storefront utilities keep money, text and HTTP URL behavior canonic
   const { escapeHtml, formatMoney, safeHttpUrl } = await import(moduleUrl);
 
   assert.equal(formatMoney(1499.5), '1.499,50 TL');
+  assert.equal(formatMoney(-0), '0,00 TL');
+  assert.equal(formatMoney(-0.001), '0,00 TL');
   assert.equal(escapeHtml('<script>"x"</script>'), '&lt;script&gt;&quot;x&quot;&lt;/script&gt;');
   assert.equal(safeHttpUrl('/tesekkur', 'https://suvera.example/siparis'), 'https://suvera.example/tesekkur');
   assert.equal(safeHttpUrl('javascript:alert(1)', 'https://suvera.example/siparis'), '');

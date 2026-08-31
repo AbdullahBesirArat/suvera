@@ -125,6 +125,10 @@
     {
       "source": "/suvera",
       "destination": "/suvera.html"
+    },
+    {
+      "source": "/cerez-politikasi",
+      "destination": "/cerez-politikasi.html"
     }
   ],
   "headers": [

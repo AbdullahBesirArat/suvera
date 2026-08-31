@@ -11,6 +11,7 @@ const featurePages = {
   'js/coupon-ui.js': new Set(['sepet.html', 'siparis.html']),
   'js/recently-viewed.js': new Set(['urun.html', 'giris.html']),
   'js/comparison.js': new Set(['urun.html', 'giris.html', 'karsilastir.html']),
+  'js/product-extras.js': new Set(['urun.html']),
 };
 
 function invariant(condition, message) {

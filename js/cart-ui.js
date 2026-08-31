@@ -31,7 +31,10 @@ import { formatMoney as money, escapeHtml } from './core/storefront-utils.js';
   }
 
   function cartSubtotal() { return serverCart ? Number(serverCart.subtotal) : 0; }
-  function cartDiscount() { return serverCart ? Number(serverCart.discount_total) : 0; }
+  function cartDiscount() {
+    const value = serverCart ? Number(serverCart.discount_total) : 0;
+    return Number.isFinite(value) && value > 0 ? value : 0;
+  }
   function cartVersion() { return serverCart ? serverCart.version : null; }
 
   function computeShipping(subtotal) {
@@ -118,7 +121,7 @@ import { formatMoney as money, escapeHtml } from './core/storefront-utils.js';
     const pageCount = document.querySelector('.page-count');
     if (pageCount) {
       const qty = list.reduce((sum, item) => sum + Number(item.qty || 1), 0);
-      pageCount.textContent = `(${qty} Ürün)`;
+      pageCount.textContent = `${qty} ürün`;
     }
 
     if (loadState === 'loading' && !list.length) {
@@ -126,7 +129,7 @@ import { formatMoney as money, escapeHtml } from './core/storefront-utils.js';
     } else if (loadState === 'error') {
       container.innerHTML = '<div data-css="padding:32px 0;text-align:center"><p data-css="color:#8b1d1d;font-size:16px" role="alert">Sepet yüklenemedi.</p><button type="button" class="btn" data-action="cart-retry">Tekrar dene</button></div>';
     } else if (!list.length) {
-      container.innerHTML = '<div class="cart-empty"><h3 id="cartEmptyHeading" tabindex="-1">Sepetiniz boş</h3><p>Yeni sezon seçkisinden birkaç parça ekleyerek alışverişe devam edebilirsiniz.</p><a class="empty-cta" href="urunler">Alışverişe Dön</a></div>';
+      container.innerHTML = '<div class="cart-empty"><h3 id="cartEmptyHeading" tabindex="-1">Sepetiniz boş.</h3><a class="empty-cta" href="urunler">Ürünleri Keşfet</a></div>';
     } else {
       container.innerHTML = list.map((item, index) => {
         const qty = Number(item.qty || 1);
@@ -163,6 +166,12 @@ import { formatMoney as money, escapeHtml } from './core/storefront-utils.js';
     if (discountRow) discountRow.hidden = discount <= 0;
     if (discountEl) discountEl.textContent = `-${money(discount)}`;
     if (totalEl) totalEl.textContent = money(Math.max(0, subtotal - discount) + shipping);
+    const summaryCard = document.getElementById('cartSummaryCard');
+    const orderNoteCard = document.getElementById('cartOrderNoteCard');
+    const listHead = document.getElementById('cartListHead');
+    if (summaryCard) summaryCard.hidden = !list.length;
+    if (orderNoteCard) orderNoteCard.hidden = !list.length;
+    if (listHead) listHead.hidden = !list.length;
     const clearButton = document.querySelector('[data-action="clear-cart"]');
     if (clearButton) clearButton.hidden = !list.length;
     const checkout = document.getElementById('cartCheckoutLink');
@@ -181,7 +190,6 @@ import { formatMoney as money, escapeHtml } from './core/storefront-utils.js';
       }
     }
     if (checkoutNote) checkoutNote.hidden = list.length > 0;
-    paintCoupon();
     container.setAttribute('aria-busy', mutating || loadState === 'loading' ? 'true' : 'false');
     restoreMutationFocus();
   }

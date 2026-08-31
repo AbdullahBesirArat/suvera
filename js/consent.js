@@ -1,31 +1,31 @@
-const CONSENT_KEY = 'suvera:privacy-consent:v1';
-const banner = document.getElementById('consentBanner');
-
-function readConsent() {
-  try {
-    const value = localStorage.getItem(CONSENT_KEY);
-    return value === 'essential' || value === 'analytics' ? value : null;
-  } catch {
-    return null;
-  }
+const CONSENT_KEY='suvera:privacy-consent:v1',CONSENT_VERSION=1,banner=document.getElementById('consentBanner');
+let consent=null;
+function normalize(value){
+  if(!value||typeof value!=='object'||Number(value.version)!==CONSENT_VERSION)return null;
+  return{version:1,necessary:true,preferences:value.preferences===true,analytics:value.analytics===true,marketing:false,updatedAt:typeof value.updatedAt==='string'?value.updatedAt:new Date().toISOString()};
 }
-
-function applyConsent(value) {
-  document.documentElement.dataset.consent = value || 'unset';
-  if (banner) banner.hidden = Boolean(value);
-  window.dispatchEvent(new CustomEvent('suvera:consent', { detail: { analytics: value === 'analytics' } }));
+function read(){
+  try{
+    const raw=localStorage.getItem(CONSENT_KEY);
+    if(raw==='essential'||raw==='analytics')return normalize({version:1,preferences:raw==='analytics',analytics:raw==='analytics'});
+    return normalize(JSON.parse(raw||'null'));
+  }catch(_){return null;}
 }
-
-banner?.addEventListener('click', (event) => {
-  const button = event.target.closest('[data-consent]');
-  if (!button) return;
-  const value = button.dataset.consent;
-  try {
-    localStorage.setItem(CONSENT_KEY, value);
-  } catch {
-    // The selection still applies for this page when storage is restricted.
-  }
-  applyConsent(value);
+function apply(value,persist=false){
+  consent=normalize(value);
+  document.documentElement.dataset.consent=consent?'saved':'unset';
+  if(banner)banner.hidden=Boolean(consent);
+  if(persist&&consent)try{localStorage.setItem(CONSENT_KEY,JSON.stringify(consent));}catch(_){}
+  window.dispatchEvent(new CustomEvent('suvera:consent',{detail:consent||{necessary:true,preferences:false,analytics:false,marketing:false}}));
+}
+function save(values){apply(normalize({version:1,...values,updatedAt:new Date().toISOString()}),true);}
+async function open(trigger){const module=await import('./consent-preferences.js');module.openConsentPreferences(trigger,consent);}
+document.addEventListener('click',event=>{
+  const button=event.target.closest('[data-consent-action]');if(!button)return;
+  const action=button.dataset.consentAction;
+  if(action==='accept-all')save({preferences:true,analytics:true});
+  if(action==='necessary-only')save({preferences:false,analytics:false});
+  if(action==='manage'||action==='open-settings')void open(button);
 });
-
-applyConsent(readConsent());
+window.SuveraConsent=Object.freeze({KEY:CONSENT_KEY,VERSION:1,current:()=>consent&&{...consent},allows:category=>category==='necessary'||Boolean(consent?.[category]),save,open});
+apply(read());

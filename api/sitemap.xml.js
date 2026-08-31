@@ -23,6 +23,7 @@ const STATIC_PATHS = [
   'iletisim',
   'arama',
   'blog',
+  'cerez-politikasi',
 ];
 
 function escapeXml(value) {

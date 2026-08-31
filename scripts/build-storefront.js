@@ -12,6 +12,7 @@ const pageFiles = [
   'iade.html', 'iletisim.html', 'kargo.html', 'kvkk.html', 'sozlesme.html',
   'uyelik-sozlesmesi.html', 'favoriler.html', 'hesabim.html', 'blog-detay.html',
   'blog.html', 'arama.html', 'dogrula.html', 'tercihler.html', 'karsilastir.html', 'suvera.html',
+  'cerez-politikasi.html',
 ];
 const staticFiles = ['favicon.svg', 'og-cover.svg', 'robots.txt', 'site.webmanifest'];
 const partialNames = [
@@ -293,10 +294,14 @@ function build() {
   }
 
   for (const file of staticFiles) fs.copyFileSync(path.join(projectRoot, file), path.join(outputRoot, file));
-  // The 2 MB editorial source is retained for design work, but the deployed build
-  // ships only its measured AVIF/WebP variants. Keeping the source out also makes an
-  // accidental regression visible to the deterministic image budget.
-  copyDirectory('assets', (entry) => path.basename(entry) !== 'suvera-istanbul-editorial.png');
+  // High-resolution design sources stay in the workspace; release builds ship only
+  // the measured AVIF/WebP assets referenced by the storefront.
+  copyDirectory('assets', (entry) => {
+    const name = path.basename(entry);
+    return name !== 'suvera-istanbul-editorial.png'
+      && !/^suvera-homepage-hero-.*\.png$/i.test(name)
+      && !/^suvera-home-hero-.*\.jpg$/i.test(name);
+  });
   copyDirectory('css');
   copyDirectory('js', (entry) => !entry.endsWith('tr-address-data.js') && !entry.endsWith('.test.js'));
   fs.copyFileSync(path.join(projectRoot, 'shared.css'), path.join(outputRoot, 'shared.css'));

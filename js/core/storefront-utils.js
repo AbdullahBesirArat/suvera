@@ -1,5 +1,7 @@
 export function formatMoney(value) {
-  return Number(value || 0).toLocaleString('tr-TR', {
+  const numeric = Number(value || 0);
+  const normalized = !Number.isFinite(numeric) || Object.is(numeric, -0) || Math.abs(numeric) < 0.005 ? 0 : numeric;
+  return normalized.toLocaleString('tr-TR', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }) + ' TL';

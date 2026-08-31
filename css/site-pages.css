@@ -47,6 +47,40 @@ body.site-page-body {
   opacity: 0.55;
 }
 
+.page-compact-header,
+.favorites-header {
+  margin-bottom: 24px;
+}
+
+.favorites-header h1 {
+  margin: 0;
+  font-family: var(--page-serif);
+  font-size: clamp(38px, 5vw, 52px);
+  font-weight: 300;
+  line-height: 1;
+}
+
+.favorites-header p {
+  margin: 8px 0 0;
+  color: var(--page-muted);
+  font-size: 13px;
+}
+
+.favorites-results {
+  min-height: 180px;
+}
+
+.favorites-empty {
+  grid-column: 1 / -1;
+  padding: 48px 20px;
+  text-align: center;
+}
+
+.favorites-empty .page-btn {
+  display: inline-flex;
+  margin-top: 10px;
+}
+
 .page-hero {
   display: grid;
   grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.7fr);

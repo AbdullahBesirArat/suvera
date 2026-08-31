@@ -97,6 +97,7 @@ const cleanPageFiles = new Map([
   ['tercihler', 'tercihler.html'],
   ['karsilastir', 'karsilastir.html'],
   ['suvera', 'suvera.html'],
+  ['cerez-politikasi', 'cerez-politikasi.html'],
 ]);
 
 const sitemapStaticPaths = [
@@ -119,6 +120,7 @@ const sitemapStaticPaths = [
   'iletisim',
   'arama',
   'blog',
+  'cerez-politikasi',
 ];
 
 function positiveNumber(value, fallback) {

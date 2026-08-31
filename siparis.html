@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Suvera checkout akisinda teslimat, iletisim ve odeme adimlarini guvenli sekilde tamamlayin." />
+  <meta name="description" content="Suvera ödeme akışında teslimat, iletişim ve ödeme adımlarını güvenli şekilde tamamlayın." />
   <link rel="canonical" href="https://suvera.com.tr/siparis" />
   <meta name="theme-color" content="#2f6041" />
   {{> head-defaults}}
@@ -490,7 +490,7 @@
       removeButton?.addEventListener('click', () => {
         window.SuveraCoupons?.clear();
         input.value = '';
-        paintCheckoutPricing(null, 'Kupon kaldirildi');
+        paintCheckoutPricing(null, 'Kupon kaldırıldı');
       });
     }
 
@@ -1195,7 +1195,7 @@
         giftWrap: Boolean(currentGiftState().option_id),
         items: cart.map((item) => ({
           id: item.product_id || item.id || '',
-          name: item.name || 'Urun',
+          name: item.name || 'Ürün',
           qty: Number(item.qty || item.quantity || 1),
           price: Number(item.price || 0),
           variant: item.variant || item.size || 'Standart',
@@ -1284,14 +1284,14 @@
 
       if (window.SuveraSEO) {
         window.SuveraSEO.applyPageMeta({
-          title: 'Odeme ve Teslimat | Suvera',
-          description: 'Suvera checkout akisinda teslimat, iletisim ve odeme adimlarini guvenli sekilde tamamlayin.',
+          title: 'Ödeme ve Teslimat | Suvera',
+          description: 'Suvera ödeme akışında teslimat, iletişim ve ödeme adımlarını güvenli şekilde tamamlayın.',
           path: 'siparis',
         });
         window.SuveraSEO.applyBaseSchemas({
           path: 'siparis',
-          name: 'Odeme ve Teslimat | Suvera',
-          description: 'Suvera checkout akisinda teslimat, iletisim ve odeme adimlarini guvenli sekilde tamamlayin.',
+          name: 'Ödeme ve Teslimat | Suvera',
+          description: 'Suvera ödeme akışında teslimat, iletişim ve ödeme adımlarını güvenli şekilde tamamlayın.',
         });
       }
       const sections = Array.from(document.querySelectorAll('.section'));

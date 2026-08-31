@@ -89,11 +89,11 @@ import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseIma
 
   function orderStatusLabel(status) {
     const labels = {
-      payment_pending: 'Odeme bekleniyor',
-      paid: 'Odeme alindi',
-      payment_failed: 'Odeme basarisiz',
-      payment_cancelled: 'Odeme iptal edildi',
-      preparing: 'Hazirlaniyor',
+      payment_pending: 'Ödeme bekleniyor',
+      paid: 'Ödeme alındı',
+      payment_failed: 'Ödeme başarısız',
+      payment_cancelled: 'Ödeme iptal edildi',
+      preparing: 'Hazırlanıyor',
       shipped: 'Kargoya verildi',
       delivered: 'Teslim edildi',
       cancelled: 'Iptal edildi',
@@ -108,7 +108,7 @@ import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseIma
         id: item.product_id || '',
         orderItemId: item.order_item_id || item.orderItemId || '',
         variantId: item.variant_id || item.variantId || '',
-        name: item.name || 'Urun',
+        name: item.name || 'Ürün',
         qty: Number(item.qty || item.quantity || 1),
         quantity: Number(item.qty || item.quantity || 1),
         price: Number(item.price || item.unit_price || 0),
@@ -256,7 +256,7 @@ import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseIma
 
   function renderOrderItems(items) {
     return (items || []).map(function (item) {
-      return '<tr><td><strong>' + escapeHtml(item.name || 'Urun') + '</strong><br/><span>' +
+      return '<tr><td><strong>' + escapeHtml(item.name || 'Ürün') + '</strong><br/><span>' +
         escapeHtml(item.variant || item.size || 'Standart') + '</span></td><td>' +
         Number(item.qty || item.quantity || 1) + '</td><td>' + money(Number(item.price || item.unit_price || 0)) +
         '</td></tr>';
@@ -274,21 +274,21 @@ import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseIma
     if (['success', 'successful', 'paid', 'ok'].includes(raw)) {
       return {
         status: 'paid',
-        note: 'Odemeniz onaylandi. Siparisiniz hazirlama sirasina alindi ve gelismeleri bu sayfadan takip edebilirsiniz.',
+        note: 'Ödemeniz onaylandı. Siparişiniz hazırlama sırasına alındı ve gelişmeleri bu sayfadan takip edebilirsiniz.',
       };
     }
 
     if (['failed', 'failure', 'error'].includes(raw)) {
       return {
         status: 'payment_failed',
-        note: 'Odeme tamamlanamadi. Kart bilgilerinizi kontrol ederek siparisi tekrar deneyebilir veya destek ekibimizle iletisime gecebilirsiniz.',
+        note: 'Ödeme tamamlanamadı. Kart bilgilerinizi kontrol ederek siparişi tekrar deneyebilir veya destek ekibimizle iletişime geçebilirsiniz.',
       };
     }
 
     if (['cancel', 'cancelled'].includes(raw)) {
       return {
         status: 'payment_cancelled',
-        note: 'Odeme islemi tamamlanmadan sonlandirildi. Hazir oldugunuzda siparisinizi yeniden baslatabilirsiniz.',
+        note: 'Ödeme işlemi tamamlanmadan sonlandırıldı. Hazır olduğunuzda siparişinizi yeniden başlatabilirsiniz.',
       };
     }
 
@@ -323,7 +323,7 @@ import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseIma
     const order = backendOrder || normalizeOrder(localOrder);
 
     if (!order) {
-      summary.innerHTML = '<div class="page-empty">Son siparis ozeti bulunamadi. Sepet veya hesabim sayfasindan son islemlerinizi kontrol edebilirsiniz.</div>';
+      summary.innerHTML = '<div class="page-empty">Son sipariş özeti bulunamadı. Sepet veya hesabım sayfasından son işlemlerinizi kontrol edebilirsiniz.</div>';
       return;
     }
 
@@ -348,15 +348,15 @@ import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseIma
     } else if (isIbanOrder(effectiveOrder)) {
       noteNode.innerHTML = 'Siparişiniz oluşturuldu. IBAN / havale ödemesi onaylanana kadar durum <strong>ödeme bekleniyor</strong> olarak kalır.';
     } else {
-      noteNode.textContent = 'Odeme saglayicisi tarafinda islem tamamlandiginda durum bu sayfadan ve hesabim alanindan takip edilebilir.';
+      noteNode.textContent = 'Ödeme sağlayıcısı tarafında işlem tamamlandığında durum bu sayfadan ve hesabım alanından takip edilebilir.';
     }
 
-    summary.innerHTML = '<div class="page-table-wrap"><table class="page-table"><thead><tr><th>Urun</th><th>Adet</th><th>Tutar</th></tr></thead><tbody>' +
+    summary.innerHTML = '<div class="page-table-wrap"><table class="page-table"><thead><tr><th>Ürün</th><th>Adet</th><th>Tutar</th></tr></thead><tbody>' +
       renderOrderItems(effectiveOrder.items || []) +
       '</tbody></table></div>' +
       (isIbanOrder(effectiveOrder) ? ibanInfoHtml(effectiveOrder.orderCode || effectiveOrder.id) : '') +
       ((effectiveOrder.tracking_number || effectiveOrder.tracking_url)
-        ? '<div class="page-info-banner" data-css="margin-top:16px;">Kargo: <strong>' + escapeHtml(effectiveOrder.shipping_company || 'Hazirlaniyor') + '</strong>' +
+        ? '<div class="page-info-banner" data-css="margin-top:16px;">Kargo: <strong>' + escapeHtml(effectiveOrder.shipping_company || 'Hazırlanıyor') + '</strong>' +
           (effectiveOrder.tracking_number ? ' • Takip No: <strong>' + escapeHtml(effectiveOrder.tracking_number) + '</strong>' : '') +
           trackingLink(effectiveOrder.tracking_url) +
           '</div>'
@@ -388,21 +388,21 @@ import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseIma
 
     const latestOrder = orders[0] || {};
     document.getElementById('accountName').textContent = profile.name || latestOrder.customer && latestOrder.customer.name || 'Suvera Uyesi';
-    document.getElementById('accountEmail').textContent = profile.email || latestOrder.customer && latestOrder.customer.email || 'E-posta eklendiginde burada gorunur';
+    document.getElementById('accountEmail').textContent = profile.email || latestOrder.customer && latestOrder.customer.email || 'E-posta eklendiğinde burada görünür';
     document.getElementById('accountPhone').textContent = profile.phone || latestOrder.customer && latestOrder.customer.phone || 'Telefon bilgisi eklenmedi';
 
     document.getElementById('accountStats').innerHTML =
-      '<div class="page-stat">Toplam siparis: ' + orders.length + '</div>' +
-      '<div class="page-stat">Favori urun: ' + favorites.length + '</div>' +
+      '<div class="page-stat">Toplam sipariş: ' + orders.length + '</div>' +
+      '<div class="page-stat">Favori ürün: ' + favorites.length + '</div>' +
       '<div class="page-stat">Son durum: ' + escapeHtml(orderStatusLabel(latestOrder.status)) + '</div>';
 
     const ordersNode = document.getElementById('accountOrders');
     if (!orders.length) {
-      ordersNode.innerHTML = '<div class="page-empty">Hesabinizda gorunecek ilk siparis, checkout sonrasi otomatik olarak burada listelenir.</div>';
+      ordersNode.innerHTML = '<div class="page-empty">Hesabınızda görünecek ilk sipariş, ödeme sonrası otomatik olarak burada listelenir.</div>';
     } else {
       ordersNode.innerHTML = orders.map(function (order) {
-        return '<div class="page-order-card"><strong>' + escapeHtml(order.orderCode || order.id || 'Siparis') + '</strong><p>' +
-          escapeHtml(order.customer && order.customer.name || 'Musteri bilgisi yok') + '</p><p>Durum: ' +
+        return '<div class="page-order-card"><strong>' + escapeHtml(order.orderCode || order.id || 'Sipariş') + '</strong><p>' +
+          escapeHtml(order.customer && order.customer.name || 'Müşteri bilgisi yok') + '</p><p>Durum: ' +
           escapeHtml(orderStatusLabel(order.status)) + '</p><p>Toplam: ' + money(order.total || 0) +
           '</p>' + shipmentCards(order.shipments) + '<div class="page-inline-actions"><a class="page-btn-secondary" href="siparis-takip?order=' +
           encodeURIComponent(order.orderCode || order.id || '') + '">Takip Et</a></div></div>';
@@ -413,7 +413,7 @@ import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseIma
 
     const favoritesNode = document.getElementById('accountFavorites');
     if (!favorites.length) {
-      favoritesNode.innerHTML = '<div class="page-empty">Henuz favori eklemediniz. Urun detaylarindaki kalp butonuyla kayda baslayabilirsiniz.</div>';
+      favoritesNode.innerHTML = '<div class="page-empty">Henüz favori eklemediniz. Ürün detaylarındaki kalp butonuyla kayda başlayabilirsiniz.</div>';
     } else {
       favoritesNode.innerHTML = favorites.slice(0, 4).map(function (item) {
         const media = item.image
@@ -421,23 +421,23 @@ import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseIma
           : escapeHtml(item.emoji || 'SU');
         return '<div class="page-favorite-card"><div class="page-favorite-media">' + media + '</div><h3>' +
           escapeHtml(item.name) + '</h3><p>' + money(item.price || 0) + '</p><a class="page-btn-secondary" href="' +
-          escapeHtml(safeHref(item.url, 'urun')) + '">Incele</a></div>';
+          escapeHtml(safeHref(item.url, 'urun')) + '">İncele</a></div>';
       }).join('');
     }
   }
 
   function shipmentStatusLabel(status) {
     return {
-      pending: 'Hazirlaniyor', label_ready: 'Etiket hazir', shipped: 'Kargoya verildi',
+      pending: 'Hazırlanıyor', label_ready: 'Etiket hazır', shipped: 'Kargoya verildi',
       in_transit: 'Yolda', delivered: 'Teslim edildi', failed: 'Teslimat sorunu',
       cancelled: 'Iptal edildi', returned: 'Geri dondu',
-    }[String(status || '')] || 'Hazirlaniyor';
+    }[String(status || '')] || 'Hazırlanıyor';
   }
 
   function shipmentCards(shipments) {
     return (shipments || []).map(function (shipment) {
       return '<div class="page-info-banner" data-css="margin-top:12px;"><strong>' +
-        escapeHtml(shipment.is_return ? 'Iade gonderisi' : shipment.carrier_name || 'Kargo') + '</strong> · ' +
+        escapeHtml(shipment.is_return ? 'İade gönderisi' : shipment.carrier_name || 'Kargo') + '</strong> · ' +
         escapeHtml(shipmentStatusLabel(shipment.status)) +
         (shipment.tracking_number ? '<br/>Takip No: <strong>' + escapeHtml(shipment.tracking_number) + '</strong>' : '') +
         trackingLink(shipment.tracking_url) + '</div>';
@@ -474,24 +474,24 @@ import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseIma
     populateReturnOrderOptions(form);
 
     if (!api || !api.customerToken || !api.customerToken()) {
-      listNode.innerHTML = '<div class="page-empty">Taleplerinizi gormek ve yeni talep olusturmak icin <a href="giris">hesabiniza giris yapin</a>.</div>';
-      if (message) message.textContent = 'Iade talebi olusturmak icin musteri hesabinizla giris yapmalisiniz.';
+      listNode.innerHTML = '<div class="page-empty">Taleplerinizi görmek ve yeni talep oluşturmak için <a href="giris">hesabınıza giriş yapın</a>.</div>';
+      if (message) message.textContent = 'İade talebi oluşturmak için müşteri hesabınızla giriş yapmalısınız.';
       return;
     }
     try {
       const requests = await api.returns.list();
       listNode.innerHTML = requests.length ? requests.map(function (request) {
         return '<div class="page-order-card"><strong>' + escapeHtml(request.order_code || 'Talep') + '</strong>' +
-          '<p>' + escapeHtml({ return: 'Iade', exchange: 'Degisim', cancellation: 'Iptal' }[request.request_type] || request.request_type) +
+          '<p>' + escapeHtml({ return: 'İade', exchange: 'Değişim', cancellation: 'İptal' }[request.request_type] || request.request_type) +
           ' · ' + escapeHtml(returnStatusLabel(request.status)) + '</p>' +
           '<p>Sebep: ' + escapeHtml(request.reason_code || '-') + '</p>' +
           (request.resolution ? '<p>Sonuc: ' + escapeHtml(request.resolution) + '</p>' : '') +
           '</div>';
-      }).join('') : '<div class="page-empty">Henuz iade, degisim veya iptal talebiniz yok.</div>';
-      if (message) message.textContent = 'Talep ve durum bilgileri hesabinizla guvenli bicimde eslestirilir.';
+      }).join('') : '<div class="page-empty">Henüz iade, değişim veya iptal talebiniz yok.</div>';
+      if (message) message.textContent = 'Talep ve durum bilgileri hesabınızla güvenli biçimde eşleştirilir.';
     } catch (err) {
       listNode.innerHTML = '<div class="page-empty">Talep durumu su anda yuklenemedi.</div>';
-      if (message) message.textContent = (err && err.message) || 'Iade bilgileri yuklenemedi.';
+      if (message) message.textContent = (err && err.message) || 'İade bilgileri yüklenemedi.';
     }
   }
 
@@ -500,7 +500,7 @@ import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseIma
     if (!select) return;
     const current = select.value;
     const options = form._returnOrders || [];
-    select.innerHTML = '<option value="">Siparis secin</option>' + options.map(function (order) {
+    select.innerHTML = '<option value="">Sipariş seçin</option>' + options.map(function (order) {
       return '<option value="' + escapeHtml(order.id) + '">' + escapeHtml(order.orderCode || order.id) +
         ' · ' + escapeHtml(orderStatusLabel(order.status)) + '</option>';
     }).join('');
@@ -514,7 +514,7 @@ import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseIma
     if (!select || !container) return;
     const order = (form._returnOrders || []).find(function (item) { return String(item.id) === select.value; });
     if (!order) {
-      container.innerHTML = 'Siparis sectiginizde uygun kalemler burada gorunur.';
+      container.innerHTML = 'Sipariş seçtiğinizde uygun kalemler burada görünür.';
       return;
     }
     container.innerHTML = order.items.filter(function (item) {
@@ -538,7 +538,7 @@ import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseIma
       const api = window.SuveraAPI;
       const message = document.getElementById('returnRequestMessage');
       if (!api || !api.customerToken || !api.customerToken()) {
-        if (message) message.innerHTML = 'Talep olusturmak icin <a href="giris">giris yapin</a>.';
+        if (message) message.innerHTML = 'Talep oluşturmak için <a href="giris">giriş yapın</a>.';
         return;
       }
       const orderId = document.getElementById('returnOrder').value;
@@ -557,7 +557,7 @@ import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseIma
         };
       });
       if (!orderId || !items.length) {
-        if (message) message.textContent = 'Siparis ve en az bir kalem secin.';
+        if (message) message.textContent = 'Sipariş ve en az bir kalem seçin.';
         return;
       }
       const button = form.querySelector('button[type="submit"]');
@@ -601,12 +601,12 @@ import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseIma
       const orderCode = orderInput ? orderInput.value.trim() : '';
       if (message) {
         message.style.display = 'block';
-        message.textContent = 'Hesap bilgisi yukleniyor.';
+        message.textContent = 'Hesap bilgisi yükleniyor.';
       }
 
       const account = await fetchAccount(email, orderCode);
       if (!account) {
-        if (message) message.textContent = 'Bu e-posta ve siparis kodu ile hesap bulunamadi.';
+        if (message) message.textContent = 'Bu e-posta ve sipariş kodu ile hesap bulunamadı.';
         return;
       }
 
@@ -633,10 +633,10 @@ import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseIma
     const grid = document.getElementById('favoritesGrid');
     const count = document.getElementById('favoritesCount');
 
-    count.textContent = String(favorites.length);
+    if (count) count.textContent = String(favorites.length);
 
     if (!favorites.length) {
-      grid.innerHTML = '<div class="page-empty">Kayitli favoriniz henuz yok. Urun listesinde veya detay sayfasinda kalp ikonuna basarak bu alani doldurabilirsiniz.</div>';
+      grid.innerHTML = '<div class="page-empty favorites-empty"><p>Henüz favori ürününüz yok.</p><a class="page-btn" href="urunler">Ürünleri Keşfet</a></div>';
       return;
     }
 
@@ -645,12 +645,12 @@ import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseIma
         ? '<img src="' + escapeHtml(assetUrl(item.image)) + '" alt="' + escapeHtml(item.name) + '" loading="lazy" decoding="async"/>'
         : escapeHtml(item.emoji || 'SU');
       return '<article class="page-favorite-card" data-favorite-id="' + escapeHtml(item.id || item.name) + '">' +
-        '<div class="page-favorite-media">' + media + '</div>' +
+        '<a class="page-favorite-media" href="' + escapeHtml(safeHref(item.url, 'urun')) + '" aria-label="' + escapeHtml(item.name) + ' ürününü görüntüle">' + media + '</a>' +
         '<h3>' + escapeHtml(item.name) + '</h3>' +
         '<p>' + money(item.price || 0) + '</p>' +
         '<div class="page-inline-actions"><a class="page-btn-secondary" href="' + escapeHtml(safeHref(item.url, 'urun')) +
-        '">Urunu Ac</a><button class="page-btn" type="button" data-remove-favorite="' + escapeHtml(item.id || item.name) +
-        '">Kaldir</button></div></article>';
+        '" aria-label="' + escapeHtml(item.name) + ' ürününü görüntüle">ÜRÜNÜ AÇ</a><button class="page-btn" type="button" aria-label="' + escapeHtml(item.name) + ' ürününü favorilerden kaldır" data-remove-favorite="' + escapeHtml(item.id || item.name) +
+        '">KALDIR</button></div></article>';
     }).join('');
 
     grid.querySelectorAll('[data-remove-favorite]').forEach(function (button) {
@@ -659,7 +659,7 @@ import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseIma
         state.toggleFavorite({ id: button.getAttribute('data-remove-favorite') });
         renderFavorites();
         if (state.refreshWishlistButtons) state.refreshWishlistButtons();
-        if (state.toast) state.toast('Favori listesinden kaldirildi', 'dark');
+        if (state.toast) state.toast('Favori listesinden kaldırıldı', 'dark');
       });
     });
   }
@@ -674,7 +674,7 @@ import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseIma
     try {
       const posts = await window.SuveraAPI.blog.list();
       if (!posts || !posts.length) {
-        grid.innerHTML = '<div class="page-empty">Blog yazilari Panelya panelinden yayinlandiginda burada gorunur.</div>';
+        grid.innerHTML = '<div class="page-empty">Blog yazıları Panelya panelinden yayınlandığında burada görünür.</div>';
         return;
       }
 
@@ -689,7 +689,7 @@ import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseIma
           '</p><div class="page-inline-actions"><a class="page-btn-secondary" href="' + escapeHtml(blogUrl(post)) + '">Yazıyı oku</a></div></article>';
       }).join('');
     } catch (err) {
-      grid.innerHTML = '<div class="page-empty">Blog yazilari yuklenemedi. Lutfen daha sonra tekrar deneyin.</div>';
+      grid.innerHTML = '<div class="page-empty">Blog yazıları yüklenemedi. Lütfen daha sonra tekrar deneyin.</div>';
     }
   }
 
@@ -781,14 +781,14 @@ import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseIma
     input.value = query;
     if (minPriceInput && minPrice > 0) minPriceInput.value = String(minPrice);
     if (maxPriceInput && maxPrice > 0) maxPriceInput.value = String(maxPrice);
-    label.textContent = query || 'Tum secki';
+    label.textContent = query || 'Tüm seçki';
 
     if (window.SuveraSEO) {
       window.SuveraSEO.applyPageMeta({
         title: query ? query + ' arama sonuclari | Suvera' : 'Arama | Suvera',
         description: query
           ? 'Suvera urunleri icinde "' + query + '" arama sonuclari.'
-          : 'Suvera koleksiyonunda urun arayin ve filtreleyin.',
+          : 'Suvera koleksiyonunda ürün arayın ve filtreleyin.',
         path: 'arama' + (query ? '?q=' + encodeURIComponent(query) : ''),
       });
       window.SuveraSEO.applyBaseSchemas({
@@ -796,12 +796,12 @@ import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseIma
         name: query ? query + ' arama sonuclari | Suvera' : 'Arama | Suvera',
         description: query
           ? 'Suvera urunleri icinde "' + query + '" arama sonuclari.'
-          : 'Suvera koleksiyonunda urun arayin ve filtreleyin.',
+          : 'Suvera koleksiyonunda ürün arayın ve filtreleyin.',
       });
     }
 
     if (!window.SuveraAPI) {
-      resultsNode.innerHTML = '<div class="page-empty">Arama servisi su anda hazir degil. Lutfen daha sonra tekrar deneyin.</div>';
+      resultsNode.innerHTML = '<div class="page-empty">Arama servisi şu anda hazır değil. Lütfen daha sonra tekrar deneyin.</div>';
       countNode.textContent = '0';
       return;
     }
@@ -845,7 +845,7 @@ import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseIma
       countNode.textContent = String(matches.length);
 
       if (!matches.length) {
-        resultsNode.innerHTML = '<div class="page-empty">Aradiginiz ifade icin sonuca ulasilamadi. Daha genel bir kelimeyle tekrar deneyebilirsiniz.</div>';
+        resultsNode.innerHTML = '<div class="page-empty">Aradığınız ifade için sonuca ulaşılamadı. Daha genel bir kelimeyle tekrar deneyebilirsiniz.</div>';
         return;
       }
 
@@ -856,9 +856,9 @@ import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseIma
           : escapeHtml(item.emoji || 'SU');
         const finalPrice = productFinalPrice(item);
         return '<article class="page-result-card"><div class="page-result-media">' + media + '</div><span class="page-badge good">' +
-          escapeHtml(item.category_name || 'Secki') + '</span><h3>' + escapeHtml(item.name) + '</h3><p>' +
-          escapeHtml(item.tags || 'Suvera katalog urunu') + '</p><div class="page-inline-actions"><a class="page-btn-secondary" href="urun?id=' +
-          encodeURIComponent(item.id) + '">Incele</a><button class="page-btn" type="button" data-search-add="' +
+          escapeHtml(item.category_name || 'Seçki') + '</span><h3>' + escapeHtml(item.name) + '</h3><p>' +
+          escapeHtml(item.tags || 'Suvera katalog ürünü') + '</p><div class="page-inline-actions"><a class="page-btn-secondary" href="urun?id=' +
+          encodeURIComponent(item.id) + '">İncele</a><button class="page-btn" type="button" data-search-add="' +
           escapeHtml(item.id) + '">Sepete Ekle</button><span class="page-badge warn">' + money(finalPrice) +
           '</span></div></article>';
       }).join('');
@@ -882,7 +882,7 @@ import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseIma
         });
       });
     } catch (err) {
-      resultsNode.innerHTML = '<div class="page-empty">Arama sonuclari yuklenemedi. Lutfen kisa sure sonra tekrar deneyin.</div>';
+      resultsNode.innerHTML = '<div class="page-empty">Arama sonuçları yüklenemedi. Lütfen kısa süre sonra tekrar deneyin.</div>';
       countNode.textContent = '0';
     }
   }
@@ -904,11 +904,11 @@ import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseIma
 
     async function paint(orderCode, email) {
       if (!orderCode) {
-        result.innerHTML = '<div class="page-empty">Siparis kodunuzu ve e-posta adresinizi yazarak durum takibini burada gorebilirsiniz.</div>';
+        result.innerHTML = '<div class="page-empty">Sipariş kodunuzu ve e-posta adresinizi yazarak durum takibini burada görebilirsiniz.</div>';
         return;
       }
       if (!email) {
-        result.innerHTML = '<div class="page-warning-banner">Siparis durumunu gorebilmek icin sipariste kullandiginiz e-posta adresini girin.</div>';
+        result.innerHTML = '<div class="page-warning-banner">Sipariş durumunu görebilmek için siparişte kullandığınız e-posta adresini girin.</div>';
         return;
       }
 
@@ -920,17 +920,17 @@ import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseIma
       const match = backendOrder || normalizeOrder(localOrder);
 
       if (!match) {
-        result.innerHTML = '<div class="page-warning-banner">Bu siparis kodu ve e-posta ile eslesen kayit bulunamadi. Bilgileri kontrol ederek tekrar deneyin.</div>';
+        result.innerHTML = '<div class="page-warning-banner">Bu sipariş kodu ve e-posta ile eşleşen kayıt bulunamadı. Bilgileri kontrol ederek tekrar deneyin.</div>';
         return;
       }
 
-      result.innerHTML = '<div class="page-kv-grid"><div class="page-kv"><small>Siparis</small><strong>' +
+      result.innerHTML = '<div class="page-kv-grid"><div class="page-kv"><small>Sipariş</small><strong>' +
         escapeHtml(match.orderCode || match.id || '-') + '</strong></div><div class="page-kv"><small>Durum</small><strong>' +
-        escapeHtml(orderStatusLabel(match.status)) + '</strong></div><div class="page-kv"><small>Musteri</small><strong>' +
+        escapeHtml(orderStatusLabel(match.status)) + '</strong></div><div class="page-kv"><small>Müşteri</small><strong>' +
         escapeHtml(match.customer && match.customer.name || '-') + '</strong></div><div class="page-kv"><small>Toplam</small><strong>' +
         money(match.total || 0) + '</strong></div></div><div class="page-info-banner" data-css="margin-top:16px;">' +
         (match.tracking_number
-          ? 'Kargo: <strong>' + escapeHtml(match.shipping_company || 'Hazirlaniyor') + '</strong> • Takip No: <strong>' + escapeHtml(match.tracking_number) + '</strong>' +
+          ? 'Kargo: <strong>' + escapeHtml(match.shipping_company || 'Hazırlanıyor') + '</strong> • Takip No: <strong>' + escapeHtml(match.tracking_number) + '</strong>' +
             trackingLink(match.tracking_url)
           : escapeHtml(orderStatusNote(match))) +
         '</div>' +
@@ -949,8 +949,8 @@ import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseIma
 
   function bindSupportForms() {
     [
-      ['returnRequestForm', 'Iade veya degisim talebiniz not edildi. Siparis kodunuzla birlikte destek ekibi sizi yonlendirecek.'],
-      ['passwordResetForm', 'Sifre sifirlama baglantisi hazir durumda. Canli entegrasyonda e-posta servisine baglanacak.'],
+      ['returnRequestForm', 'İade veya değişim talebiniz not edildi. Sipariş kodunuzla birlikte destek ekibi sizi yönlendirecek.'],
+      ['passwordResetForm', 'Şifre sıfırlama bağlantısı hazır durumda. Canlı entegrasyonda e-posta servisine bağlanacak.'],
     ].forEach(function (entry) {
       const form = document.getElementById(entry[0]);
       if (!form) return;

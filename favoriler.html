@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Favoriler | SUVERA</title>
-  <meta name="description" content="Kaydettiginiz Suvera urunlerini favoriler sayfasinda listeleyin ve tekrar inceleyin." />
+  <meta name="description" content="Kaydettiğiniz Suvera ürünlerini favoriler sayfasında listeleyin ve tekrar inceleyin." />
   <link rel="canonical" href="https://suvera.com.tr/favoriler" />
     {{> head-defaults}}<link rel="stylesheet" href="css/site-pages.css" />
 </head>
@@ -14,27 +14,12 @@
 
   <main id="main" tabindex="-1" class="info-page-shell" data-page-root="favoritesPage">
     <div class="page-breadcrumb"><a href="anasayfa">Ana Sayfa</a><span>›</span><span>Favoriler</span></div>
-    <section class="page-hero">
-      <div class="page-hero-card">
-        <div class="hero-kicker">Wishlist</div>
-        <h1 class="hero-title">Sectikleriniz kaybolmaz,<br/>burada sizi bekler.</h1>
-        <p class="page-copy">Urun kartlarindaki kalp butonu ile eklediginiz parcalar bu sayfada listelenir. Favorileriniz tarayicida saklanir; e-posta bilginiz varsa sunucu ile senkronize edilir.</p>
-        <div class="page-pill-row"><div class="page-pill">Toplam favori: <span id="favoritesCount">0</span></div></div>
-      </div>
-      <aside class="page-side-card">
-        <div class="hero-kicker">Kisa Yol</div>
-        <div class="page-actions">
-          <a class="page-btn" href="urunler">Koleksiyona Don</a>
-          <a class="page-btn-secondary" href="hesabim">Hesabim</a>
-        </div>
-      </aside>
-    </section>
+    <header class="favorites-header">
+      <h1>Favoriler</h1>
+      <p><span id="favoritesCount">0</span> ürün</p>
+    </header>
 
-    <section class="page-card">
-      <div class="page-section-head">
-        <h2 class="page-section-title">Kayitli Urunler</h2>
-        <span class="page-section-subtitle">Tekrar incele veya kaldir</span>
-      </div>
+    <section class="favorites-results" aria-label="Favori ürünler">
       <div id="favoritesGrid" class="page-favorites-grid"></div>
     </section>
   </main>

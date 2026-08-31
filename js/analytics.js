@@ -9,7 +9,7 @@ const ROUTES = new Set([
   'anasayfa', 'urunler', 'urun', 'sepet', 'giris', 'siparis', 'sifre-sifirla',
   'siparis-takip', 'tesekkur', 'hakkimizda', 'iade', 'iletisim', 'kargo', 'kvkk',
   'sozlesme', 'uyelik-sozlesmesi', 'favoriler', 'hesabim', 'blog-detay', 'blog',
-  'arama', 'dogrula', 'tercihler', 'karsilastir', 'suvera',
+  'arama', 'dogrula', 'tercihler', 'karsilastir', 'suvera', 'cerez-politikasi',
 ]);
 
 let analyticsEnabled = false;
@@ -63,6 +63,7 @@ function navigationType() {
 }
 
 function sendMetric(name, value) {
+  if (!analyticsEnabled) return false;
   const payload = metricPayload(name, value, { navigationType: navigationType() });
   if (!payload) return false;
   const body = JSON.stringify(payload);
@@ -151,10 +152,14 @@ window.SuveraWebVitals = Object.freeze({
 
 window.addEventListener('suvera:consent', (event) => {
   if (event.detail?.analytics) enableAnalytics();
+  else {
+    analyticsEnabled = false;
+    document.documentElement.dataset.analytics = 'disabled';
+  }
 });
 
 try {
-  if (localStorage.getItem('suvera:privacy-consent:v1') === 'analytics') enableAnalytics();
+  const saved = JSON.parse(localStorage.getItem('suvera:privacy-consent:v1') || 'null');
+  if (saved && saved.version === 1 && saved.analytics === true) enableAnalytics();
 } catch (_) {
-  // Analytics remains disabled when consent storage is unavailable.
 }

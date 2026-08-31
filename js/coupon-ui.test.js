@@ -71,11 +71,12 @@ test('checkout revalidates the saved coupon and preserves cart and coupon on fai
   assert.match(failurePath, /getCheckoutErrorMessage\(err\)/);
 });
 
-test('cart and checkout expose apply, feedback and explicit removal controls', () => {
-  for (const file of ['sepet.html', 'siparis.html']) {
-    const html = read(file);
-    assert.match(html, /Kupon checkout sırasında sunucuda yeniden doğrulanır/);
-    assert.match(html, /CouponApply/);
-    assert.match(html, /CouponRemove/);
-  }
+test('coupon controls stay in checkout and are intentionally absent from the cart page', () => {
+  const cart = read('sepet.html');
+  assert.doesNotMatch(cart, /Kupon checkout sırasında sunucuda yeniden doğrulanır|CouponApply|CouponRemove|cartCoupon/);
+
+  const checkout = read('siparis.html');
+  assert.match(checkout, /Kupon checkout sırasında sunucuda yeniden doğrulanır/);
+  assert.match(checkout, /CouponApply/);
+  assert.match(checkout, /CouponRemove/);
 });
