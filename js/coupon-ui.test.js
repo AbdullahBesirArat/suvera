@@ -58,7 +58,7 @@ test('checkout revalidates the saved coupon and preserves cart and coupon on fai
   const checkout = read('siparis.html');
   assert.match(checkout, /if \(couponCode\) payload\.couponCode = couponCode/);
 
-  const successStart = checkout.indexOf('const result = isIbanPayment');
+  const successStart = checkout.indexOf('const result = await window.SuveraAPI.orders.create');
   const failureStart = checkout.indexOf('} catch (err) {', successStart);
   const failureEnd = checkout.indexOf('\n      }\n    });', failureStart);
   assert.ok(successStart > -1 && failureStart > successStart && failureEnd > failureStart);

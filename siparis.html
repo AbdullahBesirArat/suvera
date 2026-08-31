@@ -21,15 +21,17 @@
     }
     *{box-sizing:border-box}
     body{margin:0;background:var(--soft);color:var(--ink);font-family:'Jost',sans-serif}
-    .checkout-shell{min-height:100vh;display:grid;grid-template-columns:minmax(0,1fr) 460px}
-    .checkout-main{background:#fff;padding:38px 56px 60px}
-    .checkout-side{background:#f3f5f2;border-left:1px solid var(--line);padding:38px 42px;position:relative}
+    .checkout-shell{min-height:100vh;display:grid;grid-template-columns:minmax(0,1fr) 460px;grid-template-rows:auto auto 1fr;grid-template-areas:"header side" "progress side" "main side"}
+    .checkout-header{grid-area:header;background:#fff;padding:38px 56px 0}
+    .order-progress-nav{grid-area:progress;background:#fff;padding:28px 56px 0}
+    .checkout-main{grid-area:main;background:#fff;padding:28px 56px 60px}
+    .checkout-side{grid-area:side;background:#f3f5f2;border-left:1px solid var(--line);padding:38px 42px;position:relative}
     .checkout-inner{max-width:720px;margin-left:auto}
-    .brand-row{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:34px}
+    .brand-row{display:flex;align-items:center;justify-content:space-between;gap:16px}
     .checkout-logo{font-family:'Cormorant Garamond',serif;font-size:30px;letter-spacing:4px;text-decoration:none;color:var(--ink)}
     .cart-link{color:var(--muted);font-size:13px;text-decoration:none}
-    .steps{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:12px;margin-bottom:28px;flex-wrap:wrap;list-style:none;padding:0;margin-left:0;margin-right:0}
-    .steps strong{color:var(--ink);font-weight:500}
+    .checkout-steps{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:12px;flex-wrap:wrap;list-style:none;padding:0;margin:0}
+    .checkout-steps strong{color:var(--ink);font-weight:500}
     .checkout-heading{font-family:var(--serif,Georgia,serif);font-size:22px;font-weight:500;letter-spacing:.5px;margin:0 0 14px}
     .section{padding:26px 0;border-top:1px solid var(--line)}
     .section:first-of-type{border-top:none;padding-top:0}
@@ -43,6 +45,11 @@
     input,select,textarea{width:100%;border:1px solid var(--line);background:#fff;border-radius:5px;font:inherit;font-size:14px;padding:13px 12px;outline:none}
     textarea{min-height:98px;resize:vertical}
     input:focus,select:focus,textarea:focus{border-color:#575f69;box-shadow:0 0 0 2px rgba(51,95,214,.08)}
+    .combobox-field{position:relative}
+    .combobox-options{position:absolute;z-index:20;top:100%;left:0;right:0;max-height:264px;overflow-y:auto;margin:2px 0 0;padding:4px;background:#fff;border:1px solid var(--line);border-radius:6px;box-shadow:0 12px 28px rgba(24,31,27,.14)}
+    .combobox-options[hidden]{display:none}
+    .combobox-option{display:flex;align-items:center;width:100%;min-height:44px;border:0;border-radius:4px;background:#fff;padding:10px 12px;color:var(--ink);font:inherit;font-size:14px;text-align:left;cursor:pointer}
+    .combobox-option:hover,.combobox-option[aria-selected="true"]{background:#eef3ee}
     .check-row{display:flex;align-items:center;gap:10px;margin-top:12px;color:#34383d;font-size:13px}
     .check-row input{width:auto}
     .method-list{display:grid;gap:10px}
@@ -64,7 +71,7 @@
     .guest-btn{border:1px solid #263b22;background:#263b22;color:#fff;border-radius:8px;padding:10px 14px;font-family:var(--sans);font-size:11px;letter-spacing:1.4px;text-transform:uppercase;cursor:pointer}
     .guest-link{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:8px;padding:10px 14px;text-decoration:none;font-size:11px;letter-spacing:1.4px;text-transform:uppercase}
     .error{display:none;background:#fff1f1;border:1px solid #efc5c5;color:var(--danger);border-radius:6px;padding:13px 14px;font-size:13px;line-height:1.55;margin-bottom:16px}
-    .trust-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:16px}
+    .trust-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}
     .trust-card{border:1px solid var(--line);border-radius:6px;background:#fafafa;padding:12px 13px;font-size:12px;color:var(--muted);line-height:1.6}
     .trust-card strong{display:block;color:var(--ink);font-size:11px;letter-spacing:1.3px;text-transform:uppercase;margin-bottom:6px}
     .pay-row{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-top:24px}
@@ -72,7 +79,8 @@
     .pay-btn{border:none;background:var(--green);color:#fff;border-radius:6px;padding:16px 24px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;min-width:190px}
     .pay-btn:disabled{opacity:.55;cursor:not-allowed}
     .summary-card{position:sticky;top:24px}
-    .summary-logo{display:none}
+    .payment-status{margin:12px 0 0;padding:12px 14px;border:1px solid #d8e2d6;border-radius:6px;background:#f6faf5;color:#315438;font-size:13px;line-height:1.55}
+    .payment-status[data-ready="false"]{border-color:#efc5c5;background:#fff1f1;color:var(--danger)}
     .summary-list{display:grid;gap:16px;margin-bottom:22px}
     .summary-item{display:grid;grid-template-columns:66px 1fr auto;gap:13px;align-items:center}
     .summary-img{width:66px;height:66px;border:1px solid var(--line);border-radius:8px;background:#fff;display:grid;place-items:center;position:relative;overflow:hidden}
@@ -111,8 +119,10 @@
     .mobile-summary-toggle{display:none}
     @media(max-width:980px){
       .checkout-shell{display:flex;flex-direction:column}
-      .checkout-side{order:-1;border-left:none;border-bottom:1px solid var(--line);padding:0}
-      .checkout-main{padding:28px 20px 44px}
+      .checkout-header{order:0;padding:22px 20px 0}
+      .order-progress-nav{order:1;padding:20px 20px 18px}
+      .checkout-side{order:2;border-left:none;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:0}
+      .checkout-main{order:3;padding:28px 20px 44px}
       .checkout-inner{max-width:none}
       .summary-card{position:static;padding:18px 20px}
        .summary-list,.money-lines{display:none}
@@ -120,8 +130,7 @@
        .checkout-side.open .summary-list,.checkout-side.open .money-lines{display:grid}
        .checkout-side.open .discount-row{display:block}
       .mobile-summary-toggle{display:flex;justify-content:space-between;align-items:center;width:100%;border:none;background:#f3f5f2;padding:18px 20px;font:inherit;color:var(--blue)}
-      .summary-logo{display:block;font-family:'Cormorant Garamond',serif;font-size:26px;letter-spacing:4px;padding:22px 20px 0}
-    .field-grid,.trust-grid{grid-template-columns:1fr}
+      .field-grid,.trust-grid{grid-template-columns:1fr}
       .pay-row{flex-direction:column-reverse;align-items:stretch}
       .pay-btn{width:100%}
     }
@@ -129,33 +138,30 @@
 </head>
 <body>
   <main id="main" tabindex="-1" class="checkout-shell">
+    <header class="checkout-header">
+      <div class="checkout-inner brand-row">
+        <a class="checkout-logo" href="anasayfa">SUVERA</a>
+        <a class="cart-link" href="sepet">Sepete dön</a>
+      </div>
+    </header>
+
+    <div class="order-progress-nav" role="navigation" aria-label="Sipariş adımları">
+      <div class="checkout-inner">
+        <ol class="checkout-steps">
+          <li>Sepet</li>
+          <li aria-hidden="true">›</li>
+          <li aria-current="step"><strong>Bilgiler</strong></li>
+          <li aria-hidden="true">›</li>
+          <li>Kargo</li>
+          <li aria-hidden="true">›</li>
+          <li>Ödeme</li>
+        </ol>
+      </div>
+    </div>
+
     <section class="checkout-main">
       <div class="checkout-inner">
-        <!-- A31: checkout deliberately drops the site navigation, so this brand row is the
-             page's own header. It stays inside the checkout column because .checkout-shell
-             is a two-column grid; a sectioning <header> here is correct HTML and does not
-             claim the banner landmark, which this page genuinely does not have. -->
-        <header class="brand-row">
-          <a class="checkout-logo" href="anasayfa">SUVERA</a>
-          <a class="cart-link" href="sepet">Sepete dön</a>
-        </header>
-
         <h1 class="checkout-heading">Siparişi tamamla</h1>
-
-        <!-- A31: a real ordered list inside a named nav, so the position in the flow is
-             conveyed by structure and aria-current rather than by bold text alone. The
-             separators are decorative and hidden from assistive technology. -->
-        <nav aria-label="Sipariş adımları">
-          <ol class="steps">
-            <li>Sepet</li>
-            <li aria-hidden="true">›</li>
-            <li aria-current="step"><strong>Bilgiler</strong></li>
-            <li aria-hidden="true">›</li>
-            <li>Kargo</li>
-            <li aria-hidden="true">›</li>
-            <li>Ödeme</li>
-          </ol>
-        </nav>
 
         <form id="checkoutForm" novalidate>
           <div class="error" id="checkoutError" role="alert" aria-live="assertive"></div>
@@ -266,12 +272,11 @@
                 <label for="address">Adres</label>
                 <input id="address" name="address" autocomplete="shipping address-line1" required maxlength="500" />
               </div>
-              <div class="field">
+              <div class="field combobox-field">
                 <label for="city">İl</label>
-                <input id="citySearch" type="search" placeholder="İl ara" aria-label="İl ara" aria-controls="city" autocomplete="off" />
-                <select id="city" name="city" autocomplete="shipping address-level1" required>
-                  <option value="">İl seçin</option>
-                </select>
+                <input id="city" name="city" type="search" placeholder="İl ara veya seç" autocomplete="shipping address-level1" required
+                       role="combobox" aria-autocomplete="list" aria-controls="cityOptions" aria-expanded="false" />
+                <div id="cityOptions" class="combobox-options" role="listbox" hidden></div>
               </div>
               <p class="field full" id="addressDataError" role="alert" hidden></p>
               <div class="field">
@@ -313,36 +318,25 @@
           <section class="section">
             <div class="section-head">
               <h2 class="section-title" id="paymentMethodTitle">Ödeme</h2>
-              <p class="section-note">Kart bilgileri bu sayfada tutulmaz, güvenli ödeme adımına yönlendirilirsiniz.</p>
+              <p class="section-note">Siparişiniz banka havalesiyle tamamlanır.</p>
             </div>
-            <div class="method-list" role="radiogroup" aria-labelledby="paymentMethodTitle">
+            <div class="method-list" aria-labelledby="paymentMethodTitle">
               <div class="method">
                 <label>
-                  <input type="radio" name="paymentMethod" value="card" checked />
+                  <input type="radio" name="paymentMethod" value="iban" checked hidden />
                   <span>
-                    <span class="method-title">Kart ile ödeme</span>
-                    <span class="method-copy">Güvenli ödeme sayfasına yönlendirilirsiniz.</span>
+                    <span class="method-title">Banka Havalesi / EFT</span>
+                    <span class="method-copy">Sipariş numaranızı açıklama alanına ekleyerek ödeme yapabilirsiniz.</span>
                   </span>
-                  <span class="method-tag">Sağlayıcı</span>
+                  <span class="method-tag">IBAN</span>
                 </label>
-                <div class="method-detail">Kart numarası bu sayfada saklanmaz veya işlenmez. Ödeme sağlayıcısının güvenli ekranında tamamlanır.</div>
-              </div>
-              <div class="method">
-                <label>
-                  <input type="radio" name="paymentMethod" value="iban" />
-                  <span>
-                    <span class="method-title">IBAN / havale ile ödeme</span>
-                    <span class="method-copy">Sipariş sonrasında ödeme bilgileri paylaşılır.</span>
-                  </span>
-                  <span class="method-tag">Manuel</span>
-                </label>
-                <div class="method-detail">Sipariş numaranızı açıklama alanına ekleyerek ödeme yapabilirsiniz. Onaydan sonra siparişiniz hazırlanır.</div>
+                <div class="method-detail" id="ibanDetails">Banka bilgileri mağaza ayarlarından güvenli biçimde yüklenir.</div>
               </div>
             </div>
+            <p class="payment-status" id="paymentConfigStatus" data-ready="false" role="status" aria-live="polite">Banka havalesi bilgileri kontrol ediliyor…</p>
             <div class="trust-grid">
-              <div class="trust-card"><strong>SSL</strong>Form verileri güvenli bağlantı üzerinden iletilir.</div>
-              <div class="trust-card"><strong>3D Secure</strong>Sağlayıcı aktif olduğunda doğrulama ekranında tamamlanır.</div>
-              <div class="trust-card"><strong>Kart Saklama Yok</strong>Kart numarası Suvera tarafında tutulmaz.</div>
+              <div class="trust-card"><strong>Güvenli İletim</strong>Form verileri güvenli bağlantı üzerinden iletilir.</div>
+              <div class="trust-card"><strong>Kontrollü Onay</strong>Ödeme doğrulandıktan sonra siparişiniz hazırlanır.</div>
             </div>
           </section>
 
@@ -366,14 +360,13 @@
 
           <div class="pay-row">
             <a class="back-link" href="sepet">Sepete geri dön</a>
-            <button class="pay-btn" id="payButton" type="submit">Siparişi Tamamla</button>
+            <button class="pay-btn" id="payButton" type="submit" disabled>Siparişi Tamamla</button>
           </div>
         </form>
       </div>
     </section>
 
     <aside class="checkout-side" id="checkoutSide">
-      <div class="summary-logo">SUVERA</div>
       <button class="mobile-summary-toggle" type="button" data-action="toggle-summary">
         <span>Sipariş özetini göster</span>
         <strong id="mobileTotal">0,00 TL</strong>
@@ -405,7 +398,7 @@
   {{> scripts}}
   <script src="js/coupon-ui.js"></script>
   <script type="module">
-    import { escapeHtml, formatMoney as money, safeHttpUrl as safePaymentUrl } from '/js/core/storefront-utils.js';
+    import { escapeHtml, formatMoney as money } from '/js/core/storefront-utils.js';
 
     const CART_KEY = 'suveraCart';
     const CHECKOUT_NOTE_KEY = 'suveraCheckoutNote';
@@ -416,9 +409,7 @@
     const CHECKOUT_IDEMPOTENCY_KEY = 'suvera:checkout-idempotency:v1';
     let checkoutSettings = {};
     let checkoutPromotionPricing = null;
-    const SITE_ORIGIN = String(window.SUVERA_SITE_ORIGIN || location.origin).replace(/\/$/, '');
-    const CARD_PAYMENT_SUCCESS_URL = SITE_ORIGIN + '/tesekkur';
-    const CARD_PAYMENT_FAILURE_URL = SITE_ORIGIN + '/tesekkur?payment=failed';
+    let ibanConfigurationReady = false;
 
     function loadCart() {
       try {
@@ -579,7 +570,7 @@
       const message = raw.toLocaleLowerCase('tr-TR');
 
       if (!raw) {
-        return 'Ödeme başlatılamadı. Lütfen bilgilerinizi kontrol edip tekrar deneyin.';
+        return 'Sipariş oluşturulamadı. Lütfen bilgilerinizi kontrol edip tekrar deneyin.';
       }
 
       if (
@@ -588,22 +579,15 @@
         message.includes('cors') ||
         message.includes('timeout')
       ) {
-        return 'Ödeme servisine şu anda ulaşılamıyor. Bağlantınızı kontrol edip kısa bir süre sonra tekrar deneyin.';
+        return 'Sipariş servisine şu anda ulaşılamıyor. Bağlantınızı kontrol edip kısa bir süre sonra tekrar deneyin.';
       }
 
       if (message.includes('stok') || message.includes('inventory')) {
         return raw + ' Sepetinizde bu ürünün miktarını mevcut stoğa göre düzeltip tekrar deneyin.';
       }
 
-      if (
-        message.includes('kart') ||
-        message.includes('card') ||
-        message.includes('payment') ||
-        message.includes('ödeme') ||
-        message.includes('odeme') ||
-        message.includes('3d')
-      ) {
-        return 'Ödeme başlatılamadı. Kart bilgilerinizi ve banka onay adımını kontrol ederek tekrar deneyin.';
+      if (message.includes('iban') || message.includes('havale')) {
+        return 'Banka havalesi bilgileri doğrulanamadı. Lütfen kısa bir süre sonra tekrar deneyin.';
       }
 
       if (message.includes('api hatası: 4') || message.includes('api hatasi: 4')) {
@@ -611,7 +595,7 @@
       }
 
       if (message.includes('api hatası: 5') || message.includes('api hatasi: 5')) {
-        return 'Ödeme altyapısında geçici bir yoğunluk var. Lütfen birkaç dakika sonra tekrar deneyin.';
+        return 'Sipariş altyapısında geçici bir yoğunluk var. Lütfen birkaç dakika sonra tekrar deneyin.';
       }
 
       return 'Sipariş oluşturulamadı. Bilgilerinizi kontrol edip tekrar deneyin.';
@@ -638,7 +622,10 @@
       if (lastName.length < 2) return { field: 'lastName', message: 'Lütfen geçerli bir soyadı girin.' };
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { field: 'customerEmail', message: 'Lütfen geçerli bir e-posta adresi girin.' };
       if (address.length < 10) return { field: 'address', message: 'Lütfen teslimat adresini daha detaylı yazın.' };
-      if (!city) return { field: 'city', message: 'Lütfen il seçin.' };
+      const canonicalCity = checkoutCities.find((item) => String(item.id) === String(selectedCityId));
+      const cityMatchesSelection = canonicalCity
+        && window.SuveraAddressData.normalizeTurkish(canonicalCity.name) === window.SuveraAddressData.normalizeTurkish(city);
+      if (!cityMatchesSelection) return { field: 'city', message: 'Lütfen listeden geçerli bir il seçin.' };
       if (!district) return { field: 'district', message: 'Lütfen ilçe seçin.' };
       if (!(phone.length === 10 || phone.length === 11)) return { field: 'customerPhone', message: 'Telefon numaranızı eksiksiz girin.' };
       if (phone.length === 11 && !phone.startsWith('0')) return { field: 'customerPhone', message: 'Telefon numarası 0 ile başlamalıdır.' };
@@ -687,14 +674,32 @@
       const shippingFee = checkoutShippingFee(subtotal);
       const shippingMethod = document.querySelector('input[name="shipping"]');
       const shippingPrice = shippingMethod && shippingMethod.closest('label') && shippingMethod.closest('label').querySelector('strong');
-      const cardInput = document.querySelector('input[name="paymentMethod"][value="card"]');
-      const ibanInput = document.querySelector('input[name="paymentMethod"][value="iban"]');
+      const status = document.getElementById('paymentConfigStatus');
+      const details = document.getElementById('ibanDetails');
+      const payButton = document.getElementById('payButton');
+      const iban = String(checkoutSettings.iban || '').replace(/\s+/g, '').toUpperCase();
+      const holder = String(checkoutSettings.ibanHolderName || checkoutSettings.iban_holder_name || '').trim();
+      const bank = String(checkoutSettings.bankName || checkoutSettings.bank_name || '').trim();
+      const paymentProvider = String(checkoutSettings.paymentProvider || checkoutSettings.payment_provider || '').toLowerCase();
 
       if (shippingPrice) shippingPrice.textContent = shippingFee ? money(shippingFee) : 'Ucretsiz';
-      if (checkoutSettings.paymentEnabled === false && cardInput) {
-        cardInput.disabled = true;
-        if (ibanInput) ibanInput.checked = true;
+      ibanConfigurationReady = checkoutSettings.paymentEnabled !== false
+        && /^TR\d{24}$/.test(iban)
+        && (!paymentProvider || paymentProvider === 'manual' || paymentProvider === 'iban');
+      if (status) {
+        status.dataset.ready = String(ibanConfigurationReady);
+        if (ibanConfigurationReady) {
+          status.removeAttribute('data-error-code');
+          status.textContent = 'Banka havalesi bilgileri hazır. Siparişinizden sonra ödeme durumunuz onaylanacaktır.';
+        } else {
+          status.dataset.errorCode = 'IBAN_DATA_REQUIRED';
+          status.textContent = 'Banka havalesi bilgileri henüz yapılandırılmamış. Sipariş şu anda tamamlanamıyor.';
+        }
       }
+      if (details) details.textContent = ibanConfigurationReady
+        ? [bank, holder, iban.replace(/(.{4})/g, '$1 ').trim()].filter(Boolean).join(' · ')
+        : 'Gerçek banka bilgileri mağaza ayarlarında tanımlandığında burada gösterilecektir.';
+      if (payButton) payButton.disabled = !ibanConfigurationReady || !loadCart().length;
     }
 
     function hydrateCheckoutProfile() {
@@ -727,6 +732,10 @@
     }
 
     let checkoutCities = [];
+    let selectedCityId = '';
+    let visibleCities = [];
+    let activeCityIndex = -1;
+    let citySearchSequence = 0;
 
     function showAddressDataError(message) {
       const error = document.getElementById('addressDataError');
@@ -760,48 +769,89 @@
       }
     }
 
-    function renderCityOptions(cities, preferredValue = '') {
-      const citySelect = document.getElementById('city');
-      citySelect.innerHTML = '<option value="">İl seçin</option>' + cities.map((city) => {
-        const name = titleCaseAddress(city.name);
-        return '<option value="' + escapeHtml(name) + '" data-city-id="' + escapeHtml(city.id) + '">' + escapeHtml(name) + '</option>';
-      }).join('');
-      if (preferredValue) citySelect.value = preferredValue;
-      return !preferredValue || citySelect.value === preferredValue;
+    function resetDistricts() {
+      const districtSelect = document.getElementById('district');
+      districtSelect.value = '';
+      districtSelect.disabled = true;
+      districtSelect.innerHTML = '<option value="">Önce il seçin</option>';
+    }
+
+    function closeCityOptions() {
+      const cityInput = document.getElementById('city');
+      const options = document.getElementById('cityOptions');
+      options.hidden = true;
+      cityInput.setAttribute('aria-expanded', 'false');
+      cityInput.removeAttribute('aria-activedescendant');
+      activeCityIndex = -1;
+    }
+
+    function setActiveCity(index) {
+      const cityInput = document.getElementById('city');
+      const nodes = Array.from(document.querySelectorAll('.combobox-option[data-city-id]'));
+      if (!nodes.length) return;
+      activeCityIndex = Math.max(0, Math.min(index, nodes.length - 1));
+      nodes.forEach((node, nodeIndex) => node.setAttribute('aria-selected', String(nodeIndex === activeCityIndex)));
+      const active = nodes[activeCityIndex];
+      cityInput.setAttribute('aria-activedescendant', active.id);
+      active.scrollIntoView({ block: 'nearest' });
+    }
+
+    function renderCityOptions(cities) {
+      const cityInput = document.getElementById('city');
+      const options = document.getElementById('cityOptions');
+      visibleCities = cities;
+      activeCityIndex = -1;
+      options.innerHTML = cities.length
+        ? cities.map((city, index) => '<button class="combobox-option" id="city-option-' + index + '" type="button" role="option" aria-selected="false" data-city-id="' + escapeHtml(city.id) + '">' + escapeHtml(titleCaseAddress(city.name)) + '</button>').join('')
+        : '<div class="combobox-option" role="option" aria-disabled="true">Eşleşen il bulunamadı</div>';
+      options.hidden = false;
+      cityInput.setAttribute('aria-expanded', 'true');
+    }
+
+    async function selectCity(city) {
+      if (!city) return;
+      selectedCityId = String(city.id);
+      document.getElementById('city').value = titleCaseAddress(city.name);
+      closeCityOptions();
+      showAddressDataError('');
+      await populateDistricts();
     }
 
     async function populateCities(preferredValue = '') {
-      const citySelect = document.getElementById('city');
-      citySelect.disabled = true;
-      citySelect.innerHTML = '<option value="">İller yükleniyor</option>';
+      const cityInput = document.getElementById('city');
+      cityInput.disabled = true;
+      cityInput.placeholder = 'İller yükleniyor';
       try {
         checkoutCities = await window.SuveraAddressData.loadCities();
-        const found = renderCityOptions(checkoutCities, preferredValue);
-        citySelect.disabled = false;
+        const preferredCity = preferredValue ? await window.SuveraAddressData.findCity(preferredValue) : null;
+        selectedCityId = preferredCity ? String(preferredCity.id) : '';
+        cityInput.value = preferredCity ? titleCaseAddress(preferredCity.name) : '';
+        cityInput.disabled = false;
+        cityInput.placeholder = 'İl ara veya seç';
+        closeCityOptions();
+        const found = !preferredValue || Boolean(preferredCity);
         if (!found) showAddressDataError('Kayıtlı il artık güncel adres listesinde bulunmuyor. Lütfen yeniden seçin.');
         return found;
       } catch (error) {
         showAddressDataError(error.message || 'Adres verisi yüklenemedi.');
-        citySelect.innerHTML = '<option value="">İller yüklenemedi</option>';
+        cityInput.value = '';
+        cityInput.placeholder = 'İller yüklenemedi';
         return false;
       }
     }
 
     async function populateDistricts(preferredValue = '') {
-      const citySelect = document.getElementById('city');
       const districtSelect = document.getElementById('district');
-      const selectedCity = citySelect.value;
       districtSelect.value = '';
       districtSelect.disabled = true;
-      if (!selectedCity) {
+      if (!selectedCityId) {
         districtSelect.innerHTML = '<option value="">Önce il seçin</option>';
         return;
       }
       districtSelect.innerHTML = '<option value="">İlçeler yükleniyor</option>';
       showAddressDataError('');
       try {
-        const selectedOption = citySelect.options[citySelect.selectedIndex];
-        const districts = await window.SuveraAddressData.loadDistricts(selectedOption?.dataset.cityId || selectedCity);
+        const districts = await window.SuveraAddressData.loadDistricts(selectedCityId);
         districtSelect.innerHTML = '<option value="">İlçe seçin</option>' + districts.map((district) => {
           const name = titleCaseAddress(district.name);
           return '<option value="' + escapeHtml(name) + '">' + escapeHtml(name) + '</option>';
@@ -817,6 +867,46 @@
         districtSelect.innerHTML = '<option value="">İlçeler yüklenemedi</option>';
         showAddressDataError(error.message || 'İlçe verisi yüklenemedi.');
       }
+    }
+
+    function bindCityCombobox() {
+      const cityInput = document.getElementById('city');
+      const options = document.getElementById('cityOptions');
+
+      cityInput.addEventListener('focus', () => renderCityOptions(checkoutCities));
+      cityInput.addEventListener('input', async () => {
+        const searchSequence = ++citySearchSequence;
+        selectedCityId = '';
+        resetDistricts();
+        showAddressDataError('');
+        const matches = await window.SuveraAddressData.searchCities(cityInput.value);
+        if (searchSequence === citySearchSequence) renderCityOptions(matches);
+      });
+      cityInput.addEventListener('keydown', (event) => {
+        if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+          event.preventDefault();
+          if (options.hidden) renderCityOptions(visibleCities.length ? visibleCities : checkoutCities);
+          const next = event.key === 'ArrowDown'
+            ? (activeCityIndex < 0 ? 0 : activeCityIndex + 1)
+            : (activeCityIndex < 0 ? visibleCities.length - 1 : activeCityIndex - 1);
+          setActiveCity(next);
+        } else if (event.key === 'Enter' && !options.hidden && activeCityIndex >= 0) {
+          event.preventDefault();
+          void selectCity(visibleCities[activeCityIndex]);
+        } else if (event.key === 'Escape') {
+          event.preventDefault();
+          closeCityOptions();
+        }
+      });
+      options.addEventListener('mousedown', (event) => event.preventDefault());
+      options.addEventListener('click', (event) => {
+        const option = event.target.closest('[data-city-id]');
+        if (!option) return;
+        void selectCity(checkoutCities.find((city) => String(city.id) === option.dataset.cityId));
+      });
+      document.addEventListener('pointerdown', (event) => {
+        if (!event.target.closest('.combobox-field')) closeCityOptions();
+      });
     }
 
     // A25: offer a signed-in customer their saved addresses to auto-fill checkout.
@@ -1066,7 +1156,7 @@
         document.getElementById('payButton').disabled = true;
         return;
       }
-      document.getElementById('payButton').disabled = false;
+      document.getElementById('payButton').disabled = !ibanConfigurationReady;
 
       list.innerHTML = cart.map((item) => {
         const qty = Number(item.qty || 1);
@@ -1118,6 +1208,10 @@
         showCheckoutMessage('Sepetiniz boş.');
         return;
       }
+      if (!ibanConfigurationReady) {
+        showCheckoutMessage('Banka havalesi bilgileri henüz yapılandırılmamış. Sipariş şu anda tamamlanamıyor.');
+        return;
+      }
 
       const validation = validateCheckoutForm();
       if (validation) {
@@ -1132,9 +1226,7 @@
       ].filter(Boolean);
       persistCheckoutAddress();
 
-      const selectedPaymentMethod = (document.querySelector('input[name="paymentMethod"]:checked') || {}).value || 'card';
       const shippingFee = checkoutShippingFee(cartSubtotal(cart));
-      const isIbanPayment = selectedPaymentMethod === 'iban';
       const serverCart = (window.Suvera && window.Suvera.currentServerCart)
         || (window.SuveraCartUI && window.SuveraCartUI.currentCart ? window.SuveraCartUI.currentCart() : null);
       const payload = {
@@ -1159,7 +1251,7 @@
         cart_id: serverCart && serverCart.id ? serverCart.id : undefined,
         cart_version: serverCart && serverCart.id ? serverCart.version : undefined,
         shipping_fee: shippingFee,
-        paymentMethod: selectedPaymentMethod === 'iban' ? 'iban' : 'card',
+        paymentMethod: 'iban',
         invoice: {
           type: document.getElementById('invoiceType').value,
           full_name: document.getElementById('invoiceFullName').value.trim() || [
@@ -1185,7 +1277,7 @@
 
       const snapshot = {
         orderCode: '',
-        provider: isIbanPayment ? 'manual' : 'provider',
+        provider: 'manual',
         status: 'payment_pending',
         paymentMethod: payload.paymentMethod,
         total: checkoutPromotionPricing ? checkoutPromotionPricing.total : cartSubtotal(cart) + shippingFee,
@@ -1212,24 +1304,14 @@
         payButton.setAttribute('aria-busy', 'true');
         payButton.textContent = 'Sipariş oluşturuluyor...';
         const idempotencyKey = checkoutIdempotencyKey(payload);
-        const result = isIbanPayment
-          ? await window.SuveraAPI.orders.create(payload, idempotencyKey)
-          : await window.SuveraAPI.payment.initialize({
-              ...payload,
-              successUrl: CARD_PAYMENT_SUCCESS_URL,
-              failureUrl: CARD_PAYMENT_FAILURE_URL,
-              success_url: CARD_PAYMENT_SUCCESS_URL,
-              failure_url: CARD_PAYMENT_FAILURE_URL,
-            }, idempotencyKey);
+        const result = await window.SuveraAPI.orders.create(payload, idempotencyKey);
         const orderCode = orderCodeFromResult(result);
-        const provider = result && result.provider || snapshot.provider || 'provider';
-        const paymentPageUrl = safePaymentUrl(result && result.paymentPageUrl);
+        const provider = result && result.provider || snapshot.provider || 'manual';
         const savedOrder = {
           ...snapshot,
           orderCode,
           provider,
           status: 'payment_pending',
-          paymentPageUrl,
           total: result && result.pricing ? result.pricing.total : snapshot.total,
           promotion: result && result.pricing ? result.pricing : checkoutPromotionPricing,
         };
@@ -1241,21 +1323,11 @@
         localStorage.removeItem(GIFT_WRAP_KEY);
         clearCheckoutIdempotencyKey();
         window.SuveraCoupons?.clear();
-        if (isIbanPayment) {
-          window.location.href = 'tesekkur?order=' + encodeURIComponent(orderCode);
-          return;
-        }
-
-        if (paymentPageUrl) {
-          window.location.href = paymentPageUrl;
-          return;
-        }
-
         window.location.href = 'tesekkur?order=' + encodeURIComponent(orderCode);
       } catch (err) {
-        console.error('Checkout payment initialize failed:', err);
+        console.error('Checkout order creation failed:', err);
         showCheckoutMessage(getCheckoutErrorMessage(err));
-        payButton.disabled = false;
+        payButton.disabled = !ibanConfigurationReady;
         payButton.removeAttribute('aria-busy');
         payButton.textContent = 'Siparişi Tamamla';
       }
@@ -1308,21 +1380,12 @@
         const input = document.getElementById(field);
         if (input && !input.value.trim() && savedAddress[field]) input.value = savedAddress[field];
       });
+      bindCityCombobox();
       populateCities(savedAddress.city || '').then((found) => {
         if (found && savedAddress.city) return populateDistricts(savedAddress.district || '');
         return null;
       });
-      document.getElementById('city').addEventListener('change', () => populateDistricts());
       void initSavedAddresses();
-      document.getElementById('citySearch').addEventListener('input', async (event) => {
-        const current = document.getElementById('city').value;
-        const filtered = await window.SuveraAddressData.searchCities(event.target.value);
-        const currentCity = checkoutCities.find((city) => titleCaseAddress(city.name) === current);
-        const visibleCities = currentCity && !filtered.some((city) => city.id === currentCity.id)
-          ? [currentCity, ...filtered]
-          : filtered;
-        renderCityOptions(visibleCities, current);
-      });
       loadCheckoutSettings().finally(() => {
         applyCheckoutSettings();
         renderSummary();

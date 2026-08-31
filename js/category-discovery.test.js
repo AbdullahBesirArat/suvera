@@ -38,6 +38,9 @@ test('discovery uses canonical APIs, real facet counts and semantic Turkish card
   assert.match(discovery, /SuveraAPI\.collections\.list\(\)/);
   assert.match(discovery, /discoveryFacetCount\(facets\.categories, category\)/);
   assert.match(discovery, /discoveryFacetCount\(facets\.collections, collection\)/);
+  assert.match(discovery, /Number\(category\.discovery_count\) > 0/);
+  assert.match(discovery, /page: '1', pageSize: '1', sort: 'recommended', status: 'active'/);
+  assert.doesNotMatch(discovery, /responses\[2\]\.items\.length|catalog\.items\.length/);
   assert.match(categoryCard, /<a class="discovery-card discovery-category-card"/);
   assert.match(categoryCard, /urunler\?category=/);
   assert.match(categoryCard, /kategorisini görüntüle/);

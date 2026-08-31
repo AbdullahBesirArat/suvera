@@ -706,6 +706,8 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
           discovery_count: discoveryFacetCount(facets.categories, category),
           discovery_image: category.image_url || category.fallback_image_url || '',
         });
+      }).filter(function (category) {
+        return Number(category.discovery_count) > 0;
       });
       var collections = (Array.isArray(responses[1]) ? responses[1] : []).filter(function (collection) {
         return collection.active !== false;
