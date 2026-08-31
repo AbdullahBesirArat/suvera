@@ -147,7 +147,7 @@ async function fillCheckout(page, { email = 'checkout@example.test' } = {}) {
   await page.locator('#address').fill('E2E Test Sokak No 1');
   const city = page.locator('#city');
   await expect(city).toBeEnabled();
-  await city.fill('ank');
+  await city.fill('ankara');
   await expect(page.locator('#cityOptions [role="option"]')).toHaveCount(1);
   await city.press('ArrowDown');
   await city.press('Enter');
