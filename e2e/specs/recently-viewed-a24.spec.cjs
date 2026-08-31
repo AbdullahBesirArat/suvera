@@ -17,9 +17,10 @@ test.describe('A24.1 recently viewed', () => {
     const [a, b, c] = await activeProductIds(organizationId, 3);
     expect(Number.isInteger(a) && Number.isInteger(b) && Number.isInteger(c)).toBe(true);
 
-    await page.goto(`${e2eState.origins.storefront}/urun?id=${a}`);
+    await page.goto(e2eState.origins.storefront);
     const acceptConsent = page.locator('[data-consent-action="accept-all"]');
     if (await acceptConsent.isVisible()) await acceptConsent.click();
+    await page.goto(`${e2eState.origins.storefront}/urun?id=${a}`);
     await page.goto(`${e2eState.origins.storefront}/urun?id=${b}`);
 
     const section = page.locator('#recentlyViewedSection');
@@ -50,9 +51,10 @@ test.describe('A24.1 recently viewed', () => {
     // Start clean so the assertion reflects the merge from this session.
     await dbQuery('delete from customer_recently_viewed where organization_id=$1 and customer_account_id=$2', [organizationId, accountId]);
 
-    await page.goto(`${e2eState.origins.storefront}/urun?id=${a}`);
+    await page.goto(e2eState.origins.storefront);
     const acceptConsent = page.locator('[data-consent-action="accept-all"]');
     if (await acceptConsent.isVisible()) await acceptConsent.click();
+    await page.goto(`${e2eState.origins.storefront}/urun?id=${a}`);
     await page.goto(`${e2eState.origins.storefront}/urun?id=${b}`);
 
     await page.goto(`${e2eState.origins.storefront}/giris`);
