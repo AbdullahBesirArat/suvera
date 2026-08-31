@@ -11,6 +11,13 @@ async function activeProductIds(organizationId, limit) {
   return rows.map((row) => Number(row.id));
 }
 
+async function expectLocalHistory(page, expectedIds) {
+  await expect.poll(() => page.evaluate((key) => {
+    const stored = JSON.parse(window.localStorage.getItem(key) || '[]');
+    return stored.map((entry) => Number(entry.id));
+  }, 'suvera:recently-viewed:v1')).toEqual(expectedIds);
+}
+
 test.describe('A24.1 recently viewed', () => {
   test('guest history persists, excludes the current product and stores only ids', async ({ page, e2eState }) => {
     const organizationId = e2eState.fixtures.tenantA.organizationId;
@@ -21,7 +28,9 @@ test.describe('A24.1 recently viewed', () => {
     const acceptConsent = page.locator('[data-consent-action="accept-all"]');
     if (await acceptConsent.isVisible()) await acceptConsent.click();
     await page.goto(`${e2eState.origins.storefront}/urun?id=${a}`);
+    await expectLocalHistory(page, [a]);
     await page.goto(`${e2eState.origins.storefront}/urun?id=${b}`);
+    await expectLocalHistory(page, [b, a]);
 
     const section = page.locator('#recentlyViewedSection');
     await expect(section).toBeVisible();
@@ -55,7 +64,9 @@ test.describe('A24.1 recently viewed', () => {
     const acceptConsent = page.locator('[data-consent-action="accept-all"]');
     if (await acceptConsent.isVisible()) await acceptConsent.click();
     await page.goto(`${e2eState.origins.storefront}/urun?id=${a}`);
+    await expectLocalHistory(page, [a]);
     await page.goto(`${e2eState.origins.storefront}/urun?id=${b}`);
+    await expectLocalHistory(page, [b, a]);
 
     await page.goto(`${e2eState.origins.storefront}/giris`);
     await page.locator('#emailInput').fill(e2eState.credentials.customerA.email);
