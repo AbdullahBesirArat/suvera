@@ -60,6 +60,20 @@
     .method-copy{font-size:12px;color:var(--muted);margin-top:3px}
     .method-tag{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:4px 8px}
     .method-detail{display:none;border-top:1px solid var(--line);padding:14px 16px;background:#fafafa;color:var(--muted);font-size:13px;line-height:1.55}
+    .bank-details{display:grid;gap:0;margin:0}
+    .bank-detail-row{display:grid;grid-template-columns:minmax(92px,.42fr) minmax(0,1fr);gap:14px;padding:11px 0;border-top:1px solid var(--line)}
+    .bank-detail-row:first-child{border-top:0;padding-top:0}
+    .bank-detail-row:last-child{padding-bottom:0}
+    .bank-detail-label{color:var(--muted);font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase}
+    .bank-detail-value{margin:0;color:var(--ink);font-size:14px;overflow-wrap:anywhere}
+    .iban-line{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .iban-value{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:13px;letter-spacing:.35px;white-space:normal}
+    .iban-copy{min-height:44px;border:1px solid #b8c7bc;border-radius:6px;background:#fff;color:#244b31;padding:9px 12px;font:inherit;font-size:12px;font-weight:600;cursor:pointer}
+    .iban-copy:hover:not(:disabled){border-color:var(--green);background:#f3f8f4}
+    .iban-copy:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+    .iban-copy:disabled{opacity:.55;cursor:not-allowed}
+    .iban-copy-feedback{min-height:20px;margin:10px 0 0;color:#315438;font-size:12px}
+    .iban-copy-feedback[data-tone="error"]{color:var(--danger)}
     .method:has(input:checked){border-color:#575f69;box-shadow:0 0 0 1px #9cadb9}
     .method:has(input:checked) .method-detail{display:block}
     .guest-choice{border:1px solid #dfe4dc;background:#f7faf5;border-radius:12px;padding:16px;margin-bottom:18px}
@@ -133,6 +147,8 @@
       .field-grid,.trust-grid{grid-template-columns:1fr}
       .pay-row{flex-direction:column-reverse;align-items:stretch}
       .pay-btn{width:100%}
+      .bank-detail-row{grid-template-columns:1fr;gap:5px}
+      .iban-line{align-items:flex-start}
     }
   </style>
 </head>
@@ -326,11 +342,30 @@
                   <input type="radio" name="paymentMethod" value="iban" checked hidden />
                   <span>
                     <span class="method-title">Banka Havalesi / EFT</span>
-                    <span class="method-copy">Sipariş numaranızı açıklama alanına ekleyerek ödeme yapabilirsiniz.</span>
+                    <span class="method-copy">Ödemenizi banka havalesi/EFT ile tamamlayabilirsiniz.</span>
                   </span>
                   <span class="method-tag">IBAN</span>
                 </label>
-                <div class="method-detail" id="ibanDetails">Banka bilgileri mağaza ayarlarından güvenli biçimde yüklenir.</div>
+                <div class="method-detail" id="ibanDetails">
+                  <dl class="bank-details">
+                    <div class="bank-detail-row">
+                      <dt class="bank-detail-label">Banka</dt>
+                      <dd class="bank-detail-value" id="bankNameValue">—</dd>
+                    </div>
+                    <div class="bank-detail-row">
+                      <dt class="bank-detail-label">Hesap Sahibi</dt>
+                      <dd class="bank-detail-value" id="ibanHolderValue">—</dd>
+                    </div>
+                    <div class="bank-detail-row">
+                      <dt class="bank-detail-label">IBAN</dt>
+                      <dd class="bank-detail-value iban-line">
+                        <code class="iban-value" id="ibanValue">—</code>
+                        <button class="iban-copy" id="copyIbanButton" type="button" aria-describedby="copyIbanFeedback" disabled>IBAN’ı Kopyala</button>
+                      </dd>
+                    </div>
+                  </dl>
+                  <p class="iban-copy-feedback" id="copyIbanFeedback" role="status" aria-live="polite"></p>
+                </div>
               </div>
             </div>
             <p class="payment-status" id="paymentConfigStatus" data-ready="false" role="status" aria-live="polite">Banka havalesi bilgileri kontrol ediliyor…</p>
@@ -675,7 +710,11 @@
       const shippingMethod = document.querySelector('input[name="shipping"]');
       const shippingPrice = shippingMethod && shippingMethod.closest('label') && shippingMethod.closest('label').querySelector('strong');
       const status = document.getElementById('paymentConfigStatus');
-      const details = document.getElementById('ibanDetails');
+      const bankValue = document.getElementById('bankNameValue');
+      const holderValue = document.getElementById('ibanHolderValue');
+      const ibanValue = document.getElementById('ibanValue');
+      const copyButton = document.getElementById('copyIbanButton');
+      const copyFeedback = document.getElementById('copyIbanFeedback');
       const payButton = document.getElementById('payButton');
       const iban = String(checkoutSettings.iban || '').replace(/\s+/g, '').toUpperCase();
       const holder = String(checkoutSettings.ibanHolderName || checkoutSettings.iban_holder_name || '').trim();
@@ -685,6 +724,8 @@
       if (shippingPrice) shippingPrice.textContent = shippingFee ? money(shippingFee) : 'Ucretsiz';
       ibanConfigurationReady = checkoutSettings.paymentEnabled !== false
         && /^TR\d{24}$/.test(iban)
+        && Boolean(holder)
+        && Boolean(bank)
         && (!paymentProvider || paymentProvider === 'manual' || paymentProvider === 'iban');
       if (status) {
         status.dataset.ready = String(ibanConfigurationReady);
@@ -696,10 +737,39 @@
           status.textContent = 'Banka havalesi bilgileri henüz yapılandırılmamış. Sipariş şu anda tamamlanamıyor.';
         }
       }
-      if (details) details.textContent = ibanConfigurationReady
-        ? [bank, holder, iban.replace(/(.{4})/g, '$1 ').trim()].filter(Boolean).join(' · ')
-        : 'Gerçek banka bilgileri mağaza ayarlarında tanımlandığında burada gösterilecektir.';
+      if (bankValue) bankValue.textContent = ibanConfigurationReady ? bank : '—';
+      if (holderValue) holderValue.textContent = ibanConfigurationReady ? holder : '—';
+      if (ibanValue) ibanValue.textContent = ibanConfigurationReady ? iban.replace(/(.{4})/g, '$1 ').trim() : '—';
+      if (copyButton) copyButton.disabled = !ibanConfigurationReady;
+      if (copyFeedback) {
+        copyFeedback.textContent = '';
+        copyFeedback.removeAttribute('data-tone');
+      }
       if (payButton) payButton.disabled = !ibanConfigurationReady || !loadCart().length;
+    }
+
+    async function copyConfiguredIban() {
+      const feedback = document.getElementById('copyIbanFeedback');
+      const iban = String(checkoutSettings.iban || '').replace(/\s+/g, '').toUpperCase();
+      if (!ibanConfigurationReady || !navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') {
+        if (feedback) {
+          feedback.dataset.tone = 'error';
+          feedback.textContent = 'IBAN kopyalanamadı';
+        }
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(iban);
+        if (feedback) {
+          feedback.removeAttribute('data-tone');
+          feedback.textContent = 'IBAN kopyalandı';
+        }
+      } catch (_) {
+        if (feedback) {
+          feedback.dataset.tone = 'error';
+          feedback.textContent = 'IBAN kopyalanamadı';
+        }
+      }
     }
 
     function hydrateCheckoutProfile() {
@@ -1335,6 +1405,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       const guestButton = document.getElementById('continueGuestBtn');
+      const copyIbanButton = document.getElementById('copyIbanButton');
       const emailInput = document.getElementById('customerEmail');
       const invoiceType = document.getElementById('invoiceType');
       const invoiceSameShipping = document.getElementById('invoiceSameShipping');
@@ -1353,6 +1424,7 @@
           if (emailInput) emailInput.focus();
         });
       }
+      if (copyIbanButton) copyIbanButton.addEventListener('click', copyConfiguredIban);
 
       if (window.SuveraSEO) {
         window.SuveraSEO.applyPageMeta({

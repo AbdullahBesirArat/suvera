@@ -47,7 +47,24 @@ test('checkout exposes only canonical bank transfer and never invents IBAN data'
   assert.doesNotMatch(checkout, /SuveraAPI\.payment\.initialize/);
   assert.match(checkout, /checkoutSettings\.iban/);
   assert.match(checkout, /IBAN_DATA_REQUIRED/);
+  assert.match(payment, /Ödemenizi banka havalesi\/EFT ile tamamlayabilirsiniz\./);
+  assert.doesNotMatch(payment, /Sipariş numaranızı açıklama alanına ekleyerek/);
+  assert.match(payment, /<dt class="bank-detail-label">Banka<\/dt>/);
+  assert.match(payment, /<dt class="bank-detail-label">Hesap Sahibi<\/dt>/);
+  assert.match(payment, /<dt class="bank-detail-label">IBAN<\/dt>/);
   assert.doesNotMatch(checkout, /TR\d{2}(?:\s?\d{4}){5}/);
+});
+
+test('bank transfer readiness is fail-closed and copy feedback is accessible', () => {
+  const applySettings = checkout.slice(checkout.indexOf('function applyCheckoutSettings()'), checkout.indexOf('function hydrateCheckoutProfile()'));
+  assert.match(applySettings, /\^TR\\d\{24\}\$\/\.test\(iban\)/);
+  assert.match(applySettings, /Boolean\(holder\)/);
+  assert.match(applySettings, /Boolean\(bank\)/);
+  assert.match(applySettings, /copyButton\.disabled = !ibanConfigurationReady/);
+  assert.match(checkout, /id="copyIbanFeedback" role="status" aria-live="polite"/);
+  assert.match(checkout, /navigator\.clipboard\.writeText\(iban\)/);
+  assert.match(checkout, /feedback\.textContent = 'IBAN kopyalandı'/);
+  assert.doesNotMatch(applySettings, /localStorage|sessionStorage|console\./);
 });
 
 test('checkout header, stepper and summary are distinct normal-flow regions', () => {
