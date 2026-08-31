@@ -50,7 +50,7 @@ test.describe('A03 Suvera storefront full-stack', () => {
   });
 
   test('3 katalog pagination ikinci sayfaya geçer', async ({ page, e2eState }) => {
-    await page.goto(`${e2eState.origins.storefront}/urunler`);
+    await page.goto(`${e2eState.origins.storefront}/urunler?sort=recommended`);
     const firstPage = page.locator('#prodsGrid .prod-card');
     await expect(firstPage).toHaveCount(24);
     const total = Number(await page.locator('#productResultCount').textContent());
@@ -62,7 +62,7 @@ test.describe('A03 Suvera storefront full-stack', () => {
   });
 
   test('4 kategori filtresi URL ve sonuç durumunu günceller', async ({ page, e2eState }) => {
-    await page.goto(`${e2eState.origins.storefront}/urunler`);
+    await page.goto(`${e2eState.origins.storefront}/urunler?sort=recommended`);
     const unfilteredTotal = await page.locator('#productResultCount').textContent();
     const category = page.locator(`#collectionCategoryFilters input[value="${e2eState.fixtures.tenantA.categoryId}"]`);
     await expect(category).toBeVisible();
@@ -73,7 +73,7 @@ test.describe('A03 Suvera storefront full-stack', () => {
   });
 
   test('5 renk filtresi seçimi kataloğa uygulanır', async ({ page, e2eState }) => {
-    await page.goto(`${e2eState.origins.storefront}/urunler`);
+    await page.goto(`${e2eState.origins.storefront}/urunler?sort=recommended`);
     const color = page.locator('#collectionColorFilters [data-color]').first();
     const value = await color.getAttribute('data-color');
     await color.click();
@@ -83,7 +83,7 @@ test.describe('A03 Suvera storefront full-stack', () => {
   });
 
   test('6 beden filtresi seçimi kataloğa uygulanır', async ({ page, e2eState }) => {
-    await page.goto(`${e2eState.origins.storefront}/urunler`);
+    await page.goto(`${e2eState.origins.storefront}/urunler?sort=recommended`);
     const size = page.locator('#collectionSizeFilters [data-size]').first();
     const value = await size.getAttribute('data-size');
     await size.click();
@@ -93,7 +93,7 @@ test.describe('A03 Suvera storefront full-stack', () => {
   });
 
   test('7 fiyat filtresi sunucu sonuçlarını sınırlar', async ({ page, e2eState }) => {
-    await page.goto(`${e2eState.origins.storefront}/urunler`);
+    await page.goto(`${e2eState.origins.storefront}/urunler?sort=recommended`);
     await page.locator('#priceRange').evaluate((element) => {
       element.value = '200';
       element.dispatchEvent(new Event('change', { bubbles: true }));
@@ -196,35 +196,34 @@ test.describe('A03 Suvera storefront full-stack', () => {
 
   test('15-16 geçerli kupon uygulanır ve geçersiz kupon reddedilir', async ({ page, e2eState }) => {
     await setCart(page, e2eState, e2eState.fixtures.tenantA);
-    await page.goto(`${e2eState.origins.storefront}/sepet`);
-    await page.locator('#cartCouponCode').fill('E2E20');
-    await page.locator('#cartCouponApply').click();
-    await expect(page.locator('#cartCouponResult')).toContainText(/Kupon uygulandı|Yeni toplam/i);
-    await page.locator('#cartCouponCode').fill('GECERSIZ');
-    await page.locator('#cartCouponApply').click();
-    await expect(page.locator('#cartCouponResult')).toContainText(/geçersiz|gecersiz|bulunamadı|uygulanamadı/i);
+    await page.goto(`${e2eState.origins.storefront}/siparis`);
+    await page.locator('#checkoutCouponCode').fill('E2E20');
+    await page.locator('#checkoutCouponApply').click();
+    await expect(page.locator('#checkoutCouponFeedback')).toContainText(/Kupon uygulandı|Yeni toplam/i);
+    await page.locator('#checkoutCouponCode').fill('GECERSIZ');
+    await page.locator('#checkoutCouponApply').click();
+    await expect(page.locator('#checkoutCouponFeedback')).toContainText(/geçersiz|gecersiz|bulunamadı|uygulanamadı/i);
   });
 
   test('17 IBAN/manual sipariş gerçek API ile oluşturulur', async ({ page, e2eState }) => {
     await setCart(page, e2eState, e2eState.fixtures.tenantA);
     await page.goto(`${e2eState.origins.storefront}/siparis`);
     await fillCheckout(page, { email: 'iban-order@example.test' });
-    await page.locator('input[name="paymentMethod"][value="iban"]').check();
+    await expect(page.locator('input[name="paymentMethod"][value="iban"]')).toBeChecked();
     await page.locator('#payButton').click();
     await page.waitForURL(/\/tesekkur\?order=/, { timeout: 30_000 });
     await expect(page.locator('#thankYouOrderCode')).not.toHaveText('-');
     expect(await page.evaluate(() => JSON.parse(localStorage.getItem('suveraCart') || '[]'))).toHaveLength(0);
   });
 
-  test('18 test ortamında mock kart ödeme tamamlanır', async ({ page, e2eState }) => {
+  test('18 checkout yalnız canonical IBAN yöntemini gösterir', async ({ page, e2eState }) => {
     await setCart(page, e2eState, e2eState.fixtures.tenantA);
     await page.goto(`${e2eState.origins.storefront}/siparis`);
-    await fillCheckout(page, { email: 'mock-card@example.test' });
-    await expect(page.locator('input[name="paymentMethod"][value="card"]')).toBeChecked();
-    await page.locator('#payButton').click();
-    await page.waitForURL(/\/tesekkur(?:\?|$)/, { timeout: 30_000 });
-    await expect(page.locator('#thankYouOrderCode')).not.toHaveText('-');
-    expect(await page.evaluate(() => JSON.parse(localStorage.getItem('suveraCart') || '[]'))).toHaveLength(0);
+    await expect(page.locator('input[name="paymentMethod"]')).toHaveCount(1);
+    await expect(page.locator('input[name="paymentMethod"][value="iban"]')).toBeChecked();
+    await expect(page.locator('input[name="paymentMethod"][value="card"]')).toHaveCount(0);
+    await expect(page.locator('#paymentMethodTitle')).toHaveText('Ödeme');
+    await expect(page.getByText('Banka Havalesi / EFT', { exact: true })).toBeVisible();
   });
 
   test('19 müşteri yeni hesap kaydı oluşturur', async ({ page, e2eState }) => {
@@ -262,7 +261,7 @@ test.describe('A03 Suvera storefront full-stack', () => {
   });
 
   test('21 favori ekleme ve çıkarma çalışır', async ({ page, e2eState }) => {
-    await page.goto(`${e2eState.origins.storefront}/urunler`);
+    await page.goto(`${e2eState.origins.storefront}/urunler?sort=recommended`);
     const card = page.locator('#prodsGrid .prod-card').first();
     await expect(card).toHaveAttribute('data-product-id', /\d+/);
     await expect(card.locator('.quick-add')).toHaveCount(0);
@@ -309,11 +308,18 @@ test.describe('A03 Suvera storefront full-stack', () => {
 
   test('26 başarısız gerçek test ödemesinden sonra sepet korunur', async ({ page, e2eState }) => {
     await setCart(page, e2eState, e2eState.fixtures.tenantA);
+    await page.route('**/api/orders', async (route) => {
+      await route.fulfill({
+        status: 500,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: { message: 'E2E sipariş hatası' } }),
+      });
+    });
     await page.goto(`${e2eState.origins.storefront}/siparis`);
     await fillCheckout(page, { email: 'e2e-payment-fail@example.test' });
     await page.locator('#payButton').click();
     await expect(page.locator('#checkoutError')).toBeVisible();
-    await expect(page.locator('#checkoutError')).toContainText(/ödeme|tekrar deneyin/i);
+    await expect(page.locator('#checkoutError')).toContainText(/sipariş|tekrar deneyin/i);
     expect(await page.evaluate(() => JSON.parse(localStorage.getItem('suveraCart') || '[]'))).toHaveLength(1);
   });
 });

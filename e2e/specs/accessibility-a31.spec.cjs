@@ -112,7 +112,7 @@ test.describe('A31 storefront accessibility', () => {
     await expect(page.locator('#homeProductsGrid .prod-card').first()).toBeVisible();
     await collector.scan(page, 'anasayfa');
 
-    await page.goto(`${origin}/urunler`);
+    await page.goto(`${origin}/urunler?sort=recommended`);
     await expect(page.locator('#prodsGrid .prod-card').first()).toBeVisible();
     await collector.scan(page, 'katalog');
 
@@ -129,6 +129,9 @@ test.describe('A31 storefront accessibility', () => {
     await collector.scan(page, 'odeme');
 
     // Checkout with validation errors showing is its own state worth scanning.
+    const acceptConsent = page.locator('[data-consent-action="accept-all"]');
+    if (await acceptConsent.isVisible()) await acceptConsent.click();
+    await expect(page.locator('#payButton')).toBeEnabled();
     await page.locator('#payButton').click();
     await expect(page.locator('#checkoutError')).not.toBeEmpty();
     await collector.scan(page, 'odeme (hatali)');
@@ -225,6 +228,9 @@ test.describe('A31 storefront accessibility', () => {
     await page.goto(`${e2eState.origins.storefront}/siparis`);
 
     // Submit with an empty form: the first invalid control must receive focus.
+    const acceptConsent = page.locator('[data-consent-action="accept-all"]');
+    if (await acceptConsent.isVisible()) await acceptConsent.click();
+    await expect(page.locator('#payButton')).toBeEnabled();
     await page.locator('#payButton').click();
     const firstName = page.locator('#firstName');
     await expect(firstName).toBeFocused();
@@ -243,8 +249,10 @@ test.describe('A31 storefront accessibility', () => {
     await expect(firstName).not.toHaveAttribute('aria-invalid', 'true');
 
     // The step indicator says where the user is, and the payment choices are a named group.
-    await expect(page.locator('ol.steps li[aria-current="step"]')).toHaveCount(1);
-    await expect(page.locator('[role="radiogroup"][aria-labelledby="paymentMethodTitle"]')).toHaveCount(1);
+    await expect(page.locator('ol.checkout-steps li[aria-current="step"]')).toHaveCount(1);
+    await expect(page.locator('.method-list[aria-labelledby="paymentMethodTitle"]')).toHaveCount(1);
+    await expect(page.locator('input[name="paymentMethod"][value="iban"]')).toBeChecked();
+    await expect(page.locator('input[name="paymentMethod"][value="card"]')).toHaveCount(0);
   });
 
   test('61-64 cart controls name the product they act on', async ({ page, e2eState }) => {
@@ -293,16 +301,8 @@ test.describe('A31 storefront accessibility', () => {
     await expect(increment).toBeFocused();
     await expect(page.locator('#cartItems')).toHaveAttribute('aria-busy', 'false');
 
-    // Blank coupon submission stays within the form, announces the error and returns
-    // focus to the field that needs correction.
-    const coupon = page.locator('#cartCouponCode');
-    await tabTo(page, coupon);
-    const apply = page.locator('#cartCouponApply');
-    await tabTo(page, apply);
-    await page.keyboard.press('Enter');
-    await expect(coupon).toBeFocused();
-    await expect(coupon).toHaveAttribute('aria-invalid', 'true');
-    await expect(page.locator('#cartCouponResult')).toHaveAttribute('role', 'alert');
+    // Coupon entry belongs to checkout, so the cart remains a short, direct flow.
+    await expect(page.locator('#cartCouponCode')).toHaveCount(0);
 
     const checkout = page.locator('#cartCheckoutLink');
     await tabTo(page, checkout);

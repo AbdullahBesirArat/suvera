@@ -138,13 +138,20 @@ async function setCart(page, state, product, overrides = {}) {
 }
 
 async function fillCheckout(page, { email = 'checkout@example.test' } = {}) {
+  const acceptConsent = page.locator('[data-consent-action="accept-all"]');
+  if (await acceptConsent.isVisible()) await acceptConsent.click();
   await page.locator('#customerEmail').fill(email);
   await page.locator('#firstName').fill('E2E');
   await page.locator('#lastName').fill('Müşteri');
   await page.locator('#customerPhone').fill('05550000123');
   await page.locator('#address').fill('E2E Test Sokak No 1');
-  await expect.poll(() => page.locator('#city option').count()).toBeGreaterThan(1);
-  await page.locator('#city').selectOption({ index: 1 });
+  const city = page.locator('#city');
+  await expect(city).toBeEnabled();
+  await city.fill('ank');
+  await expect(page.locator('#cityOptions [role="option"]')).toHaveCount(1);
+  await city.press('ArrowDown');
+  await city.press('Enter');
+  await expect(city).toHaveValue('Ankara');
   await expect(page.locator('#district')).toBeEnabled();
   await expect.poll(() => page.locator('#district option').count()).toBeGreaterThan(1);
   await page.locator('#district').selectOption({ index: 1 });

@@ -88,13 +88,14 @@ test.describe('A21 persistent cart + checkout conversion', () => {
     expect(leaked.serverCartHasToken).toBe(false);
   });
 
-  test('mock-card checkout converts the server cart atomically (converted_order_id + converted event)', async ({ page, e2eState }) => {
+  test('IBAN checkout converts the server cart atomically (converted_order_id + converted event)', async ({ page, e2eState }) => {
     await setCart(page, e2eState, e2eState.fixtures.tenantA);
     await page.goto(`${e2eState.origins.storefront}/siparis`);
     const cartId = await serverCartId(page);
 
-    await fillCheckout(page, { email: 'a21-card-conv@example.test' });
-    await expect(page.locator('input[name="paymentMethod"][value="card"]')).toBeChecked();
+    await fillCheckout(page, { email: 'a21-iban-atomic@example.test' });
+    await expect(page.locator('input[name="paymentMethod"][value="iban"]')).toBeChecked();
+    await expect(page.locator('input[name="paymentMethod"][value="card"]')).toHaveCount(0);
     await page.locator('#payButton').click();
     await page.waitForURL(/\/tesekkur(?:\?|$)/, { timeout: 30_000 });
 
@@ -118,7 +119,7 @@ test.describe('A21 persistent cart + checkout conversion', () => {
     const cartId = await serverCartId(page);
 
     await fillCheckout(page, { email: 'a21-iban-conv@example.test' });
-    await page.locator('input[name="paymentMethod"][value="iban"]').check();
+    await expect(page.locator('input[name="paymentMethod"][value="iban"]')).toBeChecked();
     await page.locator('#payButton').click();
     await page.waitForURL(/\/tesekkur\?order=/, { timeout: 30_000 });
 

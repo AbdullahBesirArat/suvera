@@ -101,7 +101,7 @@ test.describe('A24.5 gift wrap + gift note', () => {
 
     // Place the order.
     await fillCheckout(page, { email: 'a245-gift@example.test' });
-    await page.locator('input[name="paymentMethod"][value="iban"]').check();
+    await expect(page.locator('input[name="paymentMethod"][value="iban"]')).toBeChecked();
     await page.locator('#payButton').click();
     await page.waitForURL(/\/tesekkur\?order=/, { timeout: 30_000 });
 
