@@ -1,3 +1,4 @@
+import { spinManifest, createSpin360 } from './spin360.js';
 import {
   defaultProductColor,
   escapeHtml,
@@ -32,6 +33,72 @@ const colorMeta = (value) => sharedColorMeta(value, '#e9dfd0');
   };
   let activeImageIndex = 0;
   let addingToCart = false;
+  let spin = null;
+  let spinActive = false;
+  let spinFullscreen = false;
+
+  function setupSpin(product) {
+    spin?.destroy();
+    spin = null;
+    spinActive = false;
+    document.getElementById('spin360Controls')?.remove();
+    const manifest = spinManifest(product);
+    const media = document.getElementById('detailMainMedia');
+    if (!manifest || !media) return;
+    const controls = document.createElement('div');
+    controls.id = 'spin360Controls';
+    controls.className = 'spin360-controls';
+    const toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.textContent = '360° Gör';
+    toggle.setAttribute('aria-pressed', 'false');
+    const fullscreen = document.createElement('button');
+    fullscreen.type = 'button';
+    fullscreen.textContent = '360° Tam ekran';
+    fullscreen.hidden = true;
+    controls.append(toggle, fullscreen);
+    const instance = createSpin360({ manifest, name: product.name || 'Ürün', onFailure: () => {
+      if (spin !== instance) return;
+      const wasActive = spinActive;
+      if (spinFullscreen) closeImageLightbox();
+      setActiveThumb(activeImageIndex);
+      if (wasActive) media.focus({ preventScroll: true });
+      instance.destroy();
+      spin = null;
+      controls.remove();
+    } });
+    spin = instance;
+    instance.ready().then((poster) => {
+      if (spin !== instance) return;
+      if (poster) media.before(controls);
+      else { instance.destroy(); spin = null; }
+    });
+    toggle.addEventListener('click', () => {
+      if (spinActive) { setActiveThumb(activeImageIndex); return; }
+      spinActive = true;
+      media.onclick = null;
+      media.onkeydown = null;
+      media.removeAttribute('role');
+      media.removeAttribute('tabindex');
+      media.removeAttribute('aria-label');
+      toggle.textContent = 'Fotoğrafa dön';
+      toggle.setAttribute('aria-pressed', 'true');
+      fullscreen.hidden = false;
+      instance.attach(media);
+    });
+    fullscreen.addEventListener('click', () => {
+      openImageLightbox(activeImageIndex);
+      const stage = document.getElementById('imageLightboxStage');
+      if (!stage) return;
+      spinFullscreen = true;
+      document.getElementById('imageLightboxImg').hidden = true;
+      ['imageLightboxZoom', 'imageLightboxPrev', 'imageLightboxNext', 'imageLightboxCount'].forEach((id) => {
+        const element = document.getElementById(id);
+        if (element) element.hidden = true;
+      });
+      instance.attach(stage);
+    });
+  }
 
   function plainDescription(html) {
     return String(html || '')
@@ -131,6 +198,15 @@ const colorMeta = (value) => sharedColorMeta(value, '#e9dfd0');
     }
     lightbox.classList.remove('open');
     lightbox.classList.remove('zoomed');
+    if (spinFullscreen) {
+      spinFullscreen = false;
+      if (img) img.hidden = false;
+      ['imageLightboxZoom', 'imageLightboxCount'].forEach((id) => {
+        const element = document.getElementById(id);
+        if (element) element.hidden = false;
+      });
+      if (spinActive) spin?.attach(document.getElementById('detailMainMedia'));
+    }
     if (stage) {
       resetLightboxView(stage);
     }
@@ -139,6 +215,16 @@ const colorMeta = (value) => sharedColorMeta(value, '#e9dfd0');
   }
 
   function setActiveThumb(index) {
+    if (spinActive) {
+      spinActive = false;
+      spin?.detach();
+      const controls = document.getElementById('spin360Controls');
+      if (controls) {
+        controls.children[0].textContent = '360° Gör';
+        controls.children[0].setAttribute('aria-pressed', 'false');
+        controls.children[1].hidden = true;
+      }
+    }
     activeImageIndex = index;
     const thumbs = document.querySelectorAll('.thumb-btn');
     thumbs.forEach(function (thumb, i) {
@@ -165,6 +251,8 @@ const colorMeta = (value) => sharedColorMeta(value, '#e9dfd0');
     const counter = document.getElementById('galleryCounter');
 
     if (mainMedia) {
+      mainMedia.setAttribute('role', 'button');
+      mainMedia.tabIndex = 0;
       mainMedia.innerHTML = imageMarkup(media, currentProduct.name, 'main-fallback', { priority: true, purpose: 'detail' });
       mainMedia.setAttribute('aria-label', currentProduct.name + ' büyük görselini aç');
       mainMedia.onclick = function () {
@@ -182,6 +270,7 @@ const colorMeta = (value) => sharedColorMeta(value, '#e9dfd0');
   }
 
   function renderGallery(product, color) {
+    setupSpin(product);
     currentProduct.imageEntries = productImageEntries(product);
     const images = productGalleryEntries(product, color).map(function (entry) {
       return imageUrl(entry.url);
@@ -524,6 +613,7 @@ const colorMeta = (value) => sharedColorMeta(value, '#e9dfd0');
         if (event.target === stage) closeImageLightbox();
       });
       window.Suvera?.bindHorizontalSwipe(stage, function (step) {
+        if (spinFullscreen) return;
         if (!lightbox.classList.contains('zoomed')) stepLightbox(step);
       });
     }
@@ -531,6 +621,7 @@ const colorMeta = (value) => sharedColorMeta(value, '#e9dfd0');
     // the thumbnails are behind the modal and inert while it is open, so without this a
     // keyboard user could only ever see the one image they opened.
     lightbox.addEventListener('keydown', function (event) {
+      if (spinFullscreen) return;
       if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
       event.preventDefault();
       stepLightbox(event.key === 'ArrowRight' ? 1 : -1);
@@ -541,6 +632,7 @@ const colorMeta = (value) => sharedColorMeta(value, '#e9dfd0');
     const mainMedia = document.getElementById('detailMainMedia');
     if (!mainMedia) return;
     window.Suvera?.bindHorizontalSwipe(mainMedia, function (step) {
+      if (spinActive) return;
       const images = Array.isArray(currentProduct.images) ? currentProduct.images : [];
       if (images.length < 2) return;
       setActiveThumb((activeImageIndex + step + images.length) % images.length);

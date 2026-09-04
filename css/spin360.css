@@ -1,0 +1,11 @@
+.spin360-controls{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.spin360-controls button{font:inherit;font-size:12px;border:1px solid #d9d0c5;border-radius:6px;background:#fff;color:inherit;padding:9px 13px;cursor:pointer}
+.spin360-controls [hidden]{display:none}
+.spin360-viewer{position:absolute;inset:0;touch-action:pan-y;cursor:grab;user-select:none;overflow:hidden;border-radius:inherit;background:#f0ebe3}
+.spin360-viewer:focus-visible{outline:2px solid #655342;outline-offset:-3px}
+.main-media .spin360-viewer img,.image-lightbox-stage .spin360-viewer img{width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;pointer-events:none}
+.spin360-hint{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:11px;background:#ffffffed;color:#40352b;padding:8px 12px;border-radius:20px;animation:spin-hint 5s forwards}
+.spin360-progress{position:absolute;top:12px;right:12px;background:#ffffffed;color:#40352b;border-radius:12px;padding:4px 8px;font-size:11px}
+.main-media{position:relative}
+@keyframes spin-hint{0%,65%{opacity:1}100%{opacity:0;visibility:hidden}}
+@media(prefers-reduced-motion:reduce){.spin360-hint{animation-duration:0s;animation-delay:5s}}

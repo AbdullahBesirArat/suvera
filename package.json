@@ -10,7 +10,9 @@
     "test": "npm run build && node --test js/*.test.js",
     "package:source": "node scripts/package-source.js",
     "e2e:install": "playwright install chromium",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:spin360": "playwright test --config=e2e/spin360.config.cjs",
+    "prepare:spin360": "node scripts/prepare-spin360.cjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",
