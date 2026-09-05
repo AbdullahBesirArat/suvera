@@ -28,6 +28,11 @@ existing managed media upload pipeline. It shows selected filenames in numeric o
 before saving, checks equal dimensions, uses the first frame as poster, and supports
 replace/remove independently of the main product form. Upload failures leave the old
 association intact; unassociated uploads follow existing media cleanup policy.
+Before any upload, the editor hashes the selected sources with SHA-256 and queries
+the existing tenant-scoped media library by checksum. Ready matching assets are reused;
+only missing frames are uploaded. The read-only library check reports existing/missing
+counts. In-progress assets and truncated results stop the operation. An unchanged
+manifest is not rewritten. This makes sequential retries after interruption resumable.
 
 The storefront requests only the poster before activation. Activation keeps cached
 frames usable while loading 0, +1, -1, +2, -2 and the rest with bounded concurrency.
@@ -51,13 +56,11 @@ production product is automatically associated with them. The relative test mani
 must not be sent directly to the API: the editor uploads the WebPs and obtains managed
 URLs. Managed delivery already supplies immutable caching for versioned assets.
 
-**PRODUCT_MAPPING_REQUIRED:** the strongest candidate is product 77, **Actuel Nervürlü
-Elbise 35134-KT**, Kiremit. Its canonical `source_folder` and local import receipt both
-identify `051-actuel-nervurlu-elbise-35134-kt`. The canonical photo resembles the spin,
-but the ZIP has no source/product identifier proving that relationship. Its demo title
-is not canonical evidence. Confirm the source relationship before attaching anything.
-The product also has a Kahverengi variant: the present manifest is a product-level
-view, so review that color context before attaching this Kiremit-only sequence.
+**Mapping confirmed by the user:** product 77, **Actuel Nervürlü Elbise 35134-KT**,
+Kiremit. Its canonical `source_folder` and local import receipt identify
+`051-actuel-nervurlu-elbise-35134-kt`. The supplied sequence may be attached only to
+this product. The product also has a Kahverengi variant: the present manifest is a
+product-level view of the confirmed Kiremit sequence, rather than a per-color spin.
 
 ## Reproduction and validation
 
