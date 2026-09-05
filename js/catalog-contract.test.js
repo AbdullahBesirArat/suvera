@@ -144,6 +144,25 @@ test('product cards keep actions in the media overlay and remove quick add prese
   assert.match(styles, /padding: 6px 10px calc\(6px \+ env\(safe-area-inset-bottom\)\)/);
 });
 
+test('canonical spin availability renders a noninteractive badge on every product-card path', () => {
+  const utils = read('js/core/storefront-utils.js');
+  assert.match(utils, /product\.has_spin360 === true/);
+  assert.match(utils, /class="spin-product-badge" role="img" aria-label="360 derece görünüm mevcut"/);
+
+  const storefront = read('js/storefront.js');
+  assert.match(storefront, /data-has-spin360=/);
+  assert.match(storefront, /spinBadgeMarkup\(product\)/);
+  assert.match(read('js/product-detail.js'), /related-media[^\n]+spinBadgeMarkup\(product\)/);
+  assert.match(read('js/site-pages.js'), /canonicalFavorites/);
+  assert.match(read('js/site-pages.js'), /page-favorite-media[^\n]+spinBadgeMarkup\(item\)/);
+  const recent = read('js/recently-viewed.js');
+  assert.match(recent, /product\.has_spin360 === true/);
+  assert.match(recent, /media\.appendChild\(badge\)/);
+
+  const styles = read('shared.css');
+  assert.match(styles, /\.spin-product-badge\s*\{[\s\S]*?pointer-events:none/);
+});
+
 test('store profile uses canonical settings without fake social or contact fallbacks', () => {
   const source = read('js/store-profile.js');
   const footer = read('templates/partials/footer.html');

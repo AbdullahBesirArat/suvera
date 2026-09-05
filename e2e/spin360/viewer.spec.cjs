@@ -43,6 +43,8 @@ for (const [width, height] of [[390,844],[412,915],[430,932],[768,1000],[1440,10
     await control.click();
     const viewer = page.locator('#detailMainMedia .spin360-viewer');
     await expect(viewer).toBeFocused();
+    await expect(page.locator('.spin360-progress')).toHaveCount(0);
+    await expect(viewer).not.toContainText('12/12');
     await expect(viewer).toHaveAttribute('aria-label', /Kanonik Test Elbisesi 360 derece/);
     await expect.poll(() => new Set(requests).size).toBe(12);
     await viewer.press('ArrowLeft');
@@ -64,6 +66,8 @@ for (const [width, height] of [[390,844],[412,915],[430,932],[768,1000],[1440,10
     await page.getByRole('button', { name: '360° Tam ekran' }).click();
     const fullscreen = page.locator('#imageLightbox .spin360-viewer');
     await expect(fullscreen).toBeVisible();
+    await expect(fullscreen.locator('.spin360-progress')).toHaveCount(0);
+    await expect(fullscreen).not.toContainText('12/12');
     const modalBox = await fullscreen.boundingBox();
     expect(modalBox.width).toBeGreaterThan(width * .9);
     expect(modalBox.height).toBeGreaterThan(height * .9);

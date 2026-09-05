@@ -82,6 +82,7 @@
   function card(product, formatter) {
     const link = el('a', 'related-card');
     link.href = `urun?id=${encodeURIComponent(product.id)}`;
+    const media = el('span', 'related-media');
     // Entries may be plain urls, colour-aware "Colour | url" strings, or {url} objects.
     // assetUrl normalizes each shape; take the first one that actually resolves so a single
     // unusable entry does not leave the card image-less.
@@ -99,8 +100,18 @@
       const responsive = window.SuveraAPI.responsiveImage ? window.SuveraAPI.responsiveImage(src, 'card') : null;
       img.src = responsive && responsive.src ? responsive.src : src;
       if (responsive && responsive.srcset) { img.srcset = responsive.srcset; img.sizes = responsive.sizes; }
-      link.appendChild(img);
+      media.appendChild(img);
     }
+    if (product.has_spin360 === true) {
+      const badge = el('span', 'spin-product-badge');
+      badge.setAttribute('role', 'img');
+      badge.setAttribute('aria-label', '360 derece görünüm mevcut');
+      const label = el('span', '', '360°');
+      label.setAttribute('aria-hidden', 'true');
+      badge.appendChild(label);
+      media.appendChild(badge);
+    }
+    link.appendChild(media);
     link.appendChild(el('span', 'related-card-name', product.name || ''));
     link.appendChild(el('span', 'related-card-price', formatter.format(Number(product.sale_price || product.price || 0))));
     return link;

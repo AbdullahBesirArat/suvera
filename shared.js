@@ -127,6 +127,7 @@ import { escapeHtml } from './js/core/storefront-utils.js';
       image: product.image || '',
       emoji: product.emoji || '',
       category: product.category || product.category_name || '',
+      has_spin360: product.has_spin360 === true,
       url: product.url || (id ? ('urun?id=' + encodeURIComponent(id)) : 'urun'),
       addedAt: new Date().toISOString(),
     };
@@ -223,6 +224,7 @@ import { escapeHtml } from './js/core/storefront-utils.js';
       price: item.price,
       image: item.image || item.image_url,
       category: item.category,
+      has_spin360: item.has_spin360 === true,
       url: id ? ('urun?id=' + encodeURIComponent(id)) : 'urun',
     });
   }
@@ -328,6 +330,7 @@ import { escapeHtml } from './js/core/storefront-utils.js';
         emoji: button.dataset.productEmoji || '',
         url: button.dataset.productUrl || '',
         category: button.dataset.productCategory || '',
+        has_spin360: button.dataset.hasSpin360 === 'true',
       };
     }
 
@@ -342,6 +345,7 @@ import { escapeHtml } from './js/core/storefront-utils.js';
       emoji: card.dataset.productEmoji || '',
       url: card.dataset.productId ? ('urun?id=' + encodeURIComponent(card.dataset.productId)) : 'urun',
       category: card.dataset.productCategory || '',
+      has_spin360: card.dataset.hasSpin360 === 'true',
     };
   }
 

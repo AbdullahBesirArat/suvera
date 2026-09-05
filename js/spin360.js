@@ -12,7 +12,6 @@ export function spinManifest(product) {
 
 export function createSpin360({ manifest, name, onFailure }) {
   let frame = 0, wanted = 0, started = false, disposed = false, mount = null;
-  let loadedCount = 0;
   const cache = new Map();
   const wrap = (n) => (n % manifest.frameCount + manifest.frameCount) % manifest.frameCount;
   function load(index) {
@@ -54,8 +53,6 @@ export function createSpin360({ manifest, name, onFailure }) {
     for (const index of order) {
       if (disposed) return;
       if (await load(index)) loaded++;
-      loadedCount = loaded;
-      if (mount) mount.progress.textContent = `${loaded}/${manifest.frameCount}`;
     }
     if (!disposed && loaded < 2) onFailure();
   }
@@ -72,16 +69,12 @@ export function createSpin360({ manifest, name, onFailure }) {
     const hint = document.createElement('span');
     hint.className = 'spin360-hint';
     hint.textContent = 'Sağa–sola sürükleyerek döndür';
-    const progress = document.createElement('span');
-    progress.className = 'spin360-progress';
-    progress.textContent = `${loadedCount}/${manifest.frameCount}`;
-    progress.setAttribute('aria-hidden', 'true');
     const status = document.createElement('span');
     status.className = 'sr-only';
     status.setAttribute('aria-live', 'polite');
-    root.append(image, hint, progress, status);
+    root.append(image, hint, status);
     host.append(root);
-    mount = { root, image, status, progress };
+    mount = { root, image, status };
     let pointer = null;
     root.addEventListener('pointerdown', (event) => {
       if (event.button > 0 || pointer) return;

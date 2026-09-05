@@ -11,6 +11,7 @@ import {
   productSizeLabels,
   colorMeta as sharedColorMeta,
   resolveAssetUrl as imageUrl,
+  spinBadgeMarkup,
 } from './core/storefront-utils.js';
 const colorMeta = (value) => sharedColorMeta(value, '#e9dfd0');
 ﻿(function () {
@@ -670,7 +671,7 @@ const colorMeta = (value) => sharedColorMeta(value, '#e9dfd0');
     const src = firstImage ? imageUrl(firstImage.url) : '';
     // FIX: Encode product ids before inserting them into inline navigation handlers.
     return '<article class="related-card" data-nav="urun?id=' + encodeURIComponent(product.id) + '">' +
-      '<div class="related-media">' + imageMarkup(src, product.name, 'related-fallback', { purpose: 'card' }) + '</div>' +
+      '<div class="related-media">' + imageMarkup(src, product.name, 'related-fallback', { purpose: 'card' }) + spinBadgeMarkup(product) + '</div>' +
       '<div class="related-info"><p>' + escapeHtml(product.category_name || 'Seçki') + '</p><h3>' + escapeHtml(product.name) + '</h3><div class="related-price">' + money(price) + '</div></div>' +
     '</article>';
   }
@@ -856,6 +857,7 @@ const colorMeta = (value) => sharedColorMeta(value, '#e9dfd0');
         image: currentProduct.image,
         emoji: currentProduct.emoji,
         url: currentProduct.id ? ('urun?id=' + encodeURIComponent(currentProduct.id)) : 'urun',
+        has_spin360: currentProduct.has_spin360 === true,
       });
       if (window.showToast) {
         window.showToast(

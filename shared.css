@@ -506,6 +506,38 @@ nav.scrolled .hamburger span { background:#1a1a1a; }
   position:absolute; top:12px; right:12px; z-index:4;
   display:grid; gap:8px;
 }
+.prod-badges {
+  z-index:4;
+  pointer-events:none;
+}
+.spin-product-badge {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:max-content;
+  min-height:28px;
+  padding:4px 9px;
+  border:1px solid rgba(210,201,190,.9);
+  border-radius:999px;
+  background:rgba(255,253,249,.9);
+  color:#302b27;
+  box-shadow:0 4px 14px rgba(27,25,22,.08);
+  backdrop-filter:blur(7px);
+  font-size:10px;
+  font-weight:600;
+  letter-spacing:.9px;
+  line-height:1;
+  pointer-events:none;
+}
+.related-media,.page-favorite-media { position:relative; }
+.related-media { display:block; }
+.related-media > .spin-product-badge,
+.page-favorite-media > .spin-product-badge {
+  position:absolute;
+  top:10px;
+  left:10px;
+  z-index:2;
+}
 .prod-media-actions .quick-fav,
 .prod-media-actions .quick-view {
   width:44px; height:44px; min-height:44px;

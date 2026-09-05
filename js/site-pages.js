@@ -1,4 +1,4 @@
-import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseImageEntry, safeHref, productFinalPrice } from './core/storefront-utils.js';
+import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseImageEntry, safeHref, productFinalPrice, spinBadgeMarkup } from './core/storefront-utils.js';
 (function () {
   'use strict';
 
@@ -7,6 +7,24 @@ import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseIma
       .map(parseImageEntry)
       .find(function (item) { return item && item.url; });
     return entry ? assetUrl(entry.url) : '';
+  }
+
+  async function canonicalFavorites(items) {
+    const list = Array.isArray(items) ? items : [];
+    const ids = list.map(function (item) { return Number(item.id); }).filter(function (id) {
+      return Number.isInteger(id) && id > 0;
+    });
+    if (!ids.length || !window.SuveraAPI?.catalog?.byIds) return list;
+    try {
+      const data = await window.SuveraAPI.catalog.byIds(ids);
+      const canonical = new Map(((data && data.items) || []).map(function (item) { return [String(item.id), item]; }));
+      return list.map(function (item) {
+        const product = canonical.get(String(item.id));
+        return product ? { ...item, has_spin360: product.has_spin360 === true } : item;
+      });
+    } catch (_) {
+      return list;
+    }
   }
 
   function blogUrl(post) {
@@ -383,7 +401,7 @@ import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseIma
     }
     const backendOrders = account && account.orders.length ? account.orders : await fetchOrders(localOrders);
     const orders = backendOrders.length ? backendOrders : localOrders.map(normalizeOrder).filter(Boolean);
-    const favorites = state.loadFavorites ? state.loadFavorites() : [];
+    const favorites = await canonicalFavorites(state.loadFavorites ? state.loadFavorites() : []);
     bindAccountLookup();
 
     const latestOrder = orders[0] || {};
@@ -419,7 +437,7 @@ import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseIma
         const media = item.image
           ? '<img src="' + escapeHtml(assetUrl(item.image)) + '" alt="' + escapeHtml(item.name) + '" loading="lazy" decoding="async"/>'
           : escapeHtml(item.emoji || 'SU');
-        return '<div class="page-favorite-card"><div class="page-favorite-media">' + media + '</div><h3>' +
+        return '<div class="page-favorite-card"><div class="page-favorite-media">' + media + spinBadgeMarkup(item) + '</div><h3>' +
           escapeHtml(item.name) + '</h3><p>' + money(item.price || 0) + '</p><a class="page-btn-secondary" href="' +
           escapeHtml(safeHref(item.url, 'urun')) + '">İncele</a></div>';
       }).join('');
@@ -629,7 +647,7 @@ import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseIma
     if (state.syncFavoritesFromServer) {
       await state.syncFavoritesFromServer();
     }
-    const favorites = state.loadFavorites ? state.loadFavorites() : [];
+    const favorites = await canonicalFavorites(state.loadFavorites ? state.loadFavorites() : []);
     const grid = document.getElementById('favoritesGrid');
     const count = document.getElementById('favoritesCount');
 
@@ -645,7 +663,7 @@ import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseIma
         ? '<img src="' + escapeHtml(assetUrl(item.image)) + '" alt="' + escapeHtml(item.name) + '" loading="lazy" decoding="async"/>'
         : escapeHtml(item.emoji || 'SU');
       return '<article class="page-favorite-card" data-favorite-id="' + escapeHtml(item.id || item.name) + '">' +
-        '<a class="page-favorite-media" href="' + escapeHtml(safeHref(item.url, 'urun')) + '" aria-label="' + escapeHtml(item.name) + ' ürününü görüntüle">' + media + '</a>' +
+        '<a class="page-favorite-media" href="' + escapeHtml(safeHref(item.url, 'urun')) + '" aria-label="' + escapeHtml(item.name) + ' ürününü görüntüle">' + media + spinBadgeMarkup(item) + '</a>' +
         '<h3>' + escapeHtml(item.name) + '</h3>' +
         '<p>' + money(item.price || 0) + '</p>' +
         '<div class="page-inline-actions"><a class="page-btn-secondary" href="' + escapeHtml(safeHref(item.url, 'urun')) +

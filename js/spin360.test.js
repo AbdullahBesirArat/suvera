@@ -16,3 +16,8 @@ test('optional spin contract rejects missing, ambiguous and unsafe manifests wit
     assert.equal(context.spinManifest({ details: { spin360: invalid } }), null);
   }
 });
+
+test('viewer keeps frame state but has no customer-facing frame counter', () => {
+  assert.match(source, /root\.dataset\.frame = String\(frame\)/);
+  assert.doesNotMatch(source, /spin360-progress|loadedCount|\$\{loaded\}\/\$\{manifest\.frameCount\}/);
+});

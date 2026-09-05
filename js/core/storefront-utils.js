@@ -128,6 +128,16 @@ export function productFinalPrice(product) {
   return Number(product && (product.sale_price || product.price) || 0);
 }
 
+export function hasSpin360(product) {
+  return Boolean(product && product.has_spin360 === true);
+}
+
+export function spinBadgeMarkup(product) {
+  return hasSpin360(product)
+    ? '<span class="spin-product-badge" role="img" aria-label="360 derece görünüm mevcut"><span aria-hidden="true">360°</span></span>'
+    : '';
+}
+
 export function normalizeColor(value) {
   return String(value || '').trim().toLocaleLowerCase('tr-TR');
 }

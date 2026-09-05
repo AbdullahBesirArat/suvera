@@ -1,4 +1,4 @@
-import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productImageEntries, normalizeColor as normalizeProductColor, colorMeta } from './core/storefront-utils.js';
+import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productImageEntries, normalizeColor as normalizeProductColor, colorMeta, spinBadgeMarkup } from './core/storefront-utils.js';
 (function () {
   'use strict';
 
@@ -76,11 +76,12 @@ import { formatMoney as money, escapeHtml, safeHref, parseImageEntry, productIma
         data-product-price-label="${escapeHtml(money(price))}"
         data-product-image="${escapeHtml(image)}"
         data-product-category="${escapeHtml(product.category_name || '')}"
+        data-has-spin360="${product.has_spin360 === true ? 'true' : 'false'}"
         data-nav="urun?id=${id}">
         <div class="prod-img">
           <div class="prod-img-bg" data-css="background:linear-gradient(150deg,#d8d3c8,#c5bfb2)"></div>
           ${image ? `<img class="prod-main-image" src="${escapeHtml(responsive.src)}"${responsiveAttrs} alt="${escapeHtml(product.name)}" loading="lazy" decoding="async" data-css="position:relative;z-index:1;width:100%;height:100%;object-fit:cover;"/>` : '<span class="product-media-placeholder" aria-hidden="true"></span>'}
-          <div class="prod-badges">${badge(product)}</div>
+          <div class="prod-badges">${spinBadgeMarkup(product)}${badge(product)}</div>
           <div class="prod-media-actions">
             <button class="quick-fav" type="button" data-action="toggle-fav" data-stop aria-label="Favorilere ekle" aria-pressed="false">♡</button>
             <button class="quick-view" type="button" data-stop aria-label="Ürünü hızlı görüntüle" title="Ürünü hızlı görüntüle">Bak</button>
