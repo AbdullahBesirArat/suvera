@@ -4,7 +4,15 @@ const https = require('https');
 const path = require('path');
 
 const rootDir = fs.existsSync(path.join(__dirname, 'dist')) ? path.join(__dirname, 'dist') : __dirname;
-const upstreamApi = (process.env.UPSTREAM_API || 'https://panelya-api-production.up.railway.app/api').replace(/\/$/, '');
+const { resolveUpstreamApi } = require('./scripts/resolve-upstream');
+// Fail closed: no implicit production upstream (R1). Exit with an actionable message.
+let upstreamApi;
+try {
+  upstreamApi = resolveUpstreamApi(process.env);
+} catch (error) {
+  console.error(`dev-server: ${error.message}`);
+  process.exit(1);
+}
 const publicAccessToken = process.env.SUVERA_PUBLIC_ACCESS_TOKEN || '';
 const siteOrigin = (process.env.SUVERA_SITE_ORIGIN || 'https://suvera.com.tr').replace(/\/$/, '');
 const organizationSlug = process.env.SUVERA_ORGANIZATION_SLUG || 'suvera';
