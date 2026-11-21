@@ -520,13 +520,37 @@
       });
     }
 
-    function checkoutIdempotencyKey(payload) {
-      const fingerprint = JSON.stringify({
-        email: payload.customer && payload.customer.email,
-        address: payload.customer && payload.customer.address,
-        paymentMethod: payload.paymentMethod,
-        items: payload.items,
-      });
+    // Deterministic JSON: object keys sorted, undefined dropped (as JSON.stringify does), arrays
+    // keep their order. Two requests that would create the same order serialise identically.
+    function canonicalJson(value) {
+      if (Array.isArray(value)) return '[' + value.map((entry) => (entry === undefined ? 'null' : canonicalJson(entry))).join(',') + ']';
+      if (value && typeof value === 'object') {
+        return '{' + Object.keys(value).sort()
+          .filter((name) => value[name] !== undefined)
+          .map((name) => JSON.stringify(name) + ':' + canonicalJson(value[name])).join(',') + '}';
+      }
+      return JSON.stringify(value === undefined ? null : value);
+    }
+
+    // The fingerprint covers the WHOLE order-creation request (plus the server-side gift
+    // selection that is not part of the body), so the same key only ever accompanies an
+    // identical request. The backend replays an existing order for a tenant+key without
+    // comparing payloads; any material change must therefore produce a new key. The digest
+    // keeps customer data (phone, tax id) out of sessionStorage; if SubtleCrypto is missing
+    // the canonical text itself is stored, which preserves exact-match semantics.
+    async function checkoutFingerprint(payload, extra) {
+      const canonical = canonicalJson({ payload, extra: extra === undefined ? null : extra });
+      try {
+        if (window.crypto && window.crypto.subtle && typeof TextEncoder === 'function') {
+          const digest = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(canonical));
+          return 'sha256:' + Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
+        }
+      } catch (_) { /* fall through to the exact canonical text */ }
+      return 'raw:' + canonical;
+    }
+
+    async function checkoutIdempotencyKey(payload, extra) {
+      const fingerprint = await checkoutFingerprint(payload, extra);
       try {
         const saved = JSON.parse(sessionStorage.getItem(CHECKOUT_IDEMPOTENCY_KEY) || 'null');
         if (saved && saved.fingerprint === fingerprint && saved.key) return saved.key;
@@ -1373,7 +1397,10 @@
         // protection provided by disabled is unchanged.
         payButton.setAttribute('aria-busy', 'true');
         payButton.textContent = 'Sipariş oluşturuluyor...';
-        const idempotencyKey = checkoutIdempotencyKey(payload);
+        const giftSelection = currentGiftState();
+        const idempotencyKey = await checkoutIdempotencyKey(payload, {
+          gift: { option_id: giftSelection.option_id || null, note: giftSelection.note || '' },
+        });
         const result = await window.SuveraAPI.orders.create(payload, idempotencyKey);
         const orderCode = orderCodeFromResult(result);
         const provider = result && result.provider || snapshot.provider || 'manual';
