@@ -14,18 +14,20 @@ const start = html.indexOf('function canonicalJson(');
 assert.ok(start > 0 && html.includes('function clearCheckoutIdempotencyKey()'), 'idempotency helpers must exist in siparis.html');
 const helpers = html.slice(start, html.indexOf('function orderCodeFromResult'));
 
-function makeEnv({ subtle = true } = {}) {
+function makeEnv({ subtle = true, subtleThrows = false, randomUUID = true, storageThrows = false } = {}) {
   const store = new Map();
   const sessionStorage = {
-    getItem: (name) => (store.has(name) ? store.get(name) : null),
-    setItem: (name, value) => { store.set(name, String(value)); },
+    getItem: (name) => { if (storageThrows) throw new Error('blocked'); return store.has(name) ? store.get(name) : null; },
+    setItem: (name, value) => { if (storageThrows) throw new Error('blocked'); store.set(name, String(value)); },
     removeItem: (name) => { store.delete(name); },
   };
-  const crypto = subtle ? webcrypto : { randomUUID: () => webcrypto.randomUUID() };
-  const sandbox = { window: { crypto }, sessionStorage, TextEncoder, Array, Uint8Array, JSON, Object, Math, Date, CHECKOUT_IDEMPOTENCY_KEY: 'suvera:checkout-idempotency:v1' };
-  sandbox.window.sessionStorage = sessionStorage;
+  const crypto = {};
+  if (randomUUID) crypto.randomUUID = () => webcrypto.randomUUID();
+  if (subtle) crypto.subtle = subtleThrows ? { digest: async () => { throw new Error('boom ayse@example.com'); } } : webcrypto.subtle;
+  const sandbox = { window: { crypto }, sessionStorage, TextEncoder, Array, Uint8Array, JSON, Object, Math, Date, Error, CHECKOUT_IDEMPOTENCY_KEY: 'suvera:checkout-idempotency:v1' };
   vm.createContext(sandbox);
-  vm.runInContext(`${helpers}\nthis.keyFor = checkoutIdempotencyKey; this.clear = clearCheckoutIdempotencyKey;`, sandbox);
+  vm.runInContext(`${helpers}
+this.keyFor = checkoutIdempotencyKey; this.clear = clearCheckoutIdempotencyKey;`, sandbox);
   return { keyFor: sandbox.keyFor, clear: sandbox.clear, store };
 }
 
@@ -140,13 +142,55 @@ test('sessionStorage holds a digest, not customer data, when SubtleCrypto is ava
   assert.doesNotMatch(raw, /ayse@example\.com|5551112233|Sokak 1/);
 });
 
-test('without SubtleCrypto the exact canonical text still separates different requests', async () => {
-  const { keyFor } = makeEnv({ subtle: false });
-  const a = await keyFor(basePayload(), gift);
-  assert.equal(await keyFor(basePayload(), gift), a);
-  const changed = basePayload();
-  changed.couponCode = 'BASKA';
-  assert.notEqual(await keyFor(changed, gift), a);
+const PII = /ayse@example\.com|5551112233|Sokak 1|YAZ10|Kapida|1234567890/;
+
+for (const [label, options] of Object.entries({
+  'SubtleCrypto missing': { subtle: false },
+  'SubtleCrypto throws (error echoes PII)': { subtleThrows: true },
+})) {
+  test(`fails closed with a PII-free error and writes nothing to storage when ${label}`, async () => {
+    const { keyFor, store } = makeEnv(options);
+    const payload = basePayload();
+    payload.invoice.vkn = '1234567890';
+    await assert.rejects(() => keyFor(payload, gift), (error) => {
+      assert.equal(error.code, 'CHECKOUT_CRYPTO_UNAVAILABLE');
+      assert.doesNotMatch(String(error.message) + String(error.stack || ''), PII);
+      return true;
+    });
+    assert.equal(store.size, 0);
+  });
+}
+
+test('fails closed instead of using a guessable key when secure randomness is missing', async () => {
+  const { keyFor, store } = makeEnv({ randomUUID: false });
+  await assert.rejects(() => keyFor(basePayload(), gift), (error) => error.code === 'CHECKOUT_CRYPTO_UNAVAILABLE');
+  assert.equal(store.size, 0);
+  assert.doesNotMatch(helpers, /Math\.random|Date\.now/);
+  assert.doesNotMatch(helpers, /'raw:'/);
+});
+
+test('blocked sessionStorage still yields a secure UUID key and never throws', async () => {
+  const { keyFor } = makeEnv({ storageThrows: true });
+  const key = await keyFor(basePayload(), gift);
+  assert.match(key, /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+});
+
+test('storage never contains customer data across a full request lifecycle', async () => {
+  const { keyFor, store } = makeEnv();
+  const payload = basePayload();
+  payload.invoice.vkn = '1234567890';
+  await keyFor(payload, gift);
+  payload.note = 'Kapida degisti';
+  await keyFor(payload, gift);
+  assert.doesNotMatch([...store.values()].join(''), PII);
+});
+
+test('the submit handler shows a Turkish message for the crypto failure and logs no payload', () => {
+  const messageFn = html.slice(html.indexOf('function getCheckoutErrorMessage'), html.indexOf('function getCheckoutErrorMessage') + 700);
+  assert.match(messageFn, /CHECKOUT_CRYPTO_UNAVAILABLE[\s\S]*Güvenli sipariş doğrulaması/);
+  const logLine = html.match(/console\.error\('Checkout order creation failed:'[^\n]*/)[0];
+  assert.doesNotMatch(logLine, /payload|snapshot|\berr\)/);
+  assert.doesNotMatch(helpers, /console\./);
 });
 
 test('the submit handler passes the gift selection and awaits the async key', () => {
