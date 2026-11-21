@@ -14,11 +14,11 @@ const start = html.indexOf('function canonicalJson(');
 assert.ok(start > 0 && html.includes('function clearCheckoutIdempotencyKey()'), 'idempotency helpers must exist in siparis.html');
 const helpers = html.slice(start, html.indexOf('function orderCodeFromResult'));
 
-function makeEnv({ subtle = true, subtleThrows = false, randomUUID = true, storageThrows = false } = {}) {
+function makeEnv({ subtle = true, subtleThrows = false, randomUUID = true, storageMode = 'ok' } = {}) {
   const store = new Map();
   const sessionStorage = {
-    getItem: (name) => { if (storageThrows) throw new Error('blocked'); return store.has(name) ? store.get(name) : null; },
-    setItem: (name, value) => { if (storageThrows) throw new Error('blocked'); store.set(name, String(value)); },
+    getItem: (name) => { if (storageMode === 'read-throws') throw new Error('blocked'); return store.has(name) ? store.get(name) : null; },
+    setItem: (name, value) => { if (storageMode === 'write-throws') throw new Error('QuotaExceeded'); if (storageMode === 'write-dropped') return; store.set(name, String(value)); },
     removeItem: (name) => { store.delete(name); },
   };
   const crypto = {};
@@ -169,10 +169,46 @@ test('fails closed instead of using a guessable key when secure randomness is mi
   assert.doesNotMatch(helpers, /'raw:'/);
 });
 
-test('blocked sessionStorage still yields a secure UUID key and never throws', async () => {
-  const { keyFor } = makeEnv({ storageThrows: true });
+for (const mode of ['read-throws', 'write-throws', 'write-dropped']) {
+  test(`fails closed (no key, nothing stored) when sessionStorage is unusable: ${mode}`, async () => {
+    const { keyFor, store } = makeEnv({ storageMode: mode });
+    await assert.rejects(() => keyFor(basePayload(), gift), (error) => {
+      assert.equal(error.code, 'CHECKOUT_STORAGE_UNAVAILABLE');
+      assert.doesNotMatch(String(error.message) + String(error.stack || ''), PII);
+      return true;
+    });
+    assert.equal(store.size, 0);
+  });
+}
+
+test('a corrupt stored entry is replaced by a fresh persisted key', async () => {
+  const { keyFor, store } = makeEnv();
+  store.set('suvera:checkout-idempotency:v1', '{not json');
   const key = await keyFor(basePayload(), gift);
-  assert.match(key, /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+  assert.match(key, /^[0-9a-f-]{36}$/);
+  assert.equal(await keyFor(basePayload(), gift), key);
+});
+
+test('retry scenarios: timeout keeps the key, success clears it, the next order is new', async () => {
+  const { keyFor, clear, store } = makeEnv();
+  const first = await keyFor(basePayload(), gift);   // submit; response lost (timeout)
+  assert.equal(store.size, 1);
+  assert.equal(await keyFor(basePayload(), gift), first); // user retries
+  assert.equal(await keyFor(basePayload(), gift), first); // and again
+  clear();                                                // success path
+  assert.equal(store.size, 0);
+  assert.notEqual(await keyFor(basePayload(), gift), first); // next order
+});
+
+test('the key is resolved inside the try block BEFORE the order request, so a storage failure never creates an order', () => {
+  const keyAt = html.indexOf('const idempotencyKey = await checkoutIdempotencyKey(payload, {');
+  const createAt = html.indexOf('SuveraAPI.orders.create(payload, idempotencyKey)');
+  const tryAt = html.lastIndexOf('try {', keyAt);
+  const catchAt = html.indexOf("console.error('Checkout order creation failed:'");
+  assert.ok(tryAt > 0 && tryAt < keyAt && keyAt < createAt && createAt < catchAt);
+  const messageFn = html.slice(html.indexOf('function getCheckoutErrorMessage'), html.indexOf('function getCheckoutErrorMessage') + 1200);
+  assert.match(messageFn, /CHECKOUT_STORAGE_UNAVAILABLE[\s\S]*siparişiniz oluşturulmadı/);
+  assert.doesNotMatch(helpers.slice(0, helpers.indexOf('function clearCheckoutIdempotencyKey')), /catch \(_\) \{\}/);
 });
 
 test('storage never contains customer data across a full request lifecycle', async () => {

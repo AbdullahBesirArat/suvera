@@ -566,14 +566,30 @@
       return cryptoApi.randomUUID();
     }
 
+    function checkoutStorageError() {
+      const error = new Error('CHECKOUT_STORAGE_UNAVAILABLE');
+      error.code = 'CHECKOUT_STORAGE_UNAVAILABLE';
+      return error;
+    }
+
+    // The key is only useful if a retry after a lost response can find it again. When
+    // sessionStorage cannot be read, written or read back, the order is NOT created: a
+    // fresh key on retry could duplicate an order the server already accepted.
     async function checkoutIdempotencyKey(payload, extra) {
       const fingerprint = await checkoutFingerprint(payload, extra);
+      let raw;
+      try { raw = sessionStorage.getItem(CHECKOUT_IDEMPOTENCY_KEY); } catch (_) { throw checkoutStorageError(); }
       let saved = null;
-      try { saved = JSON.parse(sessionStorage.getItem(CHECKOUT_IDEMPOTENCY_KEY) || 'null'); } catch (_) { saved = null; }
+      try { saved = JSON.parse(raw || 'null'); } catch (_) { saved = null; } // corrupt entry: replaced below
       if (saved && saved.fingerprint === fingerprint && typeof saved.key === 'string' && saved.key) return saved.key;
       const key = newCheckoutKey();
-      // If storage is unavailable the key simply is not persisted (a retry then gets a new key).
-      try { sessionStorage.setItem(CHECKOUT_IDEMPOTENCY_KEY, JSON.stringify({ fingerprint, key })); } catch (_) {}
+      const record = JSON.stringify({ fingerprint, key });
+      try {
+        sessionStorage.setItem(CHECKOUT_IDEMPOTENCY_KEY, record);
+        if (sessionStorage.getItem(CHECKOUT_IDEMPOTENCY_KEY) !== record) throw checkoutStorageError();
+      } catch (_) {
+        throw checkoutStorageError();
+      }
       return key;
     }
 
@@ -638,6 +654,9 @@
     }
 
     function getCheckoutErrorMessage(error) {
+      if (error && error.code === 'CHECKOUT_STORAGE_UNAVAILABLE') {
+        return 'Siparişiniz güvenle tekrar denenebilmesi için tarayıcı depolaması gerekiyor, ancak şu anda kullanılamıyor. Özel gezinti modunu veya depolama engelini kapatıp sayfayı yenileyin; siparişiniz oluşturulmadı.';
+      }
       if (error && error.code === 'CHECKOUT_CRYPTO_UNAVAILABLE') {
         return 'Güvenli sipariş doğrulaması bu tarayıcıda kullanılamıyor. Lütfen tarayıcınızı güncelleyin veya güvenli bir bağlantı (https) üzerinden tekrar deneyin.';
       }
