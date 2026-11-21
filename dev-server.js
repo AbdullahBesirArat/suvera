@@ -4,7 +4,15 @@ const https = require('https');
 const path = require('path');
 
 const rootDir = fs.existsSync(path.join(__dirname, 'dist')) ? path.join(__dirname, 'dist') : __dirname;
-const upstreamApi = (process.env.UPSTREAM_API || 'https://panelya-api-production.up.railway.app/api').replace(/\/$/, '');
+const { resolveUpstreamApi } = require('./scripts/resolve-upstream');
+// Fail closed: no implicit production upstream (R1). Exit with an actionable message.
+let upstreamApi;
+try {
+  upstreamApi = resolveUpstreamApi(process.env);
+} catch (error) {
+  console.error(`dev-server: ${error.message}`);
+  process.exit(1);
+}
 const publicAccessToken = process.env.SUVERA_PUBLIC_ACCESS_TOKEN || '';
 const siteOrigin = (process.env.SUVERA_SITE_ORIGIN || 'https://suvera.com.tr').replace(/\/$/, '');
 const organizationSlug = process.env.SUVERA_ORGANIZATION_SLUG || 'suvera';
@@ -18,6 +26,10 @@ const refreshCookie = 'suveraRefreshToken';
 const guestCartCookie = 'suveraGuestCart';
 // Guest cart token forwarded upstream only to cart/checkout endpoints; cart
 // responses buffered so the raw token can move to an HttpOnly cookie.
+// Same checkout idempotency forwarding as api/[...path].js (R9): order/payment creation only,
+// and only for a key in the API's own format.
+const IDEMPOTENCY_UPSTREAM_PATH = /^(orders|payment\/initialize)(?:\?|$)/;
+const IDEMPOTENCY_KEY_FORMAT = /^[A-Za-z0-9._:-]{8,128}$/;
 const GUEST_TOKEN_UPSTREAM_PATH = /^(cart(?:\/|$)|orders(?:\/|\?|$)|payment(?:\/|$)|reviews(?:\/|$))/;
 const CART_BUFFER_PATH = /^cart(?:\/|$)/;
 // A28 theme preview, mirroring api/[...path].js: the draft stylesheet has to be a GET so a
@@ -278,6 +290,10 @@ async function proxyApi(req, res, pathname, search) {
     headers.Authorization = `Bearer ${cookies[customerCookie]}`;
   } else if (cookies[accessCookie]) {
     headers.Authorization = `Bearer ${cookies[accessCookie]}`;
+  }
+  const idempotencyKey = String(req.headers['idempotency-key'] || '').trim();
+  if (req.method === 'POST' && IDEMPOTENCY_UPSTREAM_PATH.test(upstreamPath) && IDEMPOTENCY_KEY_FORMAT.test(idempotencyKey)) {
+    headers['Idempotency-Key'] = idempotencyKey;
   }
   if (GUEST_TOKEN_UPSTREAM_PATH.test(upstreamPath) && cookies[guestCartCookie]) {
     headers['X-Guest-Cart-Token'] = cookies[guestCartCookie];

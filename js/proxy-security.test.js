@@ -439,3 +439,30 @@ test('the preview cookie is replayed only to preview-scoped reads, never to publ
   assert.equal(await forwarded('products'), undefined);
   assert.equal(await forwarded('orders'), undefined);
 });
+
+test('R9: the checkout Idempotency-Key is forwarded to order and payment creation, validated and capped', async () => {
+  async function forwardedKey(method, path, key) {
+    let forwarded = 'UNSET';
+    const req = mockReq(method, path, { ...SAME_ORIGIN, 'content-type': 'application/json', 'idempotency-key': key });
+    const p = withFetch(
+      async (_url, options) => {
+        forwarded = options.headers['Idempotency-Key'];
+        return new Response('{}', { status: 200, headers: { 'content-type': 'application/json' } });
+      },
+      () => proxy(req, new MockRes()),
+    );
+    setImmediate(() => req.emit('end'));
+    await p;
+    return forwarded;
+  }
+  const good = 'chk-0123456789abcdef';
+  assert.equal(await forwardedKey('POST', 'orders', good), good);
+  assert.equal(await forwardedKey('POST', 'payment/initialize', good), good);
+  // Not a generic pass-through: other endpoints never receive it.
+  assert.equal(await forwardedKey('POST', 'cart/items', good), undefined);
+  assert.equal(await forwardedKey('POST', 'products', good), undefined);
+  // Malformed or oversized keys are dropped here rather than relayed upstream.
+  assert.equal(await forwardedKey('POST', 'orders', 'short'), undefined);
+  assert.equal(await forwardedKey('POST', 'orders', 'a'.repeat(129)), undefined);
+  assert.equal(await forwardedKey('POST', 'orders', 'bad key with spaces!'), undefined);
+});

@@ -14,6 +14,12 @@ const GUEST_CART_COOKIE = 'suveraGuestCart';
 // Cart responses are buffered so the opaque guest-cart token can be relocated
 // into an HttpOnly cookie and stripped from the body (never exposed to JS).
 const CART_BUFFER_PATH = /^cart(?:\/|$)/;
+// Checkout idempotency (R9). The browser sends a per-attempt key so a retried checkout cannot
+// create a second order; it is forwarded only on order/payment creation, and only when it
+// satisfies the API's own format (8-128 chars of [A-Za-z0-9._:-]), so this is not a generic
+// header pass-through.
+const IDEMPOTENCY_UPSTREAM_PATH = /^(orders|payment\/initialize)(?:\?|$)/;
+const IDEMPOTENCY_KEY_FORMAT = /^[A-Za-z0-9._:-]{8,128}$/;
 // The opaque guest token is forwarded upstream only to cart/checkout endpoints so
 // the API can verify guest-cart ownership during order conversion.
 const GUEST_TOKEN_UPSTREAM_PATH = /^(cart(?:\/|$)|orders(?:\/|\?|$)|payment(?:\/|$)|reviews(?:\/|$))/;
@@ -269,6 +275,11 @@ module.exports = async function handler(req, res) {
   // out of URLs, logs and referrers and can never authorize the normal public endpoints.
   if (THEME_PREVIEW_UPSTREAM_PATH.test(path) && cookies[THEME_PREVIEW_COOKIE]) {
     headers['X-Theme-Preview-Token'] = cookies[THEME_PREVIEW_COOKIE];
+  }
+
+  const idempotencyKey = String(req.headers['idempotency-key'] || '').trim();
+  if (req.method === 'POST' && IDEMPOTENCY_UPSTREAM_PATH.test(path) && IDEMPOTENCY_KEY_FORMAT.test(idempotencyKey)) {
+    headers['Idempotency-Key'] = idempotencyKey;
   }
 
   // Guest cart identity travels as an opaque header only to cart/checkout endpoints.

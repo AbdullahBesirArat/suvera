@@ -68,7 +68,10 @@ Never commit real `.env` files. Use example files as templates:
 Suvera local storefront variables:
 
 ```bash
-UPSTREAM_API=https://panelya-api.example.com/api
+# Required for `npm run dev`; there is no default. Use a local API.
+UPSTREAM_API=http://127.0.0.1:3001/api
+# Only if you deliberately target a remote API (the dev proxy forwards real writes):
+# ALLOW_REMOTE_UPSTREAM=1
 SUVERA_PUBLIC_ACCESS_TOKEN=replace_with_public_storefront_access_token
 SUVERA_SITE_ORIGIN=http://localhost:4173
 SUVERA_ORGANIZATION_SLUG=suvera
@@ -93,6 +96,9 @@ Run the Suvera storefront with its local API proxy:
 ```bash
 npm run dev
 ```
+
+`npm run dev` refuses to start without `UPSTREAM_API` (no production default) and
+refuses non-loopback upstreams unless `ALLOW_REMOTE_UPSTREAM=1`.
 
 `npm run dev` first regenerates `dist/`, then serves that production-shaped
 static output. Browser API calls continue to use same-origin `/api`.
