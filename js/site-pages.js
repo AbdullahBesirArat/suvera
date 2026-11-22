@@ -1240,14 +1240,24 @@ import { formatMoney as money, escapeHtml, resolveAssetUrl as assetUrl, parseIma
     if (!api || !api.hasCustomerSession || !api.hasCustomerSession()) {
       if (listNode) listNode.innerHTML = '<div class="page-empty">Adres defterinizi görmek için <a href="giris">giriş yapın</a>.</div>';
       if (message) message.textContent = 'Adresleri görmek ve yönetmek için hesabınıza giriş yapın.';
-      if (addButton) addButton.hidden = true;
+      if (addButton) {
+        addButton.hidden = true;
+        addButton.disabled = true;
+        addButton.setAttribute('aria-disabled', 'true');
+      }
       if (form) form.hidden = true;
       return;
     }
-    if (addButton) addButton.hidden = false;
+    // Bind the handlers first and only then expose the action: the button is rendered
+    // disabled in the HTML, so an early click can never be a silent no-op.
+    bindAddressBook();
+    if (addButton) {
+      addButton.hidden = false;
+      addButton.disabled = false;
+      addButton.removeAttribute('aria-disabled');
+    }
     if (message) message.textContent = '';
 
-    bindAddressBook();
     await populateAddressCities('');
 
     try {

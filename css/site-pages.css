@@ -447,6 +447,10 @@ body.site-page-body {
   padding: 13px 20px;
 }
 
+/* The author display rule above would otherwise defeat the [hidden] attribute. */
+.page-btn-secondary[hidden] { display: none; }
+.page-btn-secondary:disabled { cursor: not-allowed; opacity: 0.55; transform: none; }
+
 .page-btn-secondary:hover {
   border-color: var(--page-accent);
   color: var(--page-accent);

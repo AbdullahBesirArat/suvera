@@ -104,6 +104,71 @@ test.describe('A25 customer address book', () => {
     expect(saved.c).toBe(1);
   });
 
+  test('the add button is inert until its handler is bound, then opens the form exactly once', async ({ page, e2eState }) => {
+    await loginCustomerA(page, e2eState);
+    // Hold every account/address API response so the page-init window stays open.
+    let release;
+    const gate = new Promise((resolve) => { release = resolve; });
+    await page.route(/\/api\/(customer-auth|customer-addresses|customer-orders)/, async (route) => {
+      await gate;
+      await route.continue();
+    });
+    await page.goto(`${e2eState.origins.storefront}/hesabim`, { waitUntil: 'domcontentloaded' });
+
+    const addButton = page.locator('#addressAddButton');
+    // Not ready: the control is disabled and says so to assistive technology.
+    await expect(addButton).toBeDisabled();
+    await expect(addButton).toHaveAttribute('aria-disabled', 'true');
+    // A forced click on the not-ready control must do nothing (no half-initialised form).
+    await addButton.click({ force: true, timeout: 2_000 }).catch(() => {});
+    await expect(page.locator('#addressForm')).toBeHidden();
+
+    release();
+    // Ready: enabled, aria-disabled removed, and the very first click opens the form.
+    await expect(addButton).toBeEnabled({ timeout: 20_000 });
+    await expect(addButton).not.toHaveAttribute('aria-disabled', 'true');
+    await addButton.click();
+    await expect(page.locator('#addressForm')).toBeVisible();
+    // One listener only: a second click keeps a single open form and does not re-init it.
+    await addButton.click();
+    await expect(page.locator('#addressForm')).toBeVisible();
+    expect(await page.locator('#addressForm').count()).toBe(1);
+  });
+
+  test('keyboard activation works as soon as the button is enabled', async ({ page, e2eState }) => {
+    await loginCustomerA(page, e2eState);
+    await page.goto(`${e2eState.origins.storefront}/hesabim`);
+    const addButton = page.locator('#addressAddButton');
+    await expect(addButton).toBeEnabled({ timeout: 20_000 });
+    await addButton.focus();
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#addressForm')).toBeVisible();
+  });
+
+  test('back/forward navigation and repeated page loads re-initialise without duplicate handlers', async ({ page, e2eState }) => {
+    await loginCustomerA(page, e2eState);
+    for (let round = 0; round < 3; round += 1) {
+      await page.goto(`${e2eState.origins.storefront}/hesabim`);
+      await expect(page.locator('#addressAddButton')).toBeEnabled({ timeout: 20_000 });
+      await page.locator('#addressAddButton').click();
+      await expect(page.locator('#addressForm')).toBeVisible();
+      await page.goto(`${e2eState.origins.storefront}/urunler`);
+      await page.goBack();
+      await expect(page.locator('#addressAddButton')).toBeEnabled({ timeout: 20_000 });
+      await page.locator('#addressAddButton').click();
+      await expect(page.locator('#addressForm')).toBeVisible();
+      await page.goForward();
+    }
+  });
+
+  test('without a customer session the add action stays unavailable', async ({ page, e2eState }) => {
+    await page.goto(`${e2eState.origins.storefront}/hesabim`);
+    const addButton = page.locator('#addressAddButton');
+    await expect(addButton).toBeHidden({ timeout: 20_000 });
+    await expect(addButton).toBeDisabled();
+    await expect(page.locator('#addressForm')).toBeHidden();
+  });
+
   test('the address book requires a signed-in customer', async ({ page, e2eState }) => {
     await page.goto(e2eState.origins.storefront);
     const status = await page.evaluate(async (origin) => {
